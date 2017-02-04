@@ -1,7 +1,7 @@
 /**
  * All data types that column can be.
  */
-export type ColumnType = "string"|"text"|"number"|"integer"|"int"|"smallint"|"bigint"|"float"|"double"|
+export type ColumnType = "string"|"text"|"mediumtext"|"number"|"integer"|"int"|"smallint"|"bigint"|"float"|"double"|
                          "decimal"|"date"|"time"|"datetime"|"boolean"|"json"|"jsonb"|"simple_array";
 
 /**
@@ -18,6 +18,11 @@ export class ColumnTypes {
      * SQL CLOB type. Your class's property type should be a "string".
      */
     static TEXT: ColumnType = "text";
+
+    /**
+     * SQL CLOB type. Your class's property type should be a "string".
+     */
+    static MEDIUMTEXT: ColumnType = "mediumtext";
 
     /**
      * SQL FLOAT type. Your class's property type should be a "number".
@@ -109,6 +114,7 @@ export class ColumnTypes {
         return [
             this.STRING,
             this.TEXT,
+            this.MEDIUMTEXT,
             this.NUMBER,
             this.INTEGER,
             this.INT,

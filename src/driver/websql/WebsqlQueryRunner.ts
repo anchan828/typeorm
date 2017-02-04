@@ -742,6 +742,7 @@ export class WebsqlQueryRunner implements QueryRunner {
             case "string":
                 return "character varying(" + (typeOptions.length ? typeOptions.length : 255) + ")";
             case "text":
+            case "mediumtext":
                 return "text";
             case "boolean":
                 return "boolean";

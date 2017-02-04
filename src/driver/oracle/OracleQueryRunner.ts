@@ -748,6 +748,7 @@ AND cons.constraint_name = cols.constraint_name AND cons.owner = cols.owner ORDE
             case "string":
                 return "varchar2(" + (typeOptions.length ? typeOptions.length : 255) + ")";
             case "text":
+            case "mediumtext":
                 return "clob";
             case "boolean":
                 return "number(1)";

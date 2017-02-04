@@ -693,6 +693,8 @@ export class MysqlQueryRunner implements QueryRunner {
                 return "varchar(" + (typeOptions.length ? typeOptions.length : 255) + ")";
             case "text":
                 return "text";
+            case "mediumtext":
+                return "mediumtext";
             case "boolean":
                 return "tinyint(1)";
             case "integer":

@@ -796,6 +796,7 @@ WHERE columnUsages.TABLE_CATALOG = '${this.dbName}' AND tableConstraints.TABLE_C
             case "string":
                 return "nvarchar(" + (typeOptions.length ? typeOptions.length : 255) + ")";
             case "text":
+            case "mediumtext":
                 return "ntext";
             case "boolean":
                 return "bit";
