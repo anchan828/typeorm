@@ -79,9 +79,7 @@
     "yargs": "^6.6.0"
   },
   "scripts": {
-    "test": "node_modules/.bin/gulp tests"
-  },
-  "bin": {
-    "typeorm": "./cli.js"
+    "test": "node_modules/.bin/gulp tests",
+    "postinstall": "gulp package"
   }
 }
