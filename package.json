@@ -80,6 +80,6 @@
   },
   "scripts": {
     "test": "node_modules/.bin/gulp tests",
-    "postinstall": "gulp package"
+    "package": "gulp package"
   }
 }
