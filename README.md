@@ -113,7 +113,7 @@ In TypeORM tables are created from Entities.
 You can get entities from the database and insert/update/remove them from there. 
 Let's say we have a model `entity/Photo.ts`:
 
-```typescript
+```javascript
 export class Photo {
     id: number;
     name: string;
@@ -127,7 +127,7 @@ export class Photo {
 
 Now lets make it entity:
 
-```typescript
+```javascript
 import {Entity} from "typeorm";
 
 @Entity()
@@ -147,7 +147,7 @@ Now we have a table, and each table consist of columns.
 Let's add some columns. 
 You can make any property of your model a column by using a `@Column` decorator:
 
-```typescript
+```javascript
 import {Entity, Column} from "typeorm";
 
 @Entity()
@@ -182,7 +182,7 @@ Each entity must have a primary column.
 This is requirement and you can't avoid it. 
 To make a column a primary you need to use `@PrimaryColumn` decorator.
 
-```typescript
+```javascript
 import {Entity, Column, PrimaryColumn} from "typeorm";
 
 @Entity()
@@ -213,7 +213,7 @@ export class Photo {
 Now, lets say you want to make your id column to be auto-generated (this is known as auto-increment / sequence / generated identity column).
 To do that you need to change your column's type to integer and set a `{ generated: true }` in your primary column's options:
 
-```typescript
+```javascript
 import {Entity, Column, PrimaryColumn} from "typeorm";
 
 @Entity()
@@ -246,7 +246,7 @@ Since this is a common task - to create a generated auto increment primary colum
 there is a special decorator called `@PrimaryGeneratedColumn` to do the same. 
 Let's use it instead:
 
-```typescript
+```javascript
 import {Entity, Column, PrimaryGeneratedColumn} from "typeorm";
 
 @Entity()
@@ -279,7 +279,7 @@ Number is mapped to a float/double-like type (depend of database type).
 We don't want all our columns to be limited varchars or excessive floats. 
 Lets setup correct data types:
 
-```typescript
+```javascript
 import {Entity, Column, PrimaryGeneratedColumn} from "typeorm";
 
 @Entity()
@@ -311,7 +311,7 @@ export class Photo {
 
 Now, when our entity is created, lets create `app.ts` file and setup our connection there:
 
-```typescript
+```javascript
 import "reflect-metadata";
 import {createConnection} from "typeorm";
 import {Photo} from "./entity/Photo";
@@ -350,7 +350,7 @@ Later, when we create more entities we need to add them to the entities in our c
 But this is not very convenient, and instead we can setup the whole directory, 
 where from all entities will be connected and used in our connection:
 
-```typescript
+```javascript
 import {createConnection} from "typeorm";
 
 createConnection({
@@ -395,7 +395,7 @@ Now you can run your `app.ts`, connection with database will be initialized, and
 
 Now lets create a new photo to save it in the database:
 
-```typescript
+```javascript
 import {createConnection} from "typeorm";
 
 createConnection(/*...*/).then(connection => {
@@ -420,7 +420,7 @@ createConnection(/*...*/).then(connection => {
 
 Lets use latest TypeScript advantages and use async/await syntax instead:
 
-```typescript
+```javascript
 import {createConnection} from "typeorm";
 import {Photo} from "./entity/Photo";
 
@@ -446,7 +446,7 @@ We used `EntityManager` to save it.
 Using entity managers you can manipulate any entity in your app. 
 Now lets load our saved entity:
 
-```typescript
+```javascript
 import {createConnection} from "typeorm";
 import {Photo} from "./entity/Photo";
 
@@ -468,7 +468,7 @@ Each entity has its own repository which handles all operations with its entity.
 When you deal with entities a lot, Repositories are more convenient to use then EntityManager:
 
 
-```typescript
+```javascript
 import {createConnection} from "typeorm";
 import {Photo} from "./entity/Photo";
 
@@ -496,7 +496,7 @@ createConnection(/*...*/).then(async connection => {
 
 Lets try more load operations using Repository:
 
-```typescript
+```javascript
 import {createConnection} from "typeorm";
 import {Photo} from "./entity/Photo";
 
@@ -529,7 +529,7 @@ createConnection(/*...*/).then(async connection => {
 
 Now lets load a single photo from the database, update it and save it:
 
-```typescript
+```javascript
 import {createConnection} from "typeorm";
 import {Photo} from "./entity/Photo";
 
@@ -550,7 +550,7 @@ Now photo with `id = 1` will be updated in the database.
 Now let's remove our photo from the database:
 
 
-```typescript
+```javascript
 import {createConnection} from "typeorm";
 import {Photo} from "./entity/Photo";
 
@@ -570,7 +570,7 @@ Now photo with `id = 1` will be removed from the database.
 Lets create a one-to-one relation with another class. 
 Lets create a new class called PhotoMetadata.ts which will contain a PhotoMetadata class which supposed to contain our photo's additional meta-information:
 
-```typescript
+```javascript
 import {Entity, Column, PrimaryGeneratedColumn, OneToOne, JoinColumn} from "typeorm";
 import {Photo} from "./Photo";
 
@@ -632,7 +632,7 @@ If you run the app you'll see a new generated table, and it will contain a colum
 
 Now lets save a photo, its metadata and attach them to each other.
 
-```typescript
+```javascript
 import {createConnection} from "typeorm";
 import {Photo} from "./entity/Photo";
 import {PhotoMetadata} from "./entity/PhotoMetadata";
@@ -680,7 +680,7 @@ This makes complicated accessing a photo metadata from the photo objects.
 To fix it we should add inverse relation and make relations between PhotoMetadata and Photo bi-directional. 
 Let's modify our entities:
 
-```typescript
+```javascript
 import {Entity, Column, PrimaryGeneratedColumn, OneToOne, JoinColumn} from "typeorm";
 import {Photo} from "./Photo";
 
@@ -695,7 +695,7 @@ export class PhotoMetadata {
 }
 ```   
 
-```typescript
+```javascript
 import {Entity, Column, PrimaryGeneratedColumn, OneToOne} from "typeorm";
 import {PhotoMetadata} from "./PhotoMetadata";
 
@@ -726,7 +726,7 @@ Lets use FindOptions first.
 `Repository.find` method allows you to specify object with FindOptions interface. 
 Using this you can customize your query to perform more complex queries.
 
-```typescript
+```javascript
 import {createConnection} from "typeorm";
 import {Photo} from "./entity/Photo";
 import {PhotoMetadata} from "./entity/PhotoMetadata";
@@ -757,7 +757,7 @@ In `"photo.metadata"` "photo" is an alias you used, and "metadata" is a property
 
 Lets use `QueryBuilder` for the same purpose. QueryBuilder allows to use more complex queries in an elegant way:
 
-```typescript
+```javascript
 import {createConnection} from "typeorm";
 import {Photo} from "./entity/Photo";
 import {PhotoMetadata} from "./entity/PhotoMetadata";
@@ -779,7 +779,7 @@ createConnection(/*...*/).then(async connection => {
 We can setup cascade options in our relations, in the cases when we want our related object to be persisted whenever other object is saved. 
 Let's change our photo's `@OneToOne` decorator a bit:
 
-```typescript
+```javascript
 export class Photo {
     /// ... other columns
 
@@ -800,7 +800,7 @@ export class Photo {
 Using cascadeInsert allows us not to separately persist photo and separately persist metadata objects now. 
 Now we can simply persist a photo object, and metadata object will persist automatically because of cascade options.
 
-```typescript
+```javascript
 createConnection(options).then(async connection => {
 
     // create photo object
@@ -837,7 +837,7 @@ Lets create a many-to-one / one-to-many relation.
 Lets say a photo has one author, and each author can have many photos. 
 First, lets create Author class:
 
-```typescript
+```javascript
 import {Entity, Column, PrimaryGeneratedColumn, OneToMany, JoinColumn} from "typeorm";
 import {Photo} from "./Photo";
 
@@ -860,7 +860,7 @@ OneToMany is always an inverse side of relation, and it can't exist without Many
 
 Now lets add owner side of relationship into the Photo entity:
 
-```typescript
+```javascript
 import {Entity, Column, PrimaryGeneratedColumn, ManyToOne} from "typeorm";
 import {PhotoMetadata} from "./PhotoMetadata";
 import {Author} from "./Author";
@@ -911,7 +911,7 @@ Lets create a many-to-one / many-to-many relation.
 Lets say a photo can be in many albums, and multiple can have many photos. 
 Lets create an `Album` class:
 
-```typescript
+```javascript
 import {Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable} from "typeorm";
 
 @Entity()
@@ -937,7 +937,7 @@ export class Album {
 
 Now lets add inverse side of our relation to the `Photo` class:
 
-```typescript
+```javascript
 export class Photo {
     /// ... other columns
 
@@ -963,7 +963,7 @@ After you run application ORM will create a **album_photos_photo_albums** *junct
 
 Don't forget to register `Album` class for your connection in the ORM:
 
-```typescript
+```javascript
 const options: CreateConnectionOptions = {
     // ... other options
     entities: [Photo, PhotoMetadata, Author, Album]
@@ -972,7 +972,7 @@ const options: CreateConnectionOptions = {
         
 Now lets insert albums and photos to our database:
 
-```typescript
+```javascript
 let connection = await createConnection(options);
 
 // create a few albums
@@ -1013,7 +1013,7 @@ console.log("Both photos have been saved");
 
 You can use QueryBuilder to build even more complex queries. For example you can do this:
 
-```typescript
+```javascript
 let photoRepository = connection.getRepository(Photo);
 let photos = await photoRepository
     .createQueryBuilder("photo") // first argument is an alias. Alias is what you are selecting - photos. You must specify it.
