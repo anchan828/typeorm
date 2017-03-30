@@ -34,6 +34,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+Object.defineProperty(exports, "__esModule", { value: true });
 var Connection_1 = require("./Connection");
 var ConnectionNotFoundError_1 = require("./error/ConnectionNotFoundError");
 var MysqlDriver_1 = require("../driver/mysql/MysqlDriver");
@@ -48,6 +49,7 @@ var OrmUtils_1 = require("../util/OrmUtils");
 var CannotDetermineConnectionOptionsError_1 = require("./error/CannotDetermineConnectionOptionsError");
 var PlatformTools_1 = require("../platform/PlatformTools");
 var WebsqlDriver_1 = require("../driver/websql/WebsqlDriver");
+var MongoDriver_1 = require("../driver/mongodb/MongoDriver");
 /**
  * ConnectionManager is used to store and manage all these different connections.
  * It also provides useful factory methods to simplify connection creation.
@@ -379,6 +381,8 @@ var ConnectionManager = (function () {
                 return new SqlServerDriver_1.SqlServerDriver(options, logger);
             case "websql":
                 return new WebsqlDriver_1.WebsqlDriver(options, logger);
+            case "mongodb":
+                return new MongoDriver_1.MongoDriver(options, logger);
             default:
                 throw new MissingDriverError_1.MissingDriverError(options.type);
         }

@@ -34,6 +34,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+Object.defineProperty(exports, "__esModule", { value: true });
 var Repository_1 = require("../repository/Repository");
 var RepositoryNotFoundError_1 = require("./error/RepositoryNotFoundError");
 var EntityListenerMetadata_1 = require("../metadata/EntityListenerMetadata");
@@ -62,6 +63,8 @@ var AbstractRepository_1 = require("../repository/AbstractRepository");
 var CustomRepositoryNotFoundError_1 = require("../repository/error/CustomRepositoryNotFoundError");
 var CustomRepositoryReusedError_1 = require("../repository/error/CustomRepositoryReusedError");
 var CustomRepositoryCannotInheritRepositoryError_1 = require("../repository/error/CustomRepositoryCannotInheritRepositoryError");
+var MongoDriver_1 = require("../driver/mongodb/MongoDriver");
+var MongoEntityManager_1 = require("../entity-manager/MongoEntityManager");
 /**
  * Connection is a single database connection to a specific database of a database management system.
  * You can have multiple connections to multiple databases in your application.
@@ -141,6 +144,19 @@ var Connection = (function () {
         get: function () {
             // if (!this.isConnected)
             //     throw new CannotGetEntityManagerNotConnectedError(this.name);
+            return this._entityManager;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Connection.prototype, "mongoEntityManager", {
+        /**
+         * Gets the mongodb entity manager that allows to perform mongodb-specific repository operations
+         * with any entity in this connection.
+         */
+        get: function () {
+            if (!(this._entityManager instanceof MongoEntityManager_1.MongoEntityManager))
+                throw new Error("MongoEntityManager is only available for MongoDB databases.");
             return this._entityManager;
         },
         enumerable: true,
@@ -245,10 +261,17 @@ var Connection = (function () {
                     case 1:
                         _a.sent();
                         _a.label = 2;
-                    case 2: return [4 /*yield*/, this.createSchemaBuilder().build()];
+                    case 2:
+                        if (!(this.driver instanceof MongoDriver_1.MongoDriver)) return [3 /*break*/, 4];
+                        return [4 /*yield*/, this.driver.syncSchema(this.entityMetadatas)];
                     case 3:
                         _a.sent();
-                        return [2 /*return*/];
+                        return [3 /*break*/, 6];
+                    case 4: return [4 /*yield*/, this.createSchemaBuilder().build()];
+                    case 5:
+                        _a.sent();
+                        _a.label = 6;
+                    case 6: return [2 /*return*/];
                 }
             });
         });
@@ -409,14 +432,25 @@ var Connection = (function () {
      * like ones decorated with @ClosureEntity decorator.
      */
     Connection.prototype.getTreeRepository = function (entityClassOrName) {
+        // todo: add checks if tree repository is supported by driver (not supported by mongodb at least)
         var repository = this.findRepositoryAggregator(entityClassOrName).treeRepository;
         if (!repository)
             throw new RepositoryNotTreeError_1.RepositoryNotTreeError(entityClassOrName);
         return repository;
     };
     /**
+     * Gets mongodb-specific repository for the given entity class or name.
+     */
+    Connection.prototype.getMongoRepository = function (entityClassOrName) {
+        if (!(this.driver instanceof MongoDriver_1.MongoDriver))
+            throw new Error("You can use getMongoRepository only for MongoDB connections.");
+        return this.findRepositoryAggregator(entityClassOrName).repository;
+    };
+    /**
      * Gets specific repository for the given entity class or name.
      * SpecificRepository is a special repository that contains specific and non standard repository methods.
+     *
+     * @experimental
      */
     Connection.prototype.getSpecificRepository = function (entityClassOrName) {
         return this.findRepositoryAggregator(entityClassOrName).specificRepository;
@@ -595,6 +629,8 @@ var Connection = (function () {
      * Creates a new default entity manager without single connection setup.
      */
     Connection.prototype.createEntityManager = function () {
+        if (this.driver instanceof MongoDriver_1.MongoDriver)
+            return new MongoEntityManager_1.MongoEntityManager(this);
         return new EntityManager_1.EntityManager(this);
     };
     /**

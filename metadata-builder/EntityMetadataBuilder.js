@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var EntityMetadata_1 = require("../metadata/EntityMetadata");
 var ColumnMetadata_1 = require("../metadata/ColumnMetadata");
 var ForeignKeyMetadata_1 = require("../metadata/ForeignKeyMetadata");
@@ -161,15 +162,20 @@ var EntityMetadataBuilder = (function () {
             var tables = [mergedArgs.table].concat(mergedArgs.children);
             tables.forEach(function (tableArgs) {
                 // find embeddable tables for embeddeds registered in this table and create EmbeddedMetadatas from them
-                var embeddeds = [];
-                mergedArgs.embeddeds.toArray().forEach(function (embedded) {
-                    var embeddableTable = embeddableMergedArgs.find(function (embeddedMergedArgs) { return embeddedMergedArgs.table.target === embedded.type(); });
-                    if (embeddableTable) {
-                        var table_1 = new TableMetadata_1.TableMetadata(embeddableTable.table);
-                        var columns_1 = embeddableTable.columns.toArray().map(function (args) { return new ColumnMetadata_1.ColumnMetadata(args); });
-                        embeddeds.push(new EmbeddedMetadata_1.EmbeddedMetadata(embedded.type(), embedded.propertyName, table_1, columns_1));
-                    }
-                });
+                var findEmbeddedsRecursively = function (embeddedArgs) {
+                    var embeddeds = [];
+                    embeddedArgs.forEach(function (embedded) {
+                        var embeddableTable = embeddableMergedArgs.find(function (embeddedMergedArgs) { return embeddedMergedArgs.table.target === embedded.type(); });
+                        if (embeddableTable) {
+                            var table_1 = new TableMetadata_1.TableMetadata(embeddableTable.table);
+                            var columns_1 = embeddableTable.columns.toArray().map(function (args) { return new ColumnMetadata_1.ColumnMetadata(args); });
+                            var subEmbeddeds = findEmbeddedsRecursively(embeddableTable.embeddeds.toArray());
+                            embeddeds.push(new EmbeddedMetadata_1.EmbeddedMetadata(table_1, columns_1, subEmbeddeds, embedded));
+                        }
+                    });
+                    return embeddeds;
+                };
+                var embeddeds = findEmbeddedsRecursively(mergedArgs.embeddeds.toArray());
                 // create metadatas from args
                 var argsForTable = mergedArgs.inheritance && mergedArgs.inheritance.type === "single-table" ? mergedArgs.table : tableArgs;
                 var table = new TableMetadata_1.TableMetadata(argsForTable);
@@ -289,7 +295,7 @@ var EntityMetadataBuilder = (function () {
             .forEach(function (metadata) {
             var indexForKey = new IndexMetadata_1.IndexMetadata({
                 target: metadata.target,
-                columns: [metadata.discriminatorColumn.name],
+                columns: [metadata.discriminatorColumn.fullName],
                 unique: false
             });
             indexForKey.entityMetadata = metadata;
@@ -333,7 +339,7 @@ var EntityMetadataBuilder = (function () {
             metadata.relationsWithJoinColumns.forEach(function (relation) {
                 // find relational column and if it does not exist - add it
                 var inverseSideColumn = relation.joinColumn.referencedColumn;
-                var relationalColumn = metadata.columns.find(function (column) { return column.name === relation.name; });
+                var relationalColumn = metadata.columns.find(function (column) { return column.fullName === relation.name; });
                 if (!relationalColumn) {
                     relationalColumn = new ColumnMetadata_1.ColumnMetadata({
                         target: metadata.target,

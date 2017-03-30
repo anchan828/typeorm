@@ -5,7 +5,11 @@ import { ConnectionOptions } from "./connection/ConnectionOptions";
 import { ObjectType } from "./common/ObjectType";
 import { Repository } from "./repository/Repository";
 import { EntityManager } from "./entity-manager/EntityManager";
+import { TreeRepository } from "./repository/TreeRepository";
+import { MongoRepository } from "./repository/MongoRepository";
 export * from "./container";
+export * from "./common/ObjectType";
+export * from "./common/ObjectLiteral";
 export * from "./decorator/columns/Column";
 export * from "./decorator/columns/CreateDateColumn";
 export * from "./decorator/columns/DiscriminatorColumn";
@@ -13,6 +17,7 @@ export * from "./decorator/columns/PrimaryGeneratedColumn";
 export * from "./decorator/columns/PrimaryColumn";
 export * from "./decorator/columns/UpdateDateColumn";
 export * from "./decorator/columns/VersionColumn";
+export * from "./decorator/columns/ObjectIdColumn";
 export * from "./decorator/listeners/AfterInsert";
 export * from "./decorator/listeners/AfterLoad";
 export * from "./decorator/listeners/AfterRemove";
@@ -67,24 +72,19 @@ export { Driver } from "./driver/Driver";
 export { QueryBuilder } from "./query-builder/QueryBuilder";
 export { QueryRunner } from "./query-runner/QueryRunner";
 export { EntityManager } from "./entity-manager/EntityManager";
+export { MongoEntityManager } from "./entity-manager/MongoEntityManager";
 export { MigrationInterface } from "./migration/MigrationInterface";
 export { DefaultNamingStrategy } from "./naming-strategy/DefaultNamingStrategy";
 export { NamingStrategyInterface } from "./naming-strategy/NamingStrategyInterface";
 export { Repository } from "./repository/Repository";
 export { TreeRepository } from "./repository/TreeRepository";
 export { SpecificRepository } from "./repository/SpecificRepository";
-export { FindOptions } from "./find-options/FindOptions";
+export { MongoRepository } from "./repository/MongoRepository";
+export { FindManyOptions } from "./find-options/FindManyOptions";
 export { InsertEvent } from "./subscriber/event/InsertEvent";
 export { UpdateEvent } from "./subscriber/event/UpdateEvent";
 export { RemoveEvent } from "./subscriber/event/RemoveEvent";
 export { EntitySubscriberInterface } from "./subscriber/EntitySubscriberInterface";
-export * from "./decorator/tables/Table";
-export * from "./decorator/tables/AbstractTable";
-export * from "./decorator/tables/ClassTableChild";
-export * from "./decorator/tables/ClosureTable";
-export * from "./decorator/tables/EmbeddableTable";
-export * from "./decorator/tables/SingleTableChild";
-export * from "./decorator/tables/Table";
 /**
  * Gets metadata args storage.
  */
@@ -191,8 +191,24 @@ export declare function getEntityManager(connectionName?: string): EntityManager
 /**
  * Gets repository for the given entity class.
  */
-export declare function getRepository<Entity>(entityClass: ObjectType<Entity>, connectionName: string): Repository<Entity>;
+export declare function getRepository<Entity>(entityClass: ObjectType<Entity>, connectionName?: string): Repository<Entity>;
 /**
  * Gets repository for the given entity name.
  */
-export declare function getRepository<Entity>(entityName: string, connectionName: string): Repository<Entity>;
+export declare function getRepository<Entity>(entityName: string, connectionName?: string): Repository<Entity>;
+/**
+ * Gets tree repository for the given entity class.
+ */
+export declare function getTreeRepository<Entity>(entityClass: ObjectType<Entity>, connectionName?: string): TreeRepository<Entity>;
+/**
+ * Gets tree repository for the given entity name.
+ */
+export declare function getTreeRepository<Entity>(entityName: string, connectionName?: string): TreeRepository<Entity>;
+/**
+ * Gets mongodb repository for the given entity class.
+ */
+export declare function getMongoRepository<Entity>(entityClass: ObjectType<Entity>, connectionName?: string): MongoRepository<Entity>;
+/**
+ * Gets mongodb repository for the given entity name.
+ */
+export declare function getMongoRepository<Entity>(entityName: string, connectionName?: string): MongoRepository<Entity>;

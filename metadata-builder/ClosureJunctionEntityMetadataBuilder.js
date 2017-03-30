@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var EntityMetadata_1 = require("../metadata/EntityMetadata");
 var ColumnMetadata_1 = require("../metadata/ColumnMetadata");
 var ForeignKeyMetadata_1 = require("../metadata/ForeignKeyMetadata");

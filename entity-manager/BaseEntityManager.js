@@ -34,6 +34,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+Object.defineProperty(exports, "__esModule", { value: true });
 var RepositoryAggregator_1 = require("../repository/RepositoryAggregator");
 var RepositoryNotTreeError_1 = require("../connection/error/RepositoryNotTreeError");
 var NoNeedToReleaseEntityManagerError_1 = require("./error/NoNeedToReleaseEntityManagerError");
@@ -90,6 +91,15 @@ var BaseEntityManager = (function () {
         return this.connection.getTreeRepository(entityClassOrName);
     };
     /**
+     * Gets mongodb repository for the given entity class or name.
+     */
+    BaseEntityManager.prototype.getMongoRepository = function (entityClassOrName) {
+        // if single db connection is used then create its own repository with reused query runner
+        if (this.queryRunnerProvider)
+            return this.obtainRepositoryAggregator(entityClassOrName).repository;
+        return this.connection.getMongoRepository(entityClassOrName);
+    };
+    /**
      * Gets specific repository for the given entity class or name.
      * If single database connection mode is used, then repository is obtained from the
      * repository aggregator, where each repository is individually created for this entity manager.
@@ -114,6 +124,14 @@ var BaseEntityManager = (function () {
         var target = arguments.length === 2 ? targetOrEntity : targetOrEntity.constructor;
         var entity = arguments.length === 2 ? maybeEntity : targetOrEntity;
         return this.getRepository(target).hasId(entity);
+    };
+    /**
+     * Gets entity mixed id.
+     */
+    BaseEntityManager.prototype.getId = function (targetOrEntity, maybeEntity) {
+        var target = arguments.length === 2 ? targetOrEntity : targetOrEntity.constructor;
+        var entity = arguments.length === 2 ? maybeEntity : targetOrEntity;
+        return this.getRepository(target).getId(entity);
     };
     /**
      * Creates a new query builder that can be used to build an sql query.
@@ -148,12 +166,12 @@ var BaseEntityManager = (function () {
     /**
      * Merges two entities into one new entity.
      */
-    BaseEntityManager.prototype.merge = function (entityClass) {
+    BaseEntityManager.prototype.merge = function (entityClass, mergeIntoEntity) {
         var objects = [];
-        for (var _i = 1; _i < arguments.length; _i++) {
-            objects[_i - 1] = arguments[_i];
+        for (var _i = 2; _i < arguments.length; _i++) {
+            objects[_i - 2] = arguments[_i];
         }
-        return (_a = this.getRepository(entityClass)).merge.apply(_a, objects);
+        return (_a = this.getRepository(entityClass)).merge.apply(_a, [mergeIntoEntity].concat(objects));
         var _a;
     };
     /**

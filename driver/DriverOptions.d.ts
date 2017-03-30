@@ -1,7 +1,7 @@
 /**
  * Driver type.
  */
-export declare type DriverType = "mysql" | "postgres" | "mariadb" | "sqlite" | "oracle" | "mssql" | "websql";
+export declare type DriverType = "mysql" | "postgres" | "mariadb" | "sqlite" | "oracle" | "mssql" | "websql" | "mongodb";
 /**
  * Connectivity options used to connect to the database, and other database-driver-specific options.
  */
@@ -35,8 +35,7 @@ export interface DriverOptions {
      */
     readonly database?: string;
     /**
-     * Schema name. (Only used in Postgres)
-     * default: "public"
+     * Schema name. By default is "public" (used only in Postgres databases).
      */
     readonly schemaName?: string;
     /**
@@ -49,15 +48,20 @@ export interface DriverOptions {
     readonly storage?: string;
     /**
      * Indicates if connection pooling should be used or not.
-     * Be default it is enabled if its supported by a platform. Set to false to disable it.
+     * Be default it is enabled if its supported by a platform.
+     * Set to false to disable it.
+     *
+     * @todo: rename to disablePool? What about mongodb pool?
      */
     readonly usePool?: boolean;
     /**
-     * Extra connection options to be passed to the driver.
+     * Extra connection options to be passed to the underlying driver.
      */
     readonly extra?: any;
     /**
-     * Prefix to use on all tables of this connection in the database.
+     * Prefix to use on all tables (collections) of this connection in the database.
+     *
+     * @todo: rename to entityPrefix
      */
     readonly tablesPrefix?: string;
 }

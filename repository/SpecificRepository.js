@@ -34,6 +34,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+Object.defineProperty(exports, "__esModule", { value: true });
 var QueryRunnerProvider_1 = require("../query-runner/QueryRunnerProvider");
 var Subject_1 = require("../persistence/Subject");
 var RelationMetadata_1 = require("../metadata/RelationMetadata");
@@ -73,12 +74,12 @@ var SpecificRepository = (function () {
                         if (relation.isOwning) {
                             table = relation.entityMetadata.table.name;
                             values[relation.name] = relatedEntityId;
-                            conditions[relation.joinColumn.referencedColumn.name] = entityId;
+                            conditions[relation.joinColumn.referencedColumn.fullName] = entityId;
                         }
                         else {
                             table = relation.inverseEntityMetadata.table.name;
                             values[relation.inverseRelation.name] = relatedEntityId;
-                            conditions[relation.inverseRelation.joinColumn.referencedColumn.name] = entityId;
+                            conditions[relation.inverseRelation.joinColumn.referencedColumn.fullName] = entityId;
                         }
                         queryRunnerProvider = this.queryRunnerProvider ? this.queryRunnerProvider : new QueryRunnerProvider_1.QueryRunnerProvider(this.connection.driver);
                         return [4 /*yield*/, queryRunnerProvider.provide()];
@@ -120,12 +121,12 @@ var SpecificRepository = (function () {
                         if (relation.isOwning) {
                             table = relation.inverseEntityMetadata.table.name;
                             values[relation.inverseRelation.name] = relatedEntityId;
-                            conditions[relation.inverseRelation.joinColumn.referencedColumn.name] = entityId;
+                            conditions[relation.inverseRelation.joinColumn.referencedColumn.fullName] = entityId;
                         }
                         else {
                             table = relation.entityMetadata.table.name;
                             values[relation.name] = relatedEntityId;
-                            conditions[relation.joinColumn.referencedColumn.name] = entityId;
+                            conditions[relation.joinColumn.referencedColumn.fullName] = entityId;
                         }
                         queryRunnerProvider = this.queryRunnerProvider ? this.queryRunnerProvider : new QueryRunnerProvider_1.QueryRunnerProvider(this.connection.driver);
                         return [4 /*yield*/, queryRunnerProvider.provide()];
@@ -168,12 +169,12 @@ var SpecificRepository = (function () {
                         insertPromises = relatedEntityIds.map(function (relatedEntityId) {
                             var values = {};
                             if (relation.isOwning) {
-                                values[relation.junctionEntityMetadata.columns[0].name] = entityId;
-                                values[relation.junctionEntityMetadata.columns[1].name] = relatedEntityId;
+                                values[relation.junctionEntityMetadata.columns[0].fullName] = entityId;
+                                values[relation.junctionEntityMetadata.columns[1].fullName] = relatedEntityId;
                             }
                             else {
-                                values[relation.junctionEntityMetadata.columns[1].name] = entityId;
-                                values[relation.junctionEntityMetadata.columns[0].name] = relatedEntityId;
+                                values[relation.junctionEntityMetadata.columns[1].fullName] = entityId;
+                                values[relation.junctionEntityMetadata.columns[0].fullName] = relatedEntityId;
                             }
                             return queryRunner.insert(relation.junctionEntityMetadata.table.name, values);
                         });
@@ -217,12 +218,12 @@ var SpecificRepository = (function () {
                         insertPromises = entityIds.map(function (entityId) {
                             var values = {};
                             if (relation.isOwning) {
-                                values[relation.junctionEntityMetadata.columns[0].name] = entityId;
-                                values[relation.junctionEntityMetadata.columns[1].name] = relatedEntityId;
+                                values[relation.junctionEntityMetadata.columns[0].fullName] = entityId;
+                                values[relation.junctionEntityMetadata.columns[1].fullName] = relatedEntityId;
                             }
                             else {
-                                values[relation.junctionEntityMetadata.columns[1].name] = entityId;
-                                values[relation.junctionEntityMetadata.columns[0].name] = relatedEntityId;
+                                values[relation.junctionEntityMetadata.columns[1].fullName] = entityId;
+                                values[relation.junctionEntityMetadata.columns[0].fullName] = relatedEntityId;
                             }
                             return queryRunner.insert(relation.junctionEntityMetadata.table.name, values);
                         });
@@ -265,8 +266,8 @@ var SpecificRepository = (function () {
                         qb = new QueryBuilder_1.QueryBuilder(this.connection, this.queryRunnerProvider)
                             .delete()
                             .fromTable(relation.junctionEntityMetadata.table.name, "junctionEntity");
-                        firstColumnName = this.connection.driver.escapeColumnName(relation.isOwning ? relation.junctionEntityMetadata.columns[0].name : relation.junctionEntityMetadata.columns[1].name);
-                        secondColumnName = this.connection.driver.escapeColumnName(relation.isOwning ? relation.junctionEntityMetadata.columns[1].name : relation.junctionEntityMetadata.columns[0].name);
+                        firstColumnName = this.connection.driver.escapeColumnName(relation.isOwning ? relation.junctionEntityMetadata.columns[0].fullName : relation.junctionEntityMetadata.columns[1].fullName);
+                        secondColumnName = this.connection.driver.escapeColumnName(relation.isOwning ? relation.junctionEntityMetadata.columns[1].fullName : relation.junctionEntityMetadata.columns[0].fullName);
                         relatedEntityIds.forEach(function (relatedEntityId, index) {
                             qb.orWhere("(" + firstColumnName + "=:entityId AND " + secondColumnName + "=:relatedEntity_" + index + ")")
                                 .setParameter("relatedEntity_" + index, relatedEntityId);
@@ -304,8 +305,8 @@ var SpecificRepository = (function () {
                         qb = new QueryBuilder_1.QueryBuilder(this.connection, this.queryRunnerProvider)
                             .delete()
                             .from(relation.junctionEntityMetadata.table.name, "junctionEntity");
-                        firstColumnName = relation.isOwning ? relation.junctionEntityMetadata.columns[1].name : relation.junctionEntityMetadata.columns[0].name;
-                        secondColumnName = relation.isOwning ? relation.junctionEntityMetadata.columns[0].name : relation.junctionEntityMetadata.columns[1].name;
+                        firstColumnName = relation.isOwning ? relation.junctionEntityMetadata.columns[1].fullName : relation.junctionEntityMetadata.columns[0].fullName;
+                        secondColumnName = relation.isOwning ? relation.junctionEntityMetadata.columns[0].fullName : relation.junctionEntityMetadata.columns[1].fullName;
                         entityIds.forEach(function (entityId, index) {
                             qb.orWhere("(" + firstColumnName + "=:relatedEntityId AND " + secondColumnName + "=:entity_" + index + ")")
                                 .setParameter("entity_" + index, entityId);
@@ -460,13 +461,13 @@ var SpecificRepository = (function () {
                         ids = [];
                         promises = entityIds.map(function (entityId) {
                             var qb = new QueryBuilder_1.QueryBuilder(_this.connection, _this.queryRunnerProvider)
-                                .select(escapeAlias("junction") + "." + escapeColumn(inverseEntityColumn.name) + " AS id")
+                                .select(escapeAlias("junction") + "." + escapeColumn(inverseEntityColumn.fullName) + " AS id")
                                 .fromTable(relation.junctionEntityMetadata.table.name, "junction")
-                                .andWhere(escapeAlias("junction") + "." + escapeColumn(ownerEntityColumn.name) + "=:entityId", { entityId: entityId });
+                                .andWhere(escapeAlias("junction") + "." + escapeColumn(ownerEntityColumn.fullName) + "=:entityId", { entityId: entityId });
                             if (inIds && inIds.length > 0)
-                                qb.andWhere(escapeAlias("junction") + "." + escapeColumn(inverseEntityColumn.name) + " IN (:inIds)", { inIds: inIds });
+                                qb.andWhere(escapeAlias("junction") + "." + escapeColumn(inverseEntityColumn.fullName) + " IN (:inIds)", { inIds: inIds });
                             if (notInIds && notInIds.length > 0)
-                                qb.andWhere(escapeAlias("junction") + "." + escapeColumn(inverseEntityColumn.name) + " NOT IN (:notInIds)", { notInIds: notInIds });
+                                qb.andWhere(escapeAlias("junction") + "." + escapeColumn(inverseEntityColumn.fullName) + " NOT IN (:notInIds)", { notInIds: notInIds });
                             return qb.getRawMany()
                                 .then(function (results) {
                                 results.forEach(function (result) { return ids.push(result.id); }); // todo: prepare result?

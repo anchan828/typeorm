@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 /**
  * This metadata contains all information about entity's column.
  */
@@ -63,6 +64,8 @@ var ColumnMetadata = (function () {
             this.timezone = args.options.timezone;
         if (args.options.localTimezone)
             this.localTimezone = args.options.localTimezone;
+        if (args.options.fixedLength)
+            this.fixedLength = args.options.fixedLength;
     }
     Object.defineProperty(ColumnMetadata.prototype, "entityTarget", {
         // ---------------------------------------------------------------------
@@ -83,11 +86,34 @@ var ColumnMetadata = (function () {
     Object.defineProperty(ColumnMetadata.prototype, "name", {
         /**
          * Column name in the database.
+         *
+         * todo: rename to originalName
+         */
+        get: function () {
+            return this.entityMetadata.namingStrategy.columnName(this.propertyName, this._name);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(ColumnMetadata.prototype, "fullName", {
+        /**
+         * Column name in the database including its embedded prefixes.
+         *
+         * todo: rename to databaseName
          */
         get: function () {
             // if this column is embedded's column then apply different entity
-            if (this.embeddedMetadata)
-                return this.embeddedMetadata.entityMetadata.namingStrategy.embeddedColumnName(this.embeddedMetadata.propertyName, this.propertyName, this._name);
+            if (this.embeddedMetadata) {
+                // because embedded can be inside other embedded we need to go recursively and collect all prefix name
+                var prefixes_1 = [];
+                var buildPrefixRecursively_1 = function (embeddedMetadata) {
+                    if (embeddedMetadata.parentEmbeddedMetadata)
+                        buildPrefixRecursively_1(embeddedMetadata.parentEmbeddedMetadata);
+                    prefixes_1.push(embeddedMetadata.prefix);
+                };
+                buildPrefixRecursively_1(this.embeddedMetadata);
+                return this.entityMetadata.namingStrategy.embeddedColumnName(prefixes_1, this.propertyName, this._name);
+            }
             // if there is a naming strategy then use it to normalize propertyName as column name
             if (this.entityMetadata)
                 return this.entityMetadata.namingStrategy.columnName(this.propertyName, this._name);
@@ -112,6 +138,19 @@ var ColumnMetadata = (function () {
          */
         get: function () {
             return this.mode === "virtual";
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(ColumnMetadata.prototype, "isArray", {
+        /**
+         * Indicates if column is array.
+         * Array columns are now only supported by Mongodb driver.
+         *
+         * todo: implement array serialization functionality for relational databases as well
+         */
+        get: function () {
+            return this.mode === "array";
         },
         enumerable: true,
         configurable: true
@@ -162,6 +201,16 @@ var ColumnMetadata = (function () {
          */
         get: function () {
             return this.mode === "version";
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(ColumnMetadata.prototype, "isObjectId", {
+        /**
+         * Indicates if this column contains an object id.
+         */
+        get: function () {
+            return this.mode === "objectId";
         },
         enumerable: true,
         configurable: true

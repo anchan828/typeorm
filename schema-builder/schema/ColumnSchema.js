@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 /**
  * Table's column's schema in the database represented in this class.
  */
@@ -60,7 +61,7 @@ var ColumnSchema = (function () {
      */
     ColumnSchema.create = function (columnMetadata, normalizedType) {
         var columnSchema = new ColumnSchema();
-        columnSchema.name = columnMetadata.name;
+        columnSchema.name = columnMetadata.fullName;
         columnSchema.default = columnMetadata.default;
         columnSchema.comment = columnMetadata.comment;
         columnSchema.isGenerated = columnMetadata.isGenerated;

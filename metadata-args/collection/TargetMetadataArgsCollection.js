@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var MetadataAlreadyExistsError_1 = require("../../metadata-builder/error/MetadataAlreadyExistsError");
 var TargetMetadataArgsCollection = (function () {
     function TargetMetadataArgsCollection() {

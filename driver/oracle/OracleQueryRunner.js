@@ -34,6 +34,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+Object.defineProperty(exports, "__esModule", { value: true });
 var TransactionAlreadyStartedError_1 = require("../error/TransactionAlreadyStartedError");
 var TransactionNotStartedError_1 = require("../error/TransactionNotStartedError");
 var DataTypeNotSupportedByDriverError_1 = require("../error/DataTypeNotSupportedByDriverError");
@@ -874,7 +875,12 @@ var OracleQueryRunner = (function () {
     OracleQueryRunner.prototype.normalizeType = function (typeOptions) {
         switch (typeOptions.type) {
             case "string":
-                return "varchar2(" + (typeOptions.length ? typeOptions.length : 255) + ")";
+                if (typeOptions.fixedLength) {
+                    return "char(" + (typeOptions.length ? typeOptions.length : 255) + ")";
+                }
+                else {
+                    return "varchar2(" + (typeOptions.length ? typeOptions.length : 255) + ")";
+                }
             case "text":
             case "mediumtext":
                 return "clob";

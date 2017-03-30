@@ -34,6 +34,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+Object.defineProperty(exports, "__esModule", { value: true });
 var QueryBuilder_1 = require("../query-builder/QueryBuilder");
 var PlainObjectToNewEntityTransformer_1 = require("../query-builder/transformer/PlainObjectToNewEntityTransformer");
 var PlainObjectToDatabaseEntityTransformer_1 = require("../query-builder/transformer/PlainObjectToDatabaseEntityTransformer");
@@ -70,6 +71,12 @@ var Repository = (function () {
         return this.metadata.hasId(entity);
     };
     /**
+     * Gets entity mixed id.
+     */
+    Repository.prototype.getId = function (entity) {
+        return this.metadata.getEntityIdMixedMap(entity);
+    };
+    /**
      * Creates a new query builder that can be used to build a sql query.
      */
     Repository.prototype.createQueryBuilder = function (alias, queryRunnerProvider) {
@@ -81,52 +88,66 @@ var Repository = (function () {
      * Creates a new entity instance or instances.
      * Can copy properties from the given object into new entities.
      */
-    Repository.prototype.create = function (plainObjectOrObjects) {
+    Repository.prototype.create = function (plainEntityLikeOrPlainEntityLikes) {
         var _this = this;
-        if (plainObjectOrObjects instanceof Array)
-            return plainObjectOrObjects.map(function (object) { return _this.create(object); });
-        var newEntity = this.metadata.create();
-        if (plainObjectOrObjects) {
-            var plainObjectToEntityTransformer = new PlainObjectToNewEntityTransformer_1.PlainObjectToNewEntityTransformer();
-            plainObjectToEntityTransformer.transform(newEntity, plainObjectOrObjects, this.metadata);
+        if (!plainEntityLikeOrPlainEntityLikes)
+            return this.metadata.create();
+        if (plainEntityLikeOrPlainEntityLikes instanceof Array)
+            return plainEntityLikeOrPlainEntityLikes.map(function (plainEntityLike) { return _this.create(plainEntityLike); });
+        return this.merge(this.metadata.create(), plainEntityLikeOrPlainEntityLikes);
+    };
+    /**
+     * Merges multiple entities (or entity-like objects) into a given entity.
+     */
+    Repository.prototype.merge = function (mergeIntoEntity) {
+        var _this = this;
+        var entityLikes = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            entityLikes[_i - 1] = arguments[_i];
         }
-        return newEntity;
+        var plainObjectToEntityTransformer = new PlainObjectToNewEntityTransformer_1.PlainObjectToNewEntityTransformer();
+        entityLikes.forEach(function (object) { return plainObjectToEntityTransformer.transform(mergeIntoEntity, object, _this.metadata); });
+        return mergeIntoEntity;
     };
     /**
      * Creates a new entity from the given plan javascript object. If entity already exist in the database, then
      * it loads it (and everything related to it), replaces all values with the new ones from the given object
      * and returns this new entity. This new entity is actually a loaded from the db entity with all properties
      * replaced from the new object.
+     *
+     * Note that given entity-like object must have an entity id / primary key to find entity by.
+     * Returns undefined if entity with given id was not found.
      */
-    Repository.prototype.preload = function (object) {
-        var queryBuilder = this.createQueryBuilder(this.metadata.table.name);
-        var plainObjectToDatabaseEntityTransformer = new PlainObjectToDatabaseEntityTransformer_1.PlainObjectToDatabaseEntityTransformer();
-        return plainObjectToDatabaseEntityTransformer.transform(object, this.metadata, queryBuilder);
-    };
-    /**
-     * Merges multiple entities (or entity-like objects) into a one new entity.
-     */
-    Repository.prototype.merge = function () {
-        var _this = this;
-        var objects = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            objects[_i] = arguments[_i];
-        }
-        var newEntity = this.metadata.create();
-        var plainObjectToEntityTransformer = new PlainObjectToNewEntityTransformer_1.PlainObjectToNewEntityTransformer();
-        objects.forEach(function (object) { return plainObjectToEntityTransformer.transform(newEntity, object, _this.metadata); });
-        return newEntity;
+    Repository.prototype.preload = function (entityLike) {
+        return __awaiter(this, void 0, void 0, function () {
+            var plainObjectToDatabaseEntityTransformer, transformedEntity;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        plainObjectToDatabaseEntityTransformer = new PlainObjectToDatabaseEntityTransformer_1.PlainObjectToDatabaseEntityTransformer(this.connection.entityManager);
+                        return [4 /*yield*/, plainObjectToDatabaseEntityTransformer.transform(entityLike, this.metadata)];
+                    case 1:
+                        transformedEntity = _a.sent();
+                        if (transformedEntity)
+                            return [2 /*return*/, this.merge(transformedEntity, entityLike)];
+                        return [2 /*return*/, undefined];
+                }
+            });
+        });
     };
     /**
      * Persists one or many given entities.
      */
-    Repository.prototype.persist = function (entityOrEntities) {
+    Repository.prototype.persist = function (entityOrEntities, options) {
         return __awaiter(this, void 0, void 0, function () {
             var _this = this;
             var queryRunnerProvider, transactionEntityManager, databaseEntityLoader, executor;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        // if for some reason non empty entity was passed then return it back without having to do anything
+                        if (!entityOrEntities)
+                            return [2 /*return*/, entityOrEntities];
                         // if multiple entities given then go throw all of them and save them
                         if (entityOrEntities instanceof Array)
                             return [2 /*return*/, Promise.all(entityOrEntities.map(function (entity) { return _this.persist(entity); }))];
@@ -157,15 +178,62 @@ var Repository = (function () {
         });
     };
     /**
+     * Updates entity partially. Entity can be found by a given conditions.
+     */
+    Repository.prototype.update = function (conditionsOrFindOptions, partialEntity, options) {
+        return __awaiter(this, void 0, void 0, function () {
+            var entity;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.findOne(conditionsOrFindOptions)];
+                    case 1:
+                        entity = _a.sent();
+                        if (!entity)
+                            throw new Error("Cannot find entity to update by a given criteria");
+                        Object.assign(entity, partialEntity);
+                        return [4 /*yield*/, this.persist(entity, options)];
+                    case 2:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    /**
+     * Updates entity partially. Entity will be found by a given id.
+     */
+    Repository.prototype.updateById = function (id, partialEntity, options) {
+        return __awaiter(this, void 0, void 0, function () {
+            var entity;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.findOneById(id)];
+                    case 1:
+                        entity = _a.sent();
+                        if (!entity)
+                            throw new Error("Cannot find entity to update by a id");
+                        Object.assign(entity, partialEntity);
+                        return [4 /*yield*/, this.persist(entity, options)];
+                    case 2:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    /**
      * Removes one or many given entities.
      */
-    Repository.prototype.remove = function (entityOrEntities) {
+    Repository.prototype.remove = function (entityOrEntities, options) {
         return __awaiter(this, void 0, void 0, function () {
             var _this = this;
             var queryRunnerProvider, transactionEntityManager, databaseEntityLoader, executor;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        // if for some reason non empty entity was passed then return it back without having to do anything
+                        if (!entityOrEntities)
+                            return [2 /*return*/, entityOrEntities];
                         // if multiple entities given then go throw all of them and save them
                         if (entityOrEntities instanceof Array)
                             return [2 /*return*/, Promise.all(entityOrEntities.map(function (entity) { return _this.remove(entity); }))];
@@ -196,68 +264,79 @@ var Repository = (function () {
         });
     };
     /**
-     * Finds entities that match given conditions and/or find options.
+     * Removes entity by a given entity id.
      */
-    Repository.prototype.find = function (conditionsOrFindOptions, options) {
+    Repository.prototype.removeById = function (id, options) {
         return __awaiter(this, void 0, void 0, function () {
+            var entity;
             return __generator(this, function (_a) {
-                return [2 /*return*/, this.createFindQueryBuilder(conditionsOrFindOptions, options)
-                        .getMany()];
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.findOneById(id)];
+                    case 1:
+                        entity = _a.sent();
+                        if (!entity)
+                            throw new Error("Cannot find entity to remove by a given id");
+                        return [4 /*yield*/, this.remove(entity, options)];
+                    case 2:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
             });
         });
     };
     /**
-     * Finds entities that match given conditions.
+     * Counts entities that match given find options or conditions.
+     */
+    Repository.prototype.count = function (optionsOrConditions) {
+        var qb = this.createQueryBuilder(FindOptionsUtils_1.FindOptionsUtils.extractFindManyOptionsAlias(optionsOrConditions) || this.metadata.table.name);
+        return FindOptionsUtils_1.FindOptionsUtils.applyFindManyOptionsOrConditionsToQueryBuilder(qb, optionsOrConditions).getCount();
+    };
+    /**
+     * Finds entities that match given find options or conditions.
+     */
+    Repository.prototype.find = function (optionsOrConditions) {
+        var qb = this.createQueryBuilder(FindOptionsUtils_1.FindOptionsUtils.extractFindManyOptionsAlias(optionsOrConditions) || this.metadata.table.name);
+        return FindOptionsUtils_1.FindOptionsUtils.applyFindManyOptionsOrConditionsToQueryBuilder(qb, optionsOrConditions).getMany();
+    };
+    /**
+     * Finds entities that match given find options or conditions.
      * Also counts all entities that match given conditions,
-     * but ignores pagination settings (maxResults, firstResult) options.
+     * but ignores pagination settings (from and take options).
      */
-    Repository.prototype.findAndCount = function (conditionsOrFindOptions, options) {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                return [2 /*return*/, this.createFindQueryBuilder(conditionsOrFindOptions, options)
-                        .getManyAndCount()];
-            });
-        });
+    Repository.prototype.findAndCount = function (optionsOrConditions) {
+        var qb = this.createQueryBuilder(FindOptionsUtils_1.FindOptionsUtils.extractFindManyOptionsAlias(optionsOrConditions) || this.metadata.table.name);
+        return FindOptionsUtils_1.FindOptionsUtils.applyFindManyOptionsOrConditionsToQueryBuilder(qb, optionsOrConditions).getManyAndCount();
     };
     /**
-     * Finds first entity that matches given conditions and/or find options.
-     */
-    Repository.prototype.findOne = function (conditionsOrFindOptions, options) {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                return [2 /*return*/, this.createFindQueryBuilder(conditionsOrFindOptions, options)
-                        .getOne()];
-            });
-        });
-    };
-    /**
-     * Finds entities with ids.
+     * Finds entities by ids.
      * Optionally find options can be applied.
      */
-    Repository.prototype.findByIds = function (ids, options) {
-        return __awaiter(this, void 0, void 0, function () {
-            var qb;
-            return __generator(this, function (_a) {
-                qb = this.createFindQueryBuilder(undefined, options);
-                return [2 /*return*/, qb.andWhereInIds(ids).getMany()];
-            });
-        });
+    Repository.prototype.findByIds = function (ids, optionsOrConditions) {
+        var qb = this.createQueryBuilder(FindOptionsUtils_1.FindOptionsUtils.extractFindManyOptionsAlias(optionsOrConditions) || this.metadata.table.name);
+        return FindOptionsUtils_1.FindOptionsUtils.applyFindManyOptionsOrConditionsToQueryBuilder(qb, optionsOrConditions)
+            .andWhereInIds(ids)
+            .getMany();
     };
     /**
-     * Finds entity with given id.
-     * Optionally find options can be applied.
+     * Finds first entity that matches given conditions.
      */
-    Repository.prototype.findOneById = function (id, options) {
-        return __awaiter(this, void 0, void 0, function () {
-            var qb;
-            return __generator(this, function (_a) {
-                qb = this.createFindQueryBuilder(undefined, options);
-                return [2 /*return*/, qb.andWhereInIds([id]).getOne()];
-            });
-        });
+    Repository.prototype.findOne = function (optionsOrConditions) {
+        var qb = this.createQueryBuilder(FindOptionsUtils_1.FindOptionsUtils.extractFindOneOptionsAlias(optionsOrConditions) || this.metadata.table.name);
+        return FindOptionsUtils_1.FindOptionsUtils.applyFindOneOptionsOrConditionsToQueryBuilder(qb, optionsOrConditions).getOne();
+    };
+    /**
+     * Finds entity by given id.
+     * Optionally find options or conditions can be applied.
+     */
+    Repository.prototype.findOneById = function (id, optionsOrConditions) {
+        var qb = this.createQueryBuilder(FindOptionsUtils_1.FindOptionsUtils.extractFindOneOptionsAlias(optionsOrConditions) || this.metadata.table.name);
+        return FindOptionsUtils_1.FindOptionsUtils.applyFindOneOptionsOrConditionsToQueryBuilder(qb, optionsOrConditions)
+            .andWhereInIds([id])
+            .getOne();
     };
     /**
      * Executes a raw SQL query and returns a raw database results.
+     * Raw query execution is supported only by relational databases (MongoDB is not supported).
      */
     Repository.prototype.query = function (query, parameters) {
         return __awaiter(this, void 0, void 0, function () {
@@ -286,6 +365,13 @@ var Repository = (function () {
     /**
      * Wraps given function execution (and all operations made there) in a transaction.
      * All database operations must be executed using provided repository.
+     *
+     * Most important, you should execute all your database operations using provided repository instance,
+     * all other operations would not be included in the transaction.
+     * If you want to execute transaction and persist multiple different entity types, then
+     * use EntityManager.transaction method instead.
+     *
+     * Transactions are supported only by relational databases (MongoDB is not supported).
      */
     Repository.prototype.transaction = function (runInTransaction) {
         return __awaiter(this, void 0, void 0, function () {
@@ -335,7 +421,7 @@ var Repository = (function () {
         });
     };
     /**
-     * Clears all the data from the given table (truncates/drops it).
+     * Clears all the data from the given table/collection (truncates/drops it).
      */
     Repository.prototype.clear = function () {
         return __awaiter(this, void 0, void 0, function () {
@@ -360,36 +446,6 @@ var Repository = (function () {
                 }
             });
         });
-    };
-    // -------------------------------------------------------------------------
-    // Protected Methods
-    // -------------------------------------------------------------------------
-    /**
-     * Creates a query builder from the given conditions or find options.
-     * Used to create a query builder for find* methods.
-     */
-    Repository.prototype.createFindQueryBuilder = function (conditionsOrFindOptions, options) {
-        var findOptions = FindOptionsUtils_1.FindOptionsUtils.isFindOptions(conditionsOrFindOptions) ? conditionsOrFindOptions : options;
-        var conditions = FindOptionsUtils_1.FindOptionsUtils.isFindOptions(conditionsOrFindOptions) ? undefined : conditionsOrFindOptions;
-        var alias = findOptions ? findOptions.alias : this.metadata.table.name;
-        var qb = this.createQueryBuilder(alias);
-        // if find options are given then apply them to query builder
-        if (findOptions)
-            FindOptionsUtils_1.FindOptionsUtils.applyOptionsToQueryBuilder(qb, findOptions);
-        // if conditions are given then apply them to query builder
-        if (conditions) {
-            Object.keys(conditions).forEach(function (key) {
-                var name = key.indexOf(".") === -1 ? alias + "." + key : key;
-                if (conditions[key] === null) {
-                    qb.andWhere(name + " IS NULL");
-                }
-                else {
-                    qb.andWhere(name + "=:" + key);
-                }
-            });
-            qb.setParameters(conditions);
-        }
-        return qb;
     };
     return Repository;
 }());

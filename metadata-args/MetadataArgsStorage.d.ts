@@ -62,6 +62,7 @@ export declare class MetadataArgsStorage {
     getMergedEmbeddableTableMetadatas(classes?: Function[]): {
         table: TableMetadataArgs;
         columns: PropertyMetadataArgsCollection<ColumnMetadataArgs>;
+        embeddeds: PropertyMetadataArgsCollection<EmbeddedMetadataArgs>;
     }[];
     /**
      */
@@ -86,6 +87,7 @@ export declare class MetadataArgsStorage {
     protected mergeWithEmbeddable(allTableMetadatas: TargetMetadataArgsCollection<TableMetadataArgs>, tableMetadata: TableMetadataArgs): {
         table: TableMetadataArgs;
         columns: PropertyMetadataArgsCollection<ColumnMetadataArgs>;
+        embeddeds: PropertyMetadataArgsCollection<EmbeddedMetadataArgs>;
     };
     /**
      * Checks if this table is inherited from another table.

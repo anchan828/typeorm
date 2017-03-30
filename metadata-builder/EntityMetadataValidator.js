@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var UsingJoinTableIsNotAllowedError_1 = require("./error/UsingJoinTableIsNotAllowedError");
 var UsingJoinTableOnlyOnOneSideAllowedError_1 = require("./error/UsingJoinTableOnlyOnOneSideAllowedError");
 var UsingJoinColumnIsNotAllowedError_1 = require("./error/UsingJoinColumnIsNotAllowedError");
@@ -86,6 +87,8 @@ var EntityMetadataValidator = (function () {
             // todo: with message like: "Inverse side is specified only on one side of the relationship. Specify on other side too to prevent confusion".
             // todo: add validation if there two entities with the same target, and show error message with description of the problem (maybe file was renamed/moved but left in output directory)
             // todo: check if there are multiple columns on the same column applied.
+            // todo: check column type if is missing in relational databases (throw new Error(`Column type of ${type} cannot be determined.`);)
+            // todo: include driver-specific checks. for example in mongodb empty prefixes are not allowed
         });
         // make sure cascade remove is not set for both sides of relationships (can be set in OneToOne decorators)
         entityMetadata.relations.forEach(function (relation) {

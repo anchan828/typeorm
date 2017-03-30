@@ -1,7 +1,7 @@
 /**
  * All data types that column can be.
  */
-export declare type ColumnType = "string" | "text" | "mediumtext" | "number" | "integer" | "int" | "smallint" | "bigint" | "float" | "double" | "decimal" | "date" | "time" | "datetime" | "boolean" | "json" | "jsonb" | "simple_array";
+export declare type ColumnType = "string" | "text" | "mediumtext" | "number" | "integer" | "int" | "smallint" | "bigint" | "float" | "double" | "decimal" | "date" | "time" | "datetime" | "boolean" | "json" | "jsonb" | "simple_array" | "uuid";
 /**
  * All data types that column can be.
  */
@@ -80,6 +80,10 @@ export declare class ColumnTypes {
      */
     static SIMPLE_ARRAY: ColumnType;
     /**
+     * UUID type. Serialized to a string in typescript or javascript
+     */
+    static UUID: ColumnType;
+    /**
      * Checks if given type in a string format is supported by ORM.
      */
     static isTypeSupported(type: string): boolean;
@@ -90,7 +94,7 @@ export declare class ColumnTypes {
     /**
      * Tries to guess a column type from the given function.
      */
-    static determineTypeFromFunction(type: Function): ColumnType;
+    static determineTypeFromFunction(type: Function): ColumnType | undefined;
     static typeToString(type: Function): string;
     /**
      * Checks if column type is numeric.

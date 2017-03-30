@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 /**
  */
 var Alias = (function () {
@@ -8,6 +9,13 @@ var Alias = (function () {
     Object.defineProperty(Alias.prototype, "selection", {
         get: function () {
             return this.parentAliasName + "." + this.parentPropertyName;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Alias.prototype, "target", {
+        get: function () {
+            return this.metadata.target;
         },
         enumerable: true,
         configurable: true

@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var ColumnSchema_1 = require("./ColumnSchema");
 /**
  * Table schema in the database represented in this class.
@@ -169,10 +170,10 @@ var TableSchema = (function () {
      */
     TableSchema.prototype.findChangedColumns = function (queryRunner, columnMetadatas) {
         return this.columns.filter(function (columnSchema) {
-            var columnMetadata = columnMetadatas.find(function (columnMetadata) { return columnMetadata.name === columnSchema.name; });
+            var columnMetadata = columnMetadatas.find(function (columnMetadata) { return columnMetadata.fullName === columnSchema.name; });
             if (!columnMetadata)
                 return false; // we don't need new columns, we only need exist and changed
-            return columnSchema.name !== columnMetadata.name ||
+            return columnSchema.name !== columnMetadata.fullName ||
                 columnSchema.type !== queryRunner.normalizeType(columnMetadata) ||
                 columnSchema.comment !== columnMetadata.comment ||
                 (!columnSchema.isGenerated && !queryRunner.compareDefaultValues(columnMetadata.default, columnSchema.default)) ||
@@ -181,6 +182,21 @@ var TableSchema = (function () {
                 // columnSchema.isPrimary !== columnMetadata.isPrimary ||
                 columnSchema.isGenerated !== columnMetadata.isGenerated;
         });
+    };
+    // -------------------------------------------------------------------------
+    // Static Methods
+    // -------------------------------------------------------------------------
+    /**
+     * Creates table schema from a given entity metadata.
+     *
+     * todo: need deeper implementation
+     */
+    TableSchema.create = function (entityMetadata, queryRunner) {
+        var tableSchema = new TableSchema(entityMetadata.table.name);
+        entityMetadata.columns.forEach(function (column) {
+            tableSchema.columns.push(ColumnSchema_1.ColumnSchema.create(column, queryRunner.normalizeType(column)));
+        });
+        return tableSchema;
     };
     return TableSchema;
 }());

@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var ColumnTypes_1 = require("../metadata/types/ColumnTypes");
 var DataTransformationUtils_1 = require("../util/DataTransformationUtils");
 /**
@@ -236,6 +237,7 @@ var Subject = (function () {
                     // } else {
                     entityValue = DataTransformationUtils_1.DataTransformationUtils.mixedDateToUtcDatetimeString(entityValue);
                     databaseValue = DataTransformationUtils_1.DataTransformationUtils.mixedDateToUtcDatetimeString(databaseValue);
+                    // }
                 }
                 else if (column.type === ColumnTypes_1.ColumnTypes.JSON) {
                     entityValue = JSON.stringify(entityValue);
@@ -247,6 +249,7 @@ var Subject = (function () {
                     databaseValue = DataTransformationUtils_1.DataTransformationUtils.simpleArrayToString(databaseValue);
                 }
             }
+            // todo: this mechanism does not get in count embeddeds in embeddeds
             // if value is not defined then no need to update it
             if (!column.isInEmbedded && _this.entity[column.propertyName] === undefined)
                 return false;

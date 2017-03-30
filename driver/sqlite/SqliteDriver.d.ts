@@ -27,7 +27,7 @@ export declare class SqliteDriver implements Driver {
      */
     protected databaseConnection: DatabaseConnection | undefined;
     /**
-     * Logger used go log queries and errors.
+     * Logger used to log queries and errors.
      */
     protected logger: Logger;
     constructor(connectionOptions: DriverOptions, logger: Logger, sqlite?: any);

@@ -6,6 +6,8 @@ import { IndexSchema } from "../schema-builder/schema/IndexSchema";
 import { ColumnType } from "../metadata/types/ColumnTypes";
 /**
  * Runs queries on a single database connection.
+ *
+ * todo: extract schema build operations out of query runner.
  */
 export interface QueryRunner {
     /**
@@ -69,7 +71,8 @@ export interface QueryRunner {
         precision?: number;
         scale?: number;
         timezone?: boolean;
-    }): any;
+        fixedLength?: boolean;
+    }): string;
     /**
      * Checks if "DEFAULT" values in the column metadata and in the database schema are equal.
      */
@@ -195,6 +198,8 @@ export interface QueryRunner {
     dropIndex(tableName: string, indexName: string): Promise<void>;
     /**
      * Truncates table.
+     *
+     * todo: probably this should be renamed to drop or clear?
      */
     truncate(tableName: string): Promise<void>;
 }

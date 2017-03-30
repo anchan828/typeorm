@@ -2,11 +2,12 @@
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
 }
+Object.defineProperty(exports, "__esModule", { value: true });
 var ConnectionManager_1 = require("./connection/ConnectionManager");
 var MetadataArgsStorage_1 = require("./metadata-args/MetadataArgsStorage");
 var container_1 = require("./container");
 var PlatformTools_1 = require("./platform/PlatformTools");
-// -------------------------------------------------------------------------
+// -----------------------------------------------------------------   --------
 // Commonly Used exports
 // -------------------------------------------------------------------------
 __export(require("./container"));
@@ -17,6 +18,7 @@ __export(require("./decorator/columns/PrimaryGeneratedColumn"));
 __export(require("./decorator/columns/PrimaryColumn"));
 __export(require("./decorator/columns/UpdateDateColumn"));
 __export(require("./decorator/columns/VersionColumn"));
+__export(require("./decorator/columns/ObjectIdColumn"));
 __export(require("./decorator/listeners/AfterInsert"));
 __export(require("./decorator/listeners/AfterLoad"));
 __export(require("./decorator/listeners/AfterRemove"));
@@ -65,6 +67,8 @@ var QueryBuilder_1 = require("./query-builder/QueryBuilder");
 exports.QueryBuilder = QueryBuilder_1.QueryBuilder;
 var EntityManager_1 = require("./entity-manager/EntityManager");
 exports.EntityManager = EntityManager_1.EntityManager;
+var MongoEntityManager_1 = require("./entity-manager/MongoEntityManager");
+exports.MongoEntityManager = MongoEntityManager_1.MongoEntityManager;
 var DefaultNamingStrategy_1 = require("./naming-strategy/DefaultNamingStrategy");
 exports.DefaultNamingStrategy = DefaultNamingStrategy_1.DefaultNamingStrategy;
 var Repository_1 = require("./repository/Repository");
@@ -73,16 +77,11 @@ var TreeRepository_1 = require("./repository/TreeRepository");
 exports.TreeRepository = TreeRepository_1.TreeRepository;
 var SpecificRepository_1 = require("./repository/SpecificRepository");
 exports.SpecificRepository = SpecificRepository_1.SpecificRepository;
+var MongoRepository_1 = require("./repository/MongoRepository");
+exports.MongoRepository = MongoRepository_1.MongoRepository;
 // -------------------------------------------------------------------------
 // Deprecated
 // -------------------------------------------------------------------------
-__export(require("./decorator/tables/Table"));
-__export(require("./decorator/tables/AbstractTable"));
-__export(require("./decorator/tables/ClassTableChild"));
-__export(require("./decorator/tables/ClosureTable"));
-__export(require("./decorator/tables/EmbeddableTable"));
-__export(require("./decorator/tables/SingleTableChild"));
-__export(require("./decorator/tables/Table"));
 // -------------------------------------------------------------------------
 // Commonly used functionality
 // -------------------------------------------------------------------------
@@ -151,5 +150,21 @@ function getRepository(entityClassOrName, connectionName) {
     return getConnectionManager().get(connectionName).getRepository(entityClassOrName);
 }
 exports.getRepository = getRepository;
+/**
+ * Gets tree repository for the given entity class or name.
+ */
+function getTreeRepository(entityClassOrName, connectionName) {
+    if (connectionName === void 0) { connectionName = "default"; }
+    return getConnectionManager().get(connectionName).getTreeRepository(entityClassOrName);
+}
+exports.getTreeRepository = getTreeRepository;
+/**
+ * Gets mongodb repository for the given entity class or name.
+ */
+function getMongoRepository(entityClassOrName, connectionName) {
+    if (connectionName === void 0) { connectionName = "default"; }
+    return getConnectionManager().get(connectionName).getMongoRepository(entityClassOrName);
+}
+exports.getMongoRepository = getMongoRepository;
 
 //# sourceMappingURL=index.js.map

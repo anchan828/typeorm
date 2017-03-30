@@ -1,9 +1,14 @@
 "use strict";
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -39,6 +44,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+Object.defineProperty(exports, "__esModule", { value: true });
 var BaseEntityManager_1 = require("./BaseEntityManager");
 var QueryRunnerProviderAlreadyReleasedError_1 = require("../query-runner/error/QueryRunnerProviderAlreadyReleasedError");
 var QueryRunnerProvider_1 = require("../query-runner/QueryRunnerProvider");
@@ -52,105 +58,151 @@ var EntityManager = (function (_super) {
     // Constructor
     // -------------------------------------------------------------------------
     function EntityManager(connection, queryRunnerProvider) {
-        return _super.call(this, connection, queryRunnerProvider) || this;
+        var _this = _super.call(this, connection, queryRunnerProvider) || this;
+        // -------------------------------------------------------------------------
+        // Private properties
+        // -------------------------------------------------------------------------
+        /**
+         * Stores temporarily user data.
+         * Useful for sharing data with subscribers.
+         */
+        _this.data = {};
+        return _this;
     }
+    // -------------------------------------------------------------------------
+    // Public Methods
+    // -------------------------------------------------------------------------
+    /**
+     * Gets user data by a given key.
+     */
+    EntityManager.prototype.getData = function (key) {
+        return this.data[key];
+    };
+    /**
+     * Sets value for the given key in user data.
+     */
+    EntityManager.prototype.setData = function (key, value) {
+        this.data[key] = value;
+    };
     /**
      * Persists (saves) a given entity in the database.
      */
-    EntityManager.prototype.persist = function (targetOrEntity, maybeEntity) {
+    EntityManager.prototype.persist = function (targetOrEntity, maybeEntity, options) {
         var _this = this;
         var target = arguments.length === 2 ? maybeEntity : targetOrEntity;
         var entity = arguments.length === 2 ? maybeEntity : targetOrEntity;
         return Promise.resolve().then(function () {
             if (typeof target === "string") {
-                return _this.getRepository(target).persist(entity);
+                return _this.getRepository(target).persist(entity, options);
             }
             else {
+                // todo: throw exception if constructor in target is not set
                 if (target instanceof Array) {
                     if (target.length === 0)
                         return Promise.resolve(target);
-                    return _this.getRepository(target[0].constructor).persist(entity);
+                    return Promise.all(target.map(function (t, i) {
+                        return _this.getRepository(t.constructor).persist(entity[i], options);
+                    }));
                 }
                 else {
-                    return _this.getRepository(target.constructor).persist(entity);
+                    return _this.getRepository(target.constructor).persist(entity, options);
                 }
             }
         });
     };
     /**
+     * Updates entity partially. Entity can be found by a given conditions.
+     */
+    EntityManager.prototype.update = function (target, conditionsOrFindOptions, partialEntity, options) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, this.getRepository(target)
+                        .update(conditionsOrFindOptions, partialEntity, options)];
+            });
+        });
+    };
+    /**
+     * Updates entity partially. Entity will be found by a given id.
+     */
+    EntityManager.prototype.updateById = function (target, id, partialEntity, options) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, this.getRepository(target)
+                        .updateById(id, partialEntity, options)];
+            });
+        });
+    };
+    /**
      * Removes a given entity from the database.
      */
-    EntityManager.prototype.remove = function (targetOrEntity, maybeEntity) {
+    EntityManager.prototype.remove = function (targetOrEntity, maybeEntity, options) {
+        var _this = this;
         var target = arguments.length === 2 ? maybeEntity : targetOrEntity;
         var entity = arguments.length === 2 ? maybeEntity : targetOrEntity;
         if (typeof target === "string") {
-            return this.getRepository(target).remove(entity);
+            return this.getRepository(target).remove(entity, options);
         }
         else {
+            // todo: throw exception if constructor in target is not set
             if (target instanceof Array) {
-                return this.getRepository(target[0].constructor).remove(entity);
+                return Promise.all(target.map(function (t, i) {
+                    return _this.getRepository(t.constructor).remove(entity[i], options);
+                }));
             }
             else {
-                return this.getRepository(target.constructor).remove(entity);
+                return this.getRepository(target.constructor).remove(entity, options);
             }
         }
     };
     /**
-     * Finds entities that match given conditions.
+     * Removes entity by a given entity id.
      */
-    EntityManager.prototype.find = function (entityClass, conditionsOrFindOptions, options) {
-        if (conditionsOrFindOptions && options) {
-            return this.getRepository(entityClass).find(conditionsOrFindOptions, options);
-        }
-        else if (conditionsOrFindOptions) {
-            return this.getRepository(entityClass).find(conditionsOrFindOptions);
-        }
-        else {
-            return this.getRepository(entityClass).find();
-        }
+    EntityManager.prototype.removeById = function (targetOrEntity, id, options) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, this.getRepository(targetOrEntity).removeById(id, options)];
+            });
+        });
     };
     /**
-     * Finds entities that match given conditions.
-     * Also counts all entities that match given conditions,
-     * but ignores pagination settings (maxResults, firstResult) options.
+     * Counts entities that match given find options or conditions.
      */
-    EntityManager.prototype.findAndCount = function (entityClass, conditionsOrFindOptions, options) {
-        if (conditionsOrFindOptions && options) {
-            return this.getRepository(entityClass).findAndCount(conditionsOrFindOptions, options);
-        }
-        else if (conditionsOrFindOptions) {
-            return this.getRepository(entityClass).findAndCount(conditionsOrFindOptions);
-        }
-        else {
-            return this.getRepository(entityClass).findAndCount();
-        }
+    EntityManager.prototype.count = function (entityClass, optionsOrConditions) {
+        return this.getRepository(entityClass).count(optionsOrConditions);
+    };
+    /**
+     * Finds entities that match given find options or conditions.
+     */
+    EntityManager.prototype.find = function (entityClass, optionsOrConditions) {
+        return this.getRepository(entityClass).find(optionsOrConditions);
+    };
+    /**
+     * Finds entities that match given find options and conditions.
+     * Also counts all entities that match given conditions,
+     * but ignores pagination settings (from and take options).
+     */
+    EntityManager.prototype.findAndCount = function (entityClass, optionsOrConditions) {
+        return this.getRepository(entityClass).findAndCount(optionsOrConditions);
     };
     /**
      * Finds first entity that matches given conditions.
      */
-    EntityManager.prototype.findOne = function (entityClass, conditionsOrFindOptions, options) {
-        if (conditionsOrFindOptions && options) {
-            return this.getRepository(entityClass).findOne(conditionsOrFindOptions, options);
-        }
-        else if (conditionsOrFindOptions) {
-            return this.getRepository(entityClass).findOne(conditionsOrFindOptions);
-        }
-        else {
-            return this.getRepository(entityClass).findOne();
-        }
+    EntityManager.prototype.findOne = function (entityClass, optionsOrConditions) {
+        return this.getRepository(entityClass).findOne(optionsOrConditions);
     };
     /**
      * Finds entities with ids.
-     * Optionally find options can be applied.
+     * Optionally find options or conditions can be applied.
      */
-    EntityManager.prototype.findByIds = function (entityClass, ids, options) {
-        return this.getRepository(entityClass).findByIds(ids, options);
+    EntityManager.prototype.findByIds = function (entityClass, ids, optionsOrConditions) {
+        return this.getRepository(entityClass).findByIds(ids, optionsOrConditions);
     };
     /**
      * Finds entity with given id.
+     * Optionally find options or conditions can be applied.
      */
-    EntityManager.prototype.findOneById = function (entityClass, id, options) {
-        return this.getRepository(entityClass).findOneById(id, options);
+    EntityManager.prototype.findOneById = function (entityClass, id, optionsOrConditions) {
+        return this.getRepository(entityClass).findOneById(id, optionsOrConditions);
     };
     /**
      * Executes raw SQL query and returns raw database results.

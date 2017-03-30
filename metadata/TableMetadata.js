@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var TableTypes_1 = require("./types/TableTypes");
 var EntityMetadataAlreadySetError_1 = require("./error/EntityMetadataAlreadySetError");
 var EntityMetadataNotSetError_1 = require("./error/EntityMetadataNotSetError");

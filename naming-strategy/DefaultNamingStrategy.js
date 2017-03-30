@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var RandomGenerator_1 = require("../util/RandomGenerator");
 var StringUtils_1 = require("../util/StringUtils");
 /**
@@ -13,8 +14,11 @@ var DefaultNamingStrategy = (function () {
     DefaultNamingStrategy.prototype.columnName = function (propertyName, customName) {
         return customName ? customName : propertyName;
     };
-    DefaultNamingStrategy.prototype.embeddedColumnName = function (embeddedPropertyName, columnPropertyName, columnCustomName) {
-        return StringUtils_1.camelCase(embeddedPropertyName + "_" + (columnCustomName ? columnCustomName : columnPropertyName));
+    DefaultNamingStrategy.prototype.embeddedColumnName = function (prefixes, columnPropertyName, columnCustomName) {
+        // todo: need snake case property name but only if its a property name and not a custom embedded prefix
+        prefixes = prefixes.filter(function (prefix) { return !!prefix; });
+        var embeddedPropertyName = prefixes.length ? prefixes.join("_") + "_" : "";
+        return StringUtils_1.camelCase(embeddedPropertyName + (columnCustomName ? columnCustomName : columnPropertyName));
     };
     DefaultNamingStrategy.prototype.relationName = function (propertyName) {
         return propertyName;

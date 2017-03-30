@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var index_1 = require("../index");
 /**
  * If entity is a child table of some table, it should have a discriminator value.

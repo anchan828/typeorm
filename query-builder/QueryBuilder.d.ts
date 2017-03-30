@@ -73,8 +73,11 @@ export declare class QueryBuilder<Entity> {
     protected parameters: ObjectLiteral;
     protected limit: number;
     protected offset: number;
-    protected firstResult: number;
-    protected maxResults: number;
+    protected lockMode: "optimistic" | "pessimistic_read" | "pessimistic_write";
+    protected lockVersion?: number | Date;
+    protected skipNumber: number;
+    protected takeNumber: number;
+    protected enableQuoting: boolean;
     protected ignoreParentTablesJoins: boolean;
     /**
      * Indicates if virtual columns should be included in entity result.
@@ -85,6 +88,10 @@ export declare class QueryBuilder<Entity> {
      * Gets the main alias string used in this query builder.
      */
     readonly alias: string;
+    /**
+     * Disable escaping.
+     */
+    disableQuoting(): this;
     /**
      * Creates DELETE query.
      */
@@ -133,6 +140,18 @@ export declare class QueryBuilder<Entity> {
      * Adds new selection to the SELECT query.
      */
     addSelect(...selection: string[]): this;
+    /**
+     * Sets locking mode.
+     */
+    setLock(lockMode: "optimistic", lockVersion: number): this;
+    /**
+     * Sets locking mode.
+     */
+    setLock(lockMode: "optimistic", lockVersion: Date): this;
+    /**
+     * Sets locking mode.
+     */
+    setLock(lockMode: "pessimistic_read" | "pessimistic_write"): this;
     /**
      * Specifies FROM which entity's table select/update/delete will be executed.
      * Also sets a main string alias of the selection data.
@@ -442,13 +461,13 @@ export declare class QueryBuilder<Entity> {
      */
     setOffset(offset: number): this;
     /**
-     * Set's maximum number of entities to be selected.
+     * Sets maximal number of entities to take.
      */
-    setMaxResults(maxResults: number): this;
+    take(take: number): this;
     /**
-     * Set's offset of entities to be selected.
+     * Sets number of entities to skip
      */
-    setFirstResult(firstResult: number): this;
+    skip(skip: number): this;
     /**
      * Sets given parameter's value.
      */
@@ -534,13 +553,19 @@ export declare class QueryBuilder<Entity> {
         skipOffset?: boolean;
         ignoreParentTablesJoins?: boolean;
     }): QueryBuilder<Entity>;
+    escapeAlias(name: string): string;
+    escapeColumn(name: string): string;
+    escapeTable(name: string): string;
     /**
      * Enables special query builder options.
      */
     enableOption(option: "RELATION_ID_VALUES"): this;
     protected loadRelationCounts(queryRunner: QueryRunner, results: Entity[]): Promise<{}>;
     protected rawResultsToEntities(results: any[]): any[];
+    protected buildEscapedEntityColumnSelects(alias: Alias): string[];
+    protected findEntityColumnSelects(alias: Alias): string[];
     protected createSelectExpression(): string;
+    protected createHavingExpression(): string;
     protected createWhereExpression(): string;
     /**
      * Replaces all entity's propertyName to name in the given statement.
@@ -549,17 +574,16 @@ export declare class QueryBuilder<Entity> {
     protected createJoinRelationIdsExpression(): string[];
     protected createJoinExpression(): string;
     protected createGroupByExpression(): string;
-    protected createHavingExpression(): string;
     protected createOrderByCombinedWithSelectExpression(parentAlias: string): string[];
     protected createOrderByExpression(): string;
     protected createLimitExpression(): string;
     protected createOffsetExpression(): string;
+    protected createLockExpression(): string;
     private extractJoinMappings();
     protected join(joinType: "INNER" | "LEFT", property: string, alias: string, condition?: string, options?: JoinOptions, mapToProperty?: string, isMappingMany?: boolean): this;
     protected join(joinType: "INNER" | "LEFT", entity: Function, alias: string, condition?: string, options?: JoinOptions, mapToProperty?: string, isMappingMany?: boolean): this;
     protected join(joinType: "INNER" | "LEFT", entityOrProperty: Function | string, alias: string, condition: string, options?: JoinOptions, mapToProperty?: string, isMappingMany?: boolean): this;
     protected joinRelationId(joinType: "LEFT" | "INNER", mapToProperty: string | undefined, property: string, condition?: string): this;
-    private isValueSimpleString(str);
     private isPropertyAlias(str);
     /**
      * Creates "WHERE" expression and variables for the given "ids".

@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var index_1 = require("../../index");
 /**
  * Abstract entity is a class that contains columns and relations for all entities that will inherit this entity.

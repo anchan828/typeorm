@@ -34,11 +34,26 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+Object.defineProperty(exports, "__esModule", { value: true });
 var Alias_1 = require("./alias/Alias");
 var AliasMap_1 = require("./alias/AliasMap");
 var RawSqlResultsToEntityTransformer_1 = require("./transformer/RawSqlResultsToEntityTransformer");
 var SqlServerDriver_1 = require("../driver/sqlserver/SqlServerDriver");
 var QueryRunnerProvider_1 = require("../query-runner/QueryRunnerProvider");
+var PessimisticLockTransactionRequiredError_1 = require("./error/PessimisticLockTransactionRequiredError");
+var NoVersionOrUpdateDateColumnError_1 = require("./error/NoVersionOrUpdateDateColumnError");
+var OptimisticLockVersionMismatchError_1 = require("./error/OptimisticLockVersionMismatchError");
+var OptimisticLockCanNotBeUsedError_1 = require("./error/OptimisticLockCanNotBeUsedError");
+var PostgresDriver_1 = require("../driver/postgres/PostgresDriver");
+var MysqlDriver_1 = require("../driver/mysql/MysqlDriver");
+var LockNotSupportedOnGivenDriverError_1 = require("./error/LockNotSupportedOnGivenDriverError");
+// todo: fix problem with long aliases eg getMaxIdentifierLength
+// todo: fix replacing in .select("COUNT(post.id) AS cnt") statement
+// todo: implement joinAlways in relations and relationId
+// todo: implement @Where decorator
+// todo: add quoting functions
+// todo: .addCount and .addCountSelect()
+// todo: add selectAndMap
 /**
  * Allows to build complex sql queries in a fashion way and execute those queries.
  */
@@ -59,6 +74,7 @@ var QueryBuilder = (function () {
         this.havings = [];
         this.orderBys = {};
         this.parameters = {};
+        this.enableQuoting = true;
         this.ignoreParentTablesJoins = false;
         /**
          * Indicates if virtual columns should be included in entity result.
@@ -83,6 +99,13 @@ var QueryBuilder = (function () {
     // Public Methods
     // -------------------------------------------------------------------------
     /**
+     * Disable escaping.
+     */
+    QueryBuilder.prototype.disableQuoting = function () {
+        this.enableQuoting = false;
+        return this;
+    };
+    /**
      * Creates DELETE query.
      */
     QueryBuilder.prototype.delete = function () {
@@ -97,7 +120,7 @@ var QueryBuilder = (function () {
         if (tableNameOrEntityOrUpdateSet instanceof Function) {
             var aliasName = tableNameOrEntityOrUpdateSet.name;
             var aliasObj = new Alias_1.Alias(aliasName);
-            aliasObj.target = tableNameOrEntityOrUpdateSet;
+            aliasObj.metadata = this.connection.getMetadata(tableNameOrEntityOrUpdateSet);
             this.aliasMap.addMainAlias(aliasObj);
             this.fromEntity = { alias: aliasObj };
         }
@@ -135,12 +158,20 @@ var QueryBuilder = (function () {
         return this;
     };
     /**
+     * Sets locking mode.
+     */
+    QueryBuilder.prototype.setLock = function (lockMode, lockVersion) {
+        this.lockMode = lockMode;
+        this.lockVersion = lockVersion;
+        return this;
+    };
+    /**
      * Specifies FROM which entity's table select/update/delete will be executed.
      * Also sets a main string alias of the selection data.
      */
     QueryBuilder.prototype.from = function (entityTarget, alias) {
         var aliasObj = new Alias_1.Alias(alias);
-        aliasObj.target = entityTarget;
+        aliasObj.metadata = this.connection.getMetadata(entityTarget);
         this.aliasMap.addMainAlias(aliasObj);
         this.fromEntity = { alias: aliasObj };
         return this;
@@ -463,17 +494,17 @@ var QueryBuilder = (function () {
         return this;
     };
     /**
-     * Set's maximum number of entities to be selected.
+     * Sets maximal number of entities to take.
      */
-    QueryBuilder.prototype.setMaxResults = function (maxResults) {
-        this.maxResults = maxResults;
+    QueryBuilder.prototype.take = function (take) {
+        this.takeNumber = take;
         return this;
     };
     /**
-     * Set's offset of entities to be selected.
+     * Sets number of entities to skip
      */
-    QueryBuilder.prototype.setFirstResult = function (firstResult) {
-        this.firstResult = firstResult;
+    QueryBuilder.prototype.skip = function (skip) {
+        this.skipNumber = skip;
         return this;
     };
     /**
@@ -534,8 +565,9 @@ var QueryBuilder = (function () {
         sql += this.createOrderByExpression();
         sql += this.createLimitExpression();
         sql += this.createOffsetExpression();
+        sql += this.createLockExpression();
         sql = this.connection.driver.escapeQueryWithParameters(sql, this.parameters)[0];
-        return sql;
+        return sql.trim();
     };
     /**
      * Gets generated sql without parameters being replaced.
@@ -552,7 +584,8 @@ var QueryBuilder = (function () {
         sql += this.createOrderByExpression();
         sql += this.createLimitExpression();
         sql += this.createOffsetExpression();
-        return sql;
+        sql += this.createLockExpression();
+        return sql.trim();
     };
     /**
      * Gets sql to be executed with all parameters used in it.
@@ -570,6 +603,7 @@ var QueryBuilder = (function () {
             sql += this.createOrderByExpression();
         sql += this.createLimitExpression();
         sql += this.createOffsetExpression();
+        sql += this.createLockExpression();
         return this.connection.driver.escapeQueryWithParameters(sql, this.getParameters());
     };
     /**
@@ -607,29 +641,38 @@ var QueryBuilder = (function () {
     QueryBuilder.prototype.getEntitiesAndRawResults = function () {
         return __awaiter(this, void 0, void 0, function () {
             var _this = this;
-            var queryRunner, mainAliasName, rawResults, _a, sql, parameters, _b, selects, orderBys, distinctAlias_1, metadata_1, idsQuery, _c, sql, parameters;
+            var queryRunner, metadata, mainAliasName_1, rawResults_1, _a, sql, parameters, _b, selects, orderBys, distinctAlias_1, metadata_1, idsQuery, _c, sql, parameters;
             return __generator(this, function (_d) {
                 switch (_d.label) {
-                    case 0:
-                        if (!this.aliasMap.hasMainAlias)
-                            throw new Error("Alias is not set. Looks like nothing is selected. Use select*, delete, update method to set an alias.");
-                        return [4 /*yield*/, this.getQueryRunner()];
+                    case 0: return [4 /*yield*/, this.getQueryRunner()];
                     case 1:
                         queryRunner = _d.sent();
-                        mainAliasName = this.fromTableName ? this.fromTableName : this.aliasMap.mainAlias.name;
-                        if (!(this.firstResult || this.maxResults)) return [3 /*break*/, 8];
+                        _d.label = 2;
+                    case 2:
+                        _d.trys.push([2, , 7, 10]);
+                        if (!this.aliasMap.hasMainAlias)
+                            throw new Error("Alias is not set. Looks like nothing is selected. Use select*, delete, update method to set an alias.");
+                        if ((this.lockMode === "pessimistic_read" || this.lockMode === "pessimistic_write") && !queryRunner.isTransactionActive())
+                            throw new PessimisticLockTransactionRequiredError_1.PessimisticLockTransactionRequiredError();
+                        if (this.lockMode === "optimistic") {
+                            metadata = this.connection.getMetadata(this.aliasMap.mainAlias.target);
+                            if (!metadata.hasVersionColumn && !metadata.hasUpdateDateColumn)
+                                throw new NoVersionOrUpdateDateColumnError_1.NoVersionOrUpdateDateColumnError(metadata.name);
+                        }
+                        mainAliasName_1 = this.fromTableName ? this.fromTableName : this.aliasMap.mainAlias.name;
+                        if (!(this.skipNumber || this.takeNumber)) return [3 /*break*/, 4];
                         _a = this.getSqlWithParameters({ skipOrderBy: true }), sql = _a[0], parameters = _a[1];
                         _b = this.createOrderByCombinedWithSelectExpression("distinctAlias"), selects = _b[0], orderBys = _b[1];
-                        distinctAlias_1 = this.connection.driver.escapeTableName("distinctAlias");
+                        distinctAlias_1 = this.escapeTable("distinctAlias");
                         metadata_1 = this.connection.getMetadata(this.fromEntity.alias.target);
                         idsQuery = "SELECT ";
                         idsQuery += metadata_1.primaryColumns.map(function (primaryColumn, index) {
-                            var propertyName = _this.connection.driver.escapeAliasName(mainAliasName + "_" + primaryColumn.name);
+                            var propertyName = _this.escapeAlias(mainAliasName_1 + "_" + primaryColumn.fullName);
                             if (index === 0) {
-                                return "DISTINCT(" + distinctAlias_1 + "." + propertyName + ") as ids_" + primaryColumn.name;
+                                return "DISTINCT(" + distinctAlias_1 + "." + propertyName + ") as ids_" + primaryColumn.fullName;
                             }
                             else {
-                                return distinctAlias_1 + "." + propertyName + ") as ids_" + primaryColumn.name;
+                                return distinctAlias_1 + "." + propertyName + ") as ids_" + primaryColumn.fullName;
                             }
                         }).join(", ");
                         if (selects.length > 0)
@@ -639,27 +682,24 @@ var QueryBuilder = (function () {
                             idsQuery += " ORDER BY " + orderBys;
                         }
                         else {
-                            idsQuery += " ORDER BY \"ids_" + metadata_1.firstPrimaryColumn.name + "\""; // this is required for mssql driver if firstResult is used. Other drivers don't care about it
+                            idsQuery += " ORDER BY \"ids_" + metadata_1.firstPrimaryColumn.fullName + "\""; // this is required for mssql driver if firstResult is used. Other drivers don't care about it
                         }
                         if (this.connection.driver instanceof SqlServerDriver_1.SqlServerDriver) {
-                            if (this.firstResult || this.maxResults) {
-                                idsQuery += " OFFSET " + (this.firstResult || 0) + " ROWS";
-                                if (this.maxResults)
-                                    idsQuery += " FETCH NEXT " + this.maxResults + " ROWS ONLY";
+                            if (this.skipNumber || this.takeNumber) {
+                                idsQuery += " OFFSET " + (this.skipNumber || 0) + " ROWS";
+                                if (this.takeNumber)
+                                    idsQuery += " FETCH NEXT " + this.takeNumber + " ROWS ONLY";
                             }
                         }
                         else {
-                            if (this.maxResults)
-                                idsQuery += " LIMIT " + this.maxResults;
-                            if (this.firstResult)
-                                idsQuery += " OFFSET " + this.firstResult;
+                            if (this.takeNumber)
+                                idsQuery += " LIMIT " + this.takeNumber;
+                            if (this.skipNumber)
+                                idsQuery += " OFFSET " + this.skipNumber;
                         }
-                        _d.label = 2;
-                    case 2:
-                        _d.trys.push([2, , 4, 7]);
                         return [4 /*yield*/, queryRunner.query(idsQuery, parameters)
                                 .then(function (results) {
-                                rawResults = results;
+                                rawResults_1 = results;
                                 if (results.length === 0)
                                     return [];
                                 var condition = "";
@@ -668,7 +708,7 @@ var QueryBuilder = (function () {
                                     condition = results.map(function (result) {
                                         return metadata_1.primaryColumns.map(function (primaryColumn) {
                                             parameters["ids_" + primaryColumn.propertyName] = result["ids_" + primaryColumn.propertyName];
-                                            return mainAliasName + "." + primaryColumn.propertyName + "=:ids_" + primaryColumn.propertyName;
+                                            return mainAliasName_1 + "." + primaryColumn.propertyName + "=:ids_" + primaryColumn.propertyName;
                                         }).join(" AND ");
                                     }).join(" OR ");
                                 }
@@ -677,11 +717,11 @@ var QueryBuilder = (function () {
                                     var areAllNumbers = ids.map(function (id) { return typeof id === "number"; });
                                     if (areAllNumbers) {
                                         // fixes #190. if all numbers then its safe to perform query without parameter
-                                        condition = mainAliasName + "." + metadata_1.firstPrimaryColumn.propertyName + " IN (" + ids.join(", ") + ")";
+                                        condition = mainAliasName_1 + "." + metadata_1.firstPrimaryColumn.propertyName + " IN (" + ids.join(", ") + ")";
                                     }
                                     else {
                                         parameters["ids"] = ids;
-                                        condition = mainAliasName + "." + metadata_1.firstPrimaryColumn.propertyName + " IN (:ids)";
+                                        condition = mainAliasName_1 + "." + metadata_1.firstPrimaryColumn.propertyName + " IN (:ids)";
                                     }
                                 }
                                 var _a = _this.clone({ queryRunnerProvider: _this.queryRunnerProvider })
@@ -695,7 +735,6 @@ var QueryBuilder = (function () {
                                 .then(function (results) {
                                 return _this.loadRelationCounts(queryRunner, results)
                                     .then(function (counts) {
-                                    // console.log("counts: ", counts);
                                     return results;
                                 });
                             })
@@ -707,32 +746,20 @@ var QueryBuilder = (function () {
                                 .then(function (results) {
                                 return {
                                     entities: results,
-                                    rawResults: rawResults
+                                    rawResults: rawResults_1
                                 };
                             })];
                     case 3: return [2 /*return*/, _d.sent()];
                     case 4:
-                        if (!this.hasOwnQueryRunner()) return [3 /*break*/, 6];
-                        return [4 /*yield*/, queryRunner.release()];
-                    case 5:
-                        _d.sent();
-                        _d.label = 6;
-                    case 6: return [7 /*endfinally*/];
-                    case 7: return [3 /*break*/, 14];
-                    case 8:
                         _c = this.getSqlWithParameters(), sql = _c[0], parameters = _c[1];
-                        _d.label = 9;
-                    case 9:
-                        _d.trys.push([9, , 11, 14]);
                         return [4 /*yield*/, queryRunner.query(sql, parameters)
                                 .then(function (results) {
-                                rawResults = results;
+                                rawResults_1 = results;
                                 return _this.rawResultsToEntities(results);
                             })
                                 .then(function (results) {
                                 return _this.loadRelationCounts(queryRunner, results)
                                     .then(function (counts) {
-                                    // console.log("counts: ", counts);
                                     return results;
                                 });
                             })
@@ -747,20 +774,19 @@ var QueryBuilder = (function () {
                                 .then(function (results) {
                                 return {
                                     entities: results,
-                                    rawResults: rawResults
+                                    rawResults: rawResults_1
                                 };
                             })];
-                    case 10: 
-                    // console.log(sql);
-                    return [2 /*return*/, _d.sent()];
-                    case 11:
-                        if (!this.hasOwnQueryRunner()) return [3 /*break*/, 13];
+                    case 5: return [2 /*return*/, _d.sent()];
+                    case 6: return [3 /*break*/, 10];
+                    case 7:
+                        if (!this.hasOwnQueryRunner()) return [3 /*break*/, 9];
                         return [4 /*yield*/, queryRunner.release()];
-                    case 12:
+                    case 8:
                         _d.sent();
-                        _d.label = 13;
-                    case 13: return [7 /*endfinally*/];
-                    case 14: return [2 /*return*/];
+                        _d.label = 9;
+                    case 9: return [7 /*endfinally*/];
+                    case 10: return [2 /*return*/];
                 }
             });
         });
@@ -775,14 +801,17 @@ var QueryBuilder = (function () {
             var queryRunner, mainAlias, metadata, distinctAlias, countSql, countQuery, _a, countQuerySql, countQueryParameters, results;
             return __generator(this, function (_b) {
                 switch (_b.label) {
-                    case 0: return [4 /*yield*/, this.getQueryRunner()];
+                    case 0:
+                        if (this.lockMode === "optimistic")
+                            throw new OptimisticLockCanNotBeUsedError_1.OptimisticLockCanNotBeUsedError();
+                        return [4 /*yield*/, this.getQueryRunner()];
                     case 1:
                         queryRunner = _b.sent();
                         mainAlias = this.fromTableName ? this.fromTableName : this.aliasMap.mainAlias.name;
                         metadata = this.connection.getMetadata(this.fromEntity.alias.target);
-                        distinctAlias = this.connection.driver.escapeAliasName(mainAlias);
+                        distinctAlias = this.escapeAlias(mainAlias);
                         countSql = "COUNT(" + metadata.primaryColumnsWithParentIdColumns.map(function (primaryColumn, index) {
-                            var propertyName = _this.connection.driver.escapeColumnName(primaryColumn.name);
+                            var propertyName = _this.escapeColumn(primaryColumn.fullName);
                             if (index === 0) {
                                 return "DISTINCT(" + distinctAlias + "." + propertyName + ")";
                             }
@@ -825,37 +854,102 @@ var QueryBuilder = (function () {
      * Gets all raw results returned by execution of generated query builder sql.
      */
     QueryBuilder.prototype.getRawMany = function () {
-        return this.execute();
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                if (this.lockMode === "optimistic")
+                    throw new OptimisticLockCanNotBeUsedError_1.OptimisticLockCanNotBeUsedError();
+                return [2 /*return*/, this.execute()];
+            });
+        });
     };
     /**
      * Gets first raw result returned by execution of generated query builder sql.
      */
     QueryBuilder.prototype.getRawOne = function () {
-        return this.getRawMany().then(function (results) { return results[0]; });
+        return __awaiter(this, void 0, void 0, function () {
+            var results;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (this.lockMode === "optimistic")
+                            throw new OptimisticLockCanNotBeUsedError_1.OptimisticLockCanNotBeUsedError();
+                        return [4 /*yield*/, this.execute()];
+                    case 1:
+                        results = _a.sent();
+                        return [2 /*return*/, results[0]];
+                }
+            });
+        });
     };
     /**
      * Gets entities and count returned by execution of generated query builder sql.
      */
     QueryBuilder.prototype.getManyAndCount = function () {
-        // todo: share database connection and counter
-        return Promise.all([
-            this.getMany(),
-            this.getCount()
-        ]);
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                if (this.lockMode === "optimistic")
+                    throw new OptimisticLockCanNotBeUsedError_1.OptimisticLockCanNotBeUsedError();
+                // todo: share database connection and counter
+                return [2 /*return*/, Promise.all([
+                        this.getMany(),
+                        this.getCount()
+                    ])];
+            });
+        });
     };
     /**
      * Gets entities returned by execution of generated query builder sql.
      */
     QueryBuilder.prototype.getMany = function () {
-        return this.getEntitiesAndRawResults().then(function (results) {
-            return results.entities;
+        return __awaiter(this, void 0, void 0, function () {
+            var results;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (this.lockMode === "optimistic")
+                            throw new OptimisticLockCanNotBeUsedError_1.OptimisticLockCanNotBeUsedError();
+                        return [4 /*yield*/, this.getEntitiesAndRawResults()];
+                    case 1:
+                        results = _a.sent();
+                        return [2 /*return*/, results.entities];
+                }
+            });
         });
     };
+    // logSql(): this {
+    //     console.log(this.getSql());
+    //     return this;
+    // }
     /**
      * Gets single entity returned by execution of generated query builder sql.
      */
     QueryBuilder.prototype.getOne = function () {
-        return this.getMany().then(function (entities) { return entities[0]; });
+        return __awaiter(this, void 0, void 0, function () {
+            var results, result, metadata, actualVersion, actualVersion;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.getEntitiesAndRawResults()];
+                    case 1:
+                        results = _a.sent();
+                        result = results.entities[0];
+                        if (result && this.lockMode === "optimistic" && this.lockVersion) {
+                            metadata = this.connection.getMetadata(this.fromEntity.alias.target);
+                            if (this.lockVersion instanceof Date) {
+                                actualVersion = result[metadata.updateDateColumn.propertyName];
+                                this.lockVersion.setMilliseconds(0);
+                                if (actualVersion.getTime() !== this.lockVersion.getTime())
+                                    throw new OptimisticLockVersionMismatchError_1.OptimisticLockVersionMismatchError(metadata.name, this.lockVersion, actualVersion);
+                            }
+                            else {
+                                actualVersion = result[metadata.versionColumn.propertyName];
+                                if (actualVersion !== this.lockVersion)
+                                    throw new OptimisticLockVersionMismatchError_1.OptimisticLockVersionMismatchError(metadata.name, this.lockVersion, actualVersion);
+                            }
+                        }
+                        return [2 /*return*/, result];
+                }
+            });
+        });
     };
     /**
      * Clones query builder as it is.
@@ -883,7 +977,10 @@ var QueryBuilder = (function () {
             qb.fromTable(this.fromTableName, this.fromTableAlias);
         }
         this.joins.forEach(function (join) {
-            var property = join.tableName || join.alias.target || (join.alias.parentAliasName + "." + join.alias.parentPropertyName);
+            var property = join.tableName || join.alias.target;
+            if (join.alias.parentAliasName && join.alias.parentPropertyName) {
+                property = join.alias.parentAliasName + "." + join.alias.parentPropertyName;
+            }
             qb.join(join.type, property, join.alias.name, join.condition || "", undefined, join.mapToProperty, join.isMappingMany);
         });
         this.groupBys.forEach(function (groupBy) { return qb.addGroupBy(groupBy); });
@@ -920,9 +1017,24 @@ var QueryBuilder = (function () {
             qb.setLimit(this.limit);
         if (!options || !options.skipOffset)
             qb.setOffset(this.offset);
-        qb.setFirstResult(this.firstResult)
-            .setMaxResults(this.maxResults);
+        qb.skip(this.skipNumber)
+            .take(this.takeNumber);
         return qb;
+    };
+    QueryBuilder.prototype.escapeAlias = function (name) {
+        if (!this.enableQuoting)
+            return name;
+        return this.connection.driver.escapeAliasName(name);
+    };
+    QueryBuilder.prototype.escapeColumn = function (name) {
+        if (!this.enableQuoting)
+            return name;
+        return this.connection.driver.escapeColumnName(name);
+    };
+    QueryBuilder.prototype.escapeTable = function (name) {
+        if (!this.enableQuoting)
+            return name;
+        return this.connection.driver.escapeTableName(name);
     };
     /**
      * Enables special query builder options.
@@ -996,7 +1108,7 @@ var QueryBuilder = (function () {
                 return Promise.resolve(); // todo: need to set zero to relationCount column in this case?
             return queryBuilder
                 .select(parentMetadata.name + "." + parentMetadata.primaryColumn.propertyName + " AS id")
-                .addSelect("COUNT(" + (_this.connection.driver.escapeAliasName(relation.propertyName) + "." + _this.connection.driver.escapeColumnName(relation.inverseEntityMetadata.primaryColumn.name)) + ") as cnt")
+                .addSelect("COUNT(" + (_this.escapeAlias(relation.propertyName) + "." + _this.escapeColumn(relation.inverseEntityMetadata.primaryColumn.fullName)) + ") as cnt")
                 .from(parentMetadata.target, parentMetadata.name)
                 .leftJoin(parentMetadata.name + "." + relation.propertyName, relation.propertyName, relationCountMeta.condition)
                 .setParameters(_this.parameters)
@@ -1004,7 +1116,6 @@ var QueryBuilder = (function () {
                 .groupBy(parentMetadata.name + "." + parentMetadata.primaryColumn.propertyName)
                 .getRawMany()
                 .then(function (results) {
-                // console.log(relationCountMeta.entities);
                 relationCountMeta.entities.forEach(function (entityWithMetadata) {
                     var entityId = entityWithMetadata.entity[entityWithMetadata.metadata.primaryColumn.propertyName];
                     var entityResult = results.find(function (result) {
@@ -1030,53 +1141,68 @@ var QueryBuilder = (function () {
         var transformer = new RawSqlResultsToEntityTransformer_1.RawSqlResultsToEntityTransformer(this.connection.driver, this.aliasMap, this.extractJoinMappings(), this.relationCountMetas, this.enableRelationIdValues);
         return transformer.transform(results);
     };
+    QueryBuilder.prototype.buildEscapedEntityColumnSelects = function (alias) {
+        var _this = this;
+        var hasMainAlias = this.selects.some(function (select) { return select === alias.name; });
+        var columns = hasMainAlias ? alias.metadata.columns : alias.metadata.columns.filter(function (column) {
+            return _this.selects.some(function (select) { return select === alias.name + "." + column.propertyName; });
+        });
+        return columns.map(function (column) {
+            return _this.escapeAlias(alias.name) + "." + _this.escapeColumn(column.fullName) +
+                " AS " + _this.escapeAlias(alias.name + "_" + column.fullName);
+        });
+    };
+    ;
+    QueryBuilder.prototype.findEntityColumnSelects = function (alias) {
+        var mainAlias = this.selects.find(function (select) { return select === alias.name; });
+        if (mainAlias)
+            return [mainAlias];
+        return this.selects.filter(function (select) {
+            return alias.metadata.columns.some(function (column) { return select === alias.name + "." + column.propertyName; });
+        });
+    };
+    ;
     QueryBuilder.prototype.createSelectExpression = function () {
         // todo throw exception if selects or from is missing
         var _this = this;
         var alias = "", tableName;
         var allSelects = [];
+        var excludedSelects = [];
         if (this.fromTableName) {
             tableName = this.fromTableName;
             alias = this.fromTableAlias;
         }
         else if (this.fromEntity) {
-            var metadata = this.aliasMap.getEntityMetadataByAlias(this.fromEntity.alias);
-            if (!metadata)
+            if (!this.fromEntity.alias.metadata)
                 throw new Error("Cannot get entity metadata for the given alias " + this.fromEntity.alias.name);
-            tableName = metadata.table.name;
+            tableName = this.fromEntity.alias.metadata.table.name;
             alias = this.fromEntity.alias.name;
-            // console.log("ALIAS N:", this.fromEntity.alias);
-            // console.log("ALIAS N:", alias);
-            // add select from the main table
-            if (this.selects.indexOf(alias) !== -1) {
-                metadata.columns.forEach(function (column) {
-                    allSelects.push(_this.connection.driver.escapeAliasName(alias) + "." + _this.connection.driver.escapeColumnName(column.name) + " AS " + _this.connection.driver.escapeAliasName(alias + "_" + column.name));
-                });
-            }
+            allSelects.push.apply(allSelects, this.buildEscapedEntityColumnSelects(this.aliasMap.mainAlias));
+            excludedSelects.push.apply(excludedSelects, this.findEntityColumnSelects(this.aliasMap.mainAlias));
         }
         else {
             throw new Error("No from given");
         }
         // add selects from joins
-        this.joins
-            .filter(function (join) { return _this.selects.indexOf(join.alias.name) !== -1; })
-            .forEach(function (join) {
-            var joinMetadata = _this.aliasMap.getEntityMetadataByAlias(join.alias);
-            if (joinMetadata) {
-                joinMetadata.columns.forEach(function (column) {
-                    allSelects.push(_this.connection.driver.escapeAliasName(join.alias.name) + "." + _this.connection.driver.escapeColumnName(column.name) + " AS " + _this.connection.driver.escapeAliasName(join.alias.name + "_" + column.name));
-                });
+        this.joins.forEach(function (join) {
+            if (join.alias.metadata) {
+                allSelects.push.apply(allSelects, _this.buildEscapedEntityColumnSelects(join.alias));
+                excludedSelects.push.apply(excludedSelects, _this.findEntityColumnSelects(join.alias));
             }
             else {
-                allSelects.push(_this.connection.driver.escapeAliasName(join.alias.name));
+                var hasMainAlias = _this.selects.some(function (select) { return select === join.alias.name; });
+                if (hasMainAlias) {
+                    allSelects.push(_this.escapeAlias(join.alias.name) + ".*");
+                    excludedSelects.push(join.alias.name);
+                }
             }
         });
         if (!this.ignoreParentTablesJoins && !this.fromTableName) {
-            var metadata = this.connection.getMetadata(this.aliasMap.mainAlias.target);
-            if (metadata.parentEntityMetadata && metadata.parentIdColumns) {
-                var alias_1 = "parentIdColumn_" + this.connection.driver.escapeAliasName(metadata.parentEntityMetadata.table.name);
-                metadata.parentEntityMetadata.columns.forEach(function (column) {
-                    allSelects.push(alias_1 + "." + _this.connection.driver.escapeColumnName(column.name) + " AS " + alias_1 + "_" + _this.connection.driver.escapeAliasName(column.name));
+            if (this.aliasMap.mainAlias.metadata.parentEntityMetadata && this.aliasMap.mainAlias.metadata.parentIdColumns) {
+                var alias_1 = "parentIdColumn_" + this.escapeAlias(this.aliasMap.mainAlias.metadata.parentEntityMetadata.table.name);
+                this.aliasMap.mainAlias.metadata.parentEntityMetadata.columns.forEach(function (column) {
+                    // TODO implement partial select
+                    allSelects.push(alias_1 + "." + _this.escapeColumn(column.fullName) + " AS " + alias_1 + "_" + _this.escapeAlias(column.fullName));
                 });
             }
         }
@@ -1087,17 +1213,15 @@ var QueryBuilder = (function () {
             var foundAlias = _this.aliasMap.findAliasByName(parentAlias);
             if (!foundAlias)
                 throw new Error("Alias \"" + parentAlias + "\" was not found");
-            var parentMetadata = _this.aliasMap.getEntityMetadataByAlias(foundAlias);
-            if (!parentMetadata)
+            if (!foundAlias.metadata)
                 throw new Error("Cannot get entity metadata for the given alias " + foundAlias.name);
-            var relation = parentMetadata.findRelationWithPropertyName(join.alias.parentPropertyName);
+            var relation = foundAlias.metadata.findRelationWithPropertyName(join.alias.parentPropertyName);
             var junctionMetadata = relation.junctionEntityMetadata;
             // const junctionTable = junctionMetadata.table.name;
             junctionMetadata.columns.forEach(function (column) {
-                allSelects.push(_this.connection.driver.escapeAliasName(join.alias.name) + "." + _this.connection.driver.escapeColumnName(column.name) + " AS " + _this.connection.driver.escapeAliasName(join.alias.name + "_" + column.name));
+                allSelects.push(_this.escapeAlias(join.alias.name) + "." + _this.escapeColumn(column.fullName) + " AS " + _this.escapeAlias(join.alias.name + "_" + column.fullName));
             });
         });
-        //
         /*if (this.enableRelationIdValues) {
             const parentMetadata = this.aliasMap.getEntityMetadataByAlias(this.aliasMap.mainAlias);
             if (!parentMetadata)
@@ -1108,27 +1232,37 @@ var QueryBuilder = (function () {
 
                 const junctionMetadata = relation.junctionEntityMetadata;
                 junctionMetadata.columns.forEach(column => {
-                    const select = this.connection.driver.escapeAliasName(this.aliasMap.mainAlias.name + "_" + junctionMetadata.table.name + "_ids") + "." +
-                        this.connection.driver.escapeColumnName(column.name) + " AS " +
-                        this.connection.driver.escapeAliasName(this.aliasMap.mainAlias.name + "_" + relation.name + "_ids_" + column.name);
+                    const select = this.escapeAlias(this.aliasMap.mainAlias.name + "_" + junctionMetadata.table.name + "_ids") + "." +
+                        this.escapeColumn(column.name) + " AS " +
+                        this.escapeAlias(this.aliasMap.mainAlias.name + "_" + relation.name + "_ids_" + column.name);
                     allSelects.push(select);
                 });
             });
         }*/
         // add all other selects
-        this.selects.filter(function (select) {
-            return select !== alias && !_this.joins.find(function (join) { return join.alias.name === select; });
-        }).forEach(function (select) { return allSelects.push(_this.replacePropertyNames(select)); });
+        this.selects.filter(function (select) { return excludedSelects.indexOf(select) === -1; })
+            .forEach(function (select) { return allSelects.push(_this.replacePropertyNames(select)); });
         // if still selection is empty, then simply set it to all (*)
         if (allSelects.length === 0)
             allSelects.push("*");
+        var lock = "";
+        if (this.connection.driver instanceof SqlServerDriver_1.SqlServerDriver) {
+            switch (this.lockMode) {
+                case "pessimistic_read":
+                    lock = " WITH (HOLDLOCK, ROWLOCK)";
+                    break;
+                case "pessimistic_write":
+                    lock = " WITH (UPDLOCK, ROWLOCK)";
+                    break;
+            }
+        }
         // create a selection query
         switch (this.type) {
             case "select":
-                return "SELECT " + allSelects.join(", ") + " FROM " + this.connection.driver.escapeTableName(tableName) + " " + this.connection.driver.escapeAliasName(alias);
+                return "SELECT " + allSelects.join(", ") + " FROM " + this.escapeTable(tableName) + " " + this.escapeAlias(alias) + lock;
             case "delete":
-                return "DELETE FROM " + this.connection.driver.escapeTableName(tableName);
-            // return "DELETE " + (alias ? this.connection.driver.escapeAliasName(alias) : "") + " FROM " + this.connection.driver.escapeTableName(tableName) + " " + (alias ? this.connection.driver.escapeAliasName(alias) : ""); // TODO: only mysql supports aliasing, so what to do with aliases in DELETE queries? right now aliases are used however we are relaying that they will always match a table names
+                return "DELETE FROM " + this.escapeTable(tableName);
+            // return "DELETE " + (alias ? this.escapeAlias(alias) : "") + " FROM " + this.escapeTable(tableName) + " " + (alias ? this.escapeAlias(alias) : ""); // TODO: only mysql supports aliasing, so what to do with aliases in DELETE queries? right now aliases are used however we are relaying that they will always match a table names
             case "update":
                 var updateSet = Object.keys(this.updateQuerySet).map(function (key) { return key + "=:updateQuerySet_" + key; });
                 var params = Object.keys(this.updateQuerySet).reduce(function (object, key) {
@@ -1137,9 +1271,27 @@ var QueryBuilder = (function () {
                     return object;
                 }, {});
                 this.setParameters(params);
-                return "UPDATE " + tableName + " " + (alias ? this.connection.driver.escapeAliasName(alias) : "") + " SET " + updateSet;
+                return "UPDATE " + tableName + " " + (alias ? this.escapeAlias(alias) : "") + " SET " + updateSet;
         }
         throw new Error("No query builder type is specified.");
+    };
+    QueryBuilder.prototype.createHavingExpression = function () {
+        var _this = this;
+        if (!this.havings || !this.havings.length)
+            return "";
+        var conditions = this.havings.map(function (having, index) {
+            switch (having.type) {
+                case "and":
+                    return (index > 0 ? "AND " : "") + _this.replacePropertyNames(having.condition);
+                case "or":
+                    return (index > 0 ? "OR " : "") + _this.replacePropertyNames(having.condition);
+                default:
+                    return _this.replacePropertyNames(having.condition);
+            }
+        }).join(" ");
+        if (!conditions.length)
+            return "";
+        return " HAVING " + conditions;
     };
     QueryBuilder.prototype.createWhereExpression = function () {
         var _this = this;
@@ -1156,7 +1308,7 @@ var QueryBuilder = (function () {
         if (!this.fromTableName) {
             var mainMetadata = this.connection.getMetadata(this.aliasMap.mainAlias.target);
             if (mainMetadata.hasDiscriminatorColumn)
-                return " WHERE " + (conditions.length ? "(" + conditions + ") AND" : "") + " " + mainMetadata.discriminatorColumn.name + "=:discriminatorColumnValue";
+                return " WHERE " + (conditions.length ? "(" + conditions + ") AND" : "") + " " + mainMetadata.discriminatorColumn.fullName + "=:discriminatorColumnValue";
         }
         if (!conditions.length)
             return "";
@@ -1168,23 +1320,22 @@ var QueryBuilder = (function () {
     QueryBuilder.prototype.replacePropertyNames = function (statement) {
         var _this = this;
         this.aliasMap.aliases.forEach(function (alias) {
-            var metadata = _this.aliasMap.getEntityMetadataByAlias(alias);
-            if (!metadata)
+            if (!alias.metadata)
                 return;
-            metadata.embeddeds.forEach(function (embedded) {
+            alias.metadata.embeddeds.forEach(function (embedded) {
                 embedded.columns.forEach(function (column) {
                     var expression = alias.name + "\\." + embedded.propertyName + "\\." + column.propertyName + "([ =]|.{0}$)";
-                    statement = statement.replace(new RegExp(expression, "gm"), _this.connection.driver.escapeAliasName(alias.name) + "." + _this.connection.driver.escapeColumnName(column.name) + "$1");
+                    statement = statement.replace(new RegExp(expression, "gm"), _this.escapeAlias(alias.name) + "." + _this.escapeColumn(column.fullName) + "$1");
                 });
                 // todo: what about embedded relations here?
             });
-            metadata.columns.filter(function (column) { return !column.isInEmbedded; }).forEach(function (column) {
+            alias.metadata.columns.filter(function (column) { return !column.isInEmbedded; }).forEach(function (column) {
                 var expression = alias.name + "\\." + column.propertyName + "([ =]|.{0}$)";
-                statement = statement.replace(new RegExp(expression, "gm"), _this.connection.driver.escapeAliasName(alias.name) + "." + _this.connection.driver.escapeColumnName(column.name) + "$1");
+                statement = statement.replace(new RegExp(expression, "gm"), _this.escapeAlias(alias.name) + "." + _this.escapeColumn(column.fullName) + "$1");
             });
-            metadata.relationsWithJoinColumns /*.filter(relation => !relation.isInEmbedded)*/.forEach(function (relation) {
+            alias.metadata.relationsWithJoinColumns /*.filter(relation => !relation.isInEmbedded)*/.forEach(function (relation) {
                 var expression = alias.name + "\\." + relation.propertyName + "([ =]|.{0}$)";
-                statement = statement.replace(new RegExp(expression, "gm"), _this.connection.driver.escapeAliasName(alias.name) + "." + _this.connection.driver.escapeColumnName(relation.name) + "$1");
+                statement = statement.replace(new RegExp(expression, "gm"), _this.escapeAlias(alias.name) + "." + _this.escapeColumn(relation.name) + "$1");
             });
         });
         return statement;
@@ -1204,17 +1355,18 @@ var QueryBuilder = (function () {
             var junctionTable = junctionMetadata.table.name;
             var junctionAlias = join.alias.name;
             var joinTable = relation.isOwning ? relation.joinTable : relation.inverseRelation.joinTable; // not sure if this is correct
-            var joinTableColumn = joinTable.referencedColumn.name; // not sure if this is correct
+            var joinTableColumn = joinTable.referencedColumn.fullName; // not sure if this is correct
             var condition1 = "";
             if (relation.isOwning) {
-                condition1 = _this.connection.driver.escapeAliasName(junctionAlias) + "." + _this.connection.driver.escapeColumnName(junctionMetadata.columns[0].name) + "=" + _this.connection.driver.escapeAliasName(parentAlias) + "." + _this.connection.driver.escapeColumnName(joinTableColumn);
+                condition1 = _this.escapeAlias(junctionAlias) + "." + _this.escapeColumn(junctionMetadata.columns[0].fullName) + "=" + _this.escapeAlias(parentAlias) + "." + _this.escapeColumn(joinTableColumn);
+                // condition2 = joinAlias + "." + inverseJoinColumnName + "=" + junctionAlias + "." + junctionMetadata.columns[1].name;
             }
             else {
-                condition1 = _this.connection.driver.escapeAliasName(junctionAlias) + "." + _this.connection.driver.escapeColumnName(junctionMetadata.columns[1].name) + "=" + _this.connection.driver.escapeAliasName(parentAlias) + "." + _this.connection.driver.escapeColumnName(joinTableColumn);
+                condition1 = _this.escapeAlias(junctionAlias) + "." + _this.escapeColumn(junctionMetadata.columns[1].fullName) + "=" + _this.escapeAlias(parentAlias) + "." + _this.escapeColumn(joinTableColumn);
+                // condition2 = joinAlias + "." + inverseJoinColumnName + "=" + junctionAlias + "." + junctionMetadata.columns[0].name;
             }
-            return " " + join.type + " JOIN " + junctionTable + " " + _this.connection.driver.escapeAliasName(junctionAlias) + " ON " + condition1;
+            return " " + join.type + " JOIN " + junctionTable + " " + _this.escapeAlias(junctionAlias) + " ON " + condition1;
             // " " + joinType + " JOIN " + joinTableName + " " + joinAlias + " " + join.conditionType + " " + condition2 + appendedCondition;
-            // console.log(join);
             // return " " + join.type + " JOIN " + joinTableName + " " + join.alias.name + " " + (join.condition ? (join.conditionType + " " + join.condition) : "");
         });
     };
@@ -1224,14 +1376,13 @@ var QueryBuilder = (function () {
             var joinType = join.type; // === "INNER" ? "INNER" : "LEFT";
             var joinTableName = join.tableName;
             if (!joinTableName) {
-                var metadata = _this.aliasMap.getEntityMetadataByAlias(join.alias);
-                if (!metadata)
+                if (!join.alias.metadata)
                     throw new Error("Cannot get entity metadata for the given alias " + join.alias.name);
-                joinTableName = metadata.table.name;
+                joinTableName = join.alias.metadata.table.name;
             }
             var parentAlias = join.alias.parentAliasName;
             if (!parentAlias) {
-                return " " + joinType + " JOIN " + _this.connection.driver.escapeTableName(joinTableName) + " " + _this.connection.driver.escapeAliasName(join.alias.name) + " " + (join.condition ? ("ON " + _this.replacePropertyNames(join.condition)) : "");
+                return " " + joinType + " JOIN " + _this.escapeTable(joinTableName) + " " + _this.escapeAlias(join.alias.name) + " " + (join.condition ? ("ON " + _this.replacePropertyNames(join.condition)) : "");
             }
             var foundAlias = _this.aliasMap.findAliasByName(parentAlias);
             if (!foundAlias)
@@ -1246,30 +1397,30 @@ var QueryBuilder = (function () {
                 var junctionTable = junctionMetadata.table.name;
                 var junctionAlias = join.alias.parentAliasName + "_" + join.alias.name;
                 var joinAlias = join.alias.name;
-                var joinTable = relation.isOwning ? relation.joinTable : relation.inverseRelation.joinTable; // not sure if this is correct
-                var joinTableColumn = joinTable.referencedColumn.name; // not sure if this is correct
-                var inverseJoinColumnName = joinTable.inverseReferencedColumn.name; // not sure if this is correct
+                var joinTable = relation.isOwning ? relation.joinTable : relation.inverseRelation.joinTable;
+                var joinTableColumn = relation.isOwning ? joinTable.referencedColumn.fullName : joinTable.inverseReferencedColumn.fullName;
+                var inverseJoinColumnName = relation.isOwning ? joinTable.inverseReferencedColumn.fullName : joinTable.referencedColumn.fullName;
                 var condition1 = "", condition2 = "";
                 if (relation.isOwning) {
-                    condition1 = _this.connection.driver.escapeAliasName(junctionAlias) + "." + _this.connection.driver.escapeColumnName(junctionMetadata.columns[0].name) + "=" + _this.connection.driver.escapeAliasName(parentAlias) + "." + _this.connection.driver.escapeColumnName(joinTableColumn);
-                    condition2 = _this.connection.driver.escapeAliasName(joinAlias) + "." + _this.connection.driver.escapeColumnName(inverseJoinColumnName) + "=" + _this.connection.driver.escapeAliasName(junctionAlias) + "." + _this.connection.driver.escapeColumnName(junctionMetadata.columns[1].name);
+                    condition1 = _this.escapeAlias(junctionAlias) + "." + _this.escapeColumn(junctionMetadata.columns[0].fullName) + "=" + _this.escapeAlias(parentAlias) + "." + _this.escapeColumn(joinTableColumn);
+                    condition2 = _this.escapeAlias(joinAlias) + "." + _this.escapeColumn(inverseJoinColumnName) + "=" + _this.escapeAlias(junctionAlias) + "." + _this.escapeColumn(junctionMetadata.columns[1].fullName);
                 }
                 else {
-                    condition1 = _this.connection.driver.escapeAliasName(junctionAlias) + "." + _this.connection.driver.escapeColumnName(junctionMetadata.columns[1].name) + "=" + _this.connection.driver.escapeAliasName(parentAlias) + "." + _this.connection.driver.escapeColumnName(joinTableColumn);
-                    condition2 = _this.connection.driver.escapeAliasName(joinAlias) + "." + _this.connection.driver.escapeColumnName(inverseJoinColumnName) + "=" + _this.connection.driver.escapeAliasName(junctionAlias) + "." + _this.connection.driver.escapeColumnName(junctionMetadata.columns[0].name);
+                    condition1 = _this.escapeAlias(junctionAlias) + "." + _this.escapeColumn(junctionMetadata.columns[1].fullName) + "=" + _this.escapeAlias(parentAlias) + "." + _this.escapeColumn(joinTableColumn);
+                    condition2 = _this.escapeAlias(joinAlias) + "." + _this.escapeColumn(inverseJoinColumnName) + "=" + _this.escapeAlias(junctionAlias) + "." + _this.escapeColumn(junctionMetadata.columns[0].fullName);
                 }
-                return " " + joinType + " JOIN " + _this.connection.driver.escapeTableName(junctionTable) + " " + _this.connection.driver.escapeAliasName(junctionAlias) + " ON " + condition1 +
-                    " " + joinType + " JOIN " + _this.connection.driver.escapeTableName(joinTableName) + " " + _this.connection.driver.escapeAliasName(joinAlias) + " ON " + condition2 + appendedCondition;
+                return " " + joinType + " JOIN " + _this.escapeTable(junctionTable) + " " + _this.escapeAlias(junctionAlias) + " ON " + condition1 +
+                    " " + joinType + " JOIN " + _this.escapeTable(joinTableName) + " " + _this.escapeAlias(joinAlias) + " ON " + condition2 + appendedCondition;
             }
             else if (relation.isManyToOne || (relation.isOneToOne && relation.isOwning)) {
-                var joinTableColumn = relation.joinColumn.referencedColumn.name;
-                var condition = _this.connection.driver.escapeAliasName(join.alias.name) + "." + _this.connection.driver.escapeColumnName(joinTableColumn) + "=" + _this.connection.driver.escapeAliasName(parentAlias) + "." + _this.connection.driver.escapeColumnName(relation.name);
-                return " " + joinType + " JOIN " + _this.connection.driver.escapeTableName(joinTableName) + " " + _this.connection.driver.escapeAliasName(join.alias.name) + " ON " + condition + appendedCondition;
+                var joinTableColumn = relation.joinColumn.referencedColumn.fullName;
+                var condition = _this.escapeAlias(join.alias.name) + "." + _this.escapeColumn(joinTableColumn) + "=" + _this.escapeAlias(parentAlias) + "." + _this.escapeColumn(relation.name);
+                return " " + joinType + " JOIN " + _this.escapeTable(joinTableName) + " " + _this.escapeAlias(join.alias.name) + " ON " + condition + appendedCondition;
             }
             else if (relation.isOneToMany || (relation.isOneToOne && !relation.isOwning)) {
-                var joinTableColumn = relation.inverseRelation.joinColumn.referencedColumn.name;
-                var condition = _this.connection.driver.escapeAliasName(join.alias.name) + "." + _this.connection.driver.escapeColumnName(relation.inverseRelation.name) + "=" + _this.connection.driver.escapeAliasName(parentAlias) + "." + _this.connection.driver.escapeColumnName(joinTableColumn);
-                return " " + joinType + " JOIN " + _this.connection.driver.escapeTableName(joinTableName) + " " + _this.connection.driver.escapeAliasName(join.alias.name) + " ON " + condition + appendedCondition;
+                var joinTableColumn = relation.inverseRelation.joinColumn.referencedColumn.fullName;
+                var condition = _this.escapeAlias(join.alias.name) + "." + _this.escapeColumn(relation.inverseRelation.name) + "=" + _this.escapeAlias(parentAlias) + "." + _this.escapeColumn(joinTableColumn);
+                return " " + joinType + " JOIN " + _this.escapeTable(joinTableName) + " " + _this.escapeAlias(join.alias.name) + " ON " + condition + appendedCondition;
             }
             else {
                 throw new Error("Unexpected relation type"); // this should not be possible
@@ -1278,11 +1429,11 @@ var QueryBuilder = (function () {
         if (!this.ignoreParentTablesJoins && !this.fromTableName) {
             var metadata = this.connection.getMetadata(this.aliasMap.mainAlias.target);
             if (metadata.parentEntityMetadata && metadata.parentIdColumns) {
-                var alias_2 = this.connection.driver.escapeAliasName("parentIdColumn_" + metadata.parentEntityMetadata.table.name);
-                joins += " JOIN " + this.connection.driver.escapeTableName(metadata.parentEntityMetadata.table.name)
+                var alias_2 = this.escapeAlias("parentIdColumn_" + metadata.parentEntityMetadata.table.name);
+                joins += " JOIN " + this.escapeTable(metadata.parentEntityMetadata.table.name)
                     + " " + alias_2 + " ON ";
                 joins += metadata.parentIdColumns.map(function (parentIdColumn) {
-                    return _this.aliasMap.mainAlias.name + "." + parentIdColumn.name + "=" + alias_2 + "." + parentIdColumn.propertyName;
+                    return _this.aliasMap.mainAlias.name + "." + parentIdColumn.fullName + "=" + alias_2 + "." + parentIdColumn.propertyName;
                 });
             }
         }
@@ -1302,18 +1453,18 @@ var QueryBuilder = (function () {
 
                 let condition1 = "";
                 if (relation.isOwning) {
-                    condition1 = this.connection.driver.escapeAliasName(junctionAlias) + "." +
-                        this.connection.driver.escapeColumnName(junctionMetadata.columns[0].name) + "=" +
-                        this.connection.driver.escapeAliasName(this.aliasMap.mainAlias.name) + "." +
-                        this.connection.driver.escapeColumnName(joinTableColumn);
+                    condition1 = this.escapeAlias(junctionAlias) + "." +
+                        this.escapeColumn(junctionMetadata.columns[0].name) + "=" +
+                        this.escapeAlias(this.aliasMap.mainAlias.name) + "." +
+                        this.escapeColumn(joinTableColumn);
                 } else {
-                    condition1 = this.connection.driver.escapeAliasName(junctionAlias) + "." +
-                        this.connection.driver.escapeColumnName(junctionMetadata.columns[1].name) + "=" +
-                        this.connection.driver.escapeAliasName(this.aliasMap.mainAlias.name) + "." +
-                        this.connection.driver.escapeColumnName(joinTableColumn);
+                    condition1 = this.escapeAlias(junctionAlias) + "." +
+                        this.escapeColumn(junctionMetadata.columns[1].name) + "=" +
+                        this.escapeAlias(this.aliasMap.mainAlias.name) + "." +
+                        this.escapeColumn(joinTableColumn);
                 }
 
-                return " LEFT JOIN " + junctionTable + " " + this.connection.driver.escapeAliasName(junctionAlias) + " ON " + condition1;
+                return " LEFT JOIN " + junctionTable + " " + this.escapeAlias(junctionAlias) + " ON " + condition1;
             }).join(" ");
         }*/
         return joins;
@@ -1322,21 +1473,6 @@ var QueryBuilder = (function () {
         if (!this.groupBys || !this.groupBys.length)
             return "";
         return " GROUP BY " + this.replacePropertyNames(this.groupBys.join(", "));
-    };
-    QueryBuilder.prototype.createHavingExpression = function () {
-        var _this = this;
-        if (!this.havings || !this.havings.length)
-            return "";
-        return " HAVING " + this.havings.map(function (having) {
-            switch (having.type) {
-                case "and":
-                    return " AND " + _this.replacePropertyNames(having.condition);
-                case "or":
-                    return " OR " + _this.replacePropertyNames(having.condition);
-                default:
-                    return " " + _this.replacePropertyNames(having.condition);
-            }
-        }).join(" ");
     };
     QueryBuilder.prototype.createOrderByCombinedWithSelectExpression = function (parentAlias) {
         var _this = this;
@@ -1349,13 +1485,13 @@ var QueryBuilder = (function () {
         var selectString = Object.keys(orderBys)
             .map(function (columnName) {
             var _a = columnName.split("."), alias = _a[0], column = _a[1], embeddedProperties = _a.slice(2);
-            return _this.connection.driver.escapeAliasName(parentAlias) + "." + _this.connection.driver.escapeColumnName(alias + "_" + column + embeddedProperties.join("_"));
+            return _this.escapeAlias(parentAlias) + "." + _this.escapeColumn(alias + "_" + column + embeddedProperties.join("_"));
         })
             .join(", ");
         var orderByString = Object.keys(orderBys)
             .map(function (columnName) {
             var _a = columnName.split("."), alias = _a[0], column = _a[1], embeddedProperties = _a.slice(2);
-            return _this.connection.driver.escapeAliasName(parentAlias) + "." + _this.connection.driver.escapeColumnName(alias + "_" + column + embeddedProperties.join("_")) + " " + _this.orderBys[columnName];
+            return _this.escapeAlias(parentAlias) + "." + _this.escapeColumn(alias + "_" + column + embeddedProperties.join("_")) + " " + _this.orderBys[columnName];
         })
             .join(", ");
         return [selectString, orderByString];
@@ -1386,6 +1522,35 @@ var QueryBuilder = (function () {
         if (!this.offset)
             return "";
         return " OFFSET " + this.offset;
+    };
+    QueryBuilder.prototype.createLockExpression = function () {
+        switch (this.lockMode) {
+            case "pessimistic_read":
+                if (this.connection.driver instanceof MysqlDriver_1.MysqlDriver) {
+                    return " LOCK IN SHARE MODE";
+                }
+                else if (this.connection.driver instanceof PostgresDriver_1.PostgresDriver) {
+                    return " FOR SHARE";
+                }
+                else if (this.connection.driver instanceof SqlServerDriver_1.SqlServerDriver) {
+                    return "";
+                }
+                else {
+                    throw new LockNotSupportedOnGivenDriverError_1.LockNotSupportedOnGivenDriverError();
+                }
+            case "pessimistic_write":
+                if (this.connection.driver instanceof MysqlDriver_1.MysqlDriver || this.connection.driver instanceof PostgresDriver_1.PostgresDriver) {
+                    return " FOR UPDATE";
+                }
+                else if (this.connection.driver instanceof SqlServerDriver_1.SqlServerDriver) {
+                    return "";
+                }
+                else {
+                    throw new LockNotSupportedOnGivenDriverError_1.LockNotSupportedOnGivenDriverError();
+                }
+            default:
+                return "";
+        }
     };
     QueryBuilder.prototype.extractJoinMappings = function () {
         var mappings = [];
@@ -1424,13 +1589,27 @@ var QueryBuilder = (function () {
         var aliasObj = new Alias_1.Alias(alias);
         this.aliasMap.addAlias(aliasObj);
         if (entityOrProperty instanceof Function) {
-            aliasObj.target = entityOrProperty;
+            aliasObj.metadata = this.connection.getMetadata(entityOrProperty);
         }
         else if (this.isPropertyAlias(entityOrProperty)) {
             _a = entityOrProperty.split("."), aliasObj.parentAliasName = _a[0], aliasObj.parentPropertyName = _a[1];
+            var parentAlias = this.aliasMap.findAliasByName(aliasObj.parentAliasName);
+            // todo: throw exception if parentAlias not found
+            // todo: throw exception if parentAlias.metadata not found
+            // todo: throw exception if parentAlias not found
+            // todo: throw exception if relation not found?
+            var relation = parentAlias.metadata.findRelationWithPropertyName(aliasObj.parentPropertyName);
+            aliasObj.metadata = relation.inverseEntityMetadata;
         }
         else if (typeof entityOrProperty === "string") {
-            tableName = entityOrProperty;
+            // check if we have entity with such table name, and use its metadata if found
+            var metadata = this.connection.entityMetadatas.find(function (metadata) { return metadata.table.name === entityOrProperty; });
+            if (metadata) {
+                aliasObj.metadata = metadata;
+            }
+            else {
+                tableName = entityOrProperty;
+            }
             if (!mapToProperty)
                 mapToProperty = entityOrProperty;
         }
@@ -1464,9 +1643,6 @@ var QueryBuilder = (function () {
         });
         return this;
     };
-    QueryBuilder.prototype.isValueSimpleString = function (str) {
-        return /^[A-Za-z0-9_-]+$/.test(str);
-    };
     QueryBuilder.prototype.isPropertyAlias = function (str) {
         if (!(typeof str === "string"))
             return false;
@@ -1489,29 +1665,29 @@ var QueryBuilder = (function () {
         var _this = this;
         var metadata = this.connection.getMetadata(this.aliasMap.mainAlias.target);
         // create shortcuts for better readability
-        var escapeAlias = function (alias) { return _this.connection.driver.escapeAliasName(alias); };
-        var escapeColumn = function (column) { return _this.connection.driver.escapeColumnName(column); };
+        var escapeAlias = function (alias) { return _this.escapeAlias(alias); };
+        var escapeColumn = function (column) { return _this.escapeColumn(column); };
         var alias = this.aliasMap.mainAlias.name;
         var parameters = {};
         var whereStrings = ids.map(function (id, index) {
             var whereSubStrings = [];
             if (metadata.hasMultiplePrimaryKeys) {
                 metadata.primaryColumns.forEach(function (primaryColumn, secondIndex) {
-                    whereSubStrings.push(escapeAlias(alias) + "." + escapeColumn(primaryColumn.name) + "=:id_" + index + "_" + secondIndex);
-                    parameters["id_" + index + "_" + secondIndex] = id[primaryColumn.name];
+                    whereSubStrings.push(escapeAlias(alias) + "." + escapeColumn(primaryColumn.fullName) + "=:id_" + index + "_" + secondIndex);
+                    parameters["id_" + index + "_" + secondIndex] = id[primaryColumn.fullName];
                 });
                 metadata.parentIdColumns.forEach(function (primaryColumn, secondIndex) {
-                    whereSubStrings.push(escapeAlias(alias) + "." + escapeColumn(id[primaryColumn.name]) + "=:parentId_" + index + "_" + secondIndex);
+                    whereSubStrings.push(escapeAlias(alias) + "." + escapeColumn(id[primaryColumn.fullName]) + "=:parentId_" + index + "_" + secondIndex);
                     parameters["parentId_" + index + "_" + secondIndex] = id[primaryColumn.propertyName];
                 });
             }
             else {
                 if (metadata.primaryColumns.length > 0) {
-                    whereSubStrings.push(escapeAlias(alias) + "." + escapeColumn(metadata.firstPrimaryColumn.name) + "=:id_" + index);
+                    whereSubStrings.push(escapeAlias(alias) + "." + escapeColumn(metadata.firstPrimaryColumn.fullName) + "=:id_" + index);
                     parameters["id_" + index] = id;
                 }
                 else if (metadata.parentIdColumns.length > 0) {
-                    whereSubStrings.push(escapeAlias(alias) + "." + escapeColumn(metadata.parentIdColumns[0].name) + "=:parentId_" + index);
+                    whereSubStrings.push(escapeAlias(alias) + "." + escapeColumn(metadata.parentIdColumns[0].fullName) + "=:parentId_" + index);
                     parameters["parentId_" + index] = id;
                 }
             }

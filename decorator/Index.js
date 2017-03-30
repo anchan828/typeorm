@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var index_1 = require("../index");
 /**
  * Composite index must be set on entity classes and must specify entity's fields to be indexed.

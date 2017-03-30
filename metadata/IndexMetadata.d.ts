@@ -37,4 +37,11 @@ export declare class IndexMetadata {
      * Gets the column names which are in this index.
      */
     readonly columns: string[];
+    /**
+     * Builds columns as a map of values where column name is key of object and value is a value provided by
+     * function or default value given to this function.
+     */
+    buildColumnsAsMap(defaultValue?: number): {
+        [key: string]: number;
+    };
 }

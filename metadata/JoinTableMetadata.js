@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 /**
  * JoinTableMetadata contains all information about relation's join table.
  */
@@ -33,7 +34,7 @@ var JoinTableMetadata = (function () {
         get: function () {
             if (this._name)
                 return this._name;
-            return this.relation.entityMetadata.namingStrategy.joinTableName(this.relation.entityMetadata.table.nameWithoutPrefix, this.relation.inverseEntityMetadata.table.nameWithoutPrefix, this.relation.propertyName, this.relation.hasInverseSide ? this.relation.inverseRelation.propertyName : "", this.referencedColumn.name, this.inverseReferencedColumn.name);
+            return this.relation.entityMetadata.namingStrategy.joinTableName(this.relation.entityMetadata.table.nameWithoutPrefix, this.relation.inverseEntityMetadata.table.nameWithoutPrefix, this.relation.propertyName, this.relation.hasInverseSide ? this.relation.inverseRelation.propertyName : "", this.referencedColumn.fullName, this.inverseReferencedColumn.fullName);
         },
         enumerable: true,
         configurable: true
@@ -48,7 +49,7 @@ var JoinTableMetadata = (function () {
             return this.relation
                 .entityMetadata
                 .namingStrategy
-                .joinTableColumnName(this.relation.entityMetadata.table.nameWithoutPrefix, this.referencedColumn.name, this.relation.inverseEntityMetadata.table.nameWithoutPrefix, this.inverseReferencedColumn.name);
+                .joinTableColumnName(this.relation.entityMetadata.table.nameWithoutPrefix, this.referencedColumn.fullName, this.relation.inverseEntityMetadata.table.nameWithoutPrefix, this.inverseReferencedColumn.fullName);
         },
         enumerable: true,
         configurable: true
@@ -63,7 +64,7 @@ var JoinTableMetadata = (function () {
             return this.relation
                 .entityMetadata
                 .namingStrategy
-                .joinTableInverseColumnName(this.relation.inverseEntityMetadata.table.nameWithoutPrefix, this.inverseReferencedColumn.name, this.relation.entityMetadata.table.nameWithoutPrefix, this.referencedColumn.name);
+                .joinTableInverseColumnName(this.relation.inverseEntityMetadata.table.nameWithoutPrefix, this.inverseReferencedColumn.fullName, this.relation.entityMetadata.table.nameWithoutPrefix, this.referencedColumn.fullName);
         },
         enumerable: true,
         configurable: true
@@ -75,7 +76,7 @@ var JoinTableMetadata = (function () {
         get: function () {
             var _this = this;
             if (this._joinColumnReferencedColumnName) {
-                var referencedColumn = this.relation.entityMetadata.columns.find(function (column) { return column.name === _this._joinColumnReferencedColumnName; });
+                var referencedColumn = this.relation.entityMetadata.columns.find(function (column) { return column.fullName === _this._joinColumnReferencedColumnName; });
                 if (!referencedColumn)
                     throw new Error("Referenced column " + this._joinColumnReferencedColumnName + " was not found in entity " + this.name);
                 return referencedColumn;
@@ -94,7 +95,7 @@ var JoinTableMetadata = (function () {
         get: function () {
             var _this = this;
             if (this._inverseJoinColumnReferencedColumnName) {
-                var referencedColumn = this.relation.inverseEntityMetadata.columns.find(function (column) { return column.name === _this._inverseJoinColumnReferencedColumnName; });
+                var referencedColumn = this.relation.inverseEntityMetadata.columns.find(function (column) { return column.fullName === _this._inverseJoinColumnReferencedColumnName; });
                 if (!referencedColumn)
                     throw new Error("Referenced column " + this._inverseJoinColumnReferencedColumnName + " was not found in entity " + this.name);
                 return referencedColumn;

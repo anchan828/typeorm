@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 /**
  * Transforms plain old javascript object
  * Entity is constructed based on its entity metadata.

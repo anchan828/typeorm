@@ -13,5 +13,8 @@ export declare class AliasMap {
     readonly mainAlias: Alias;
     findAliasByName(name: string): Alias | undefined;
     findAliasByParent(parentAliasName: string, parentPropertyName: string): Alias | undefined;
+    /**
+     * @deprecated
+     */
     getEntityMetadataByAlias(alias: Alias): EntityMetadata | undefined;
 }

@@ -201,6 +201,7 @@ export declare class WebsqlQueryRunner implements QueryRunner {
         precision?: number;
         scale?: number;
         timezone?: boolean;
+        fixedLength?: boolean;
     }): string;
     /**
      * Checks if "DEFAULT" values in the column metadata and in the database schema are equal.

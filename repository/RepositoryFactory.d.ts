@@ -19,5 +19,5 @@ export declare class RepositoryFactory {
     /**
      * Creates a specific repository.
      */
-    createSpecificRepository(connection: Connection, metadata: EntityMetadata, repository: Repository<any>, queryRunnerProvider?: QueryRunnerProvider): SpecificRepository<any>;
+    createSpecificRepository(connection: Connection, metadata: EntityMetadata, queryRunnerProvider?: QueryRunnerProvider): SpecificRepository<any>;
 }

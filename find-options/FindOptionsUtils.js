@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 /**
  * Utilities to work with FindOptions.
  */
@@ -6,100 +7,115 @@ var FindOptionsUtils = (function () {
     function FindOptionsUtils() {
     }
     /**
+     * Checks if given object is really instance of FindOneOptions interface.
+     */
+    FindOptionsUtils.isFindOneOptions = function (object) {
+        var possibleOptions = object;
+        return possibleOptions &&
+            (possibleOptions.where instanceof Object ||
+                possibleOptions.join instanceof Object ||
+                possibleOptions.order instanceof Object);
+    };
+    /**
+     * Checks if given object is really instance of FindManyOptions interface.
+     */
+    FindOptionsUtils.isFindManyOptions = function (object) {
+        var possibleOptions = object;
+        return possibleOptions &&
+            (possibleOptions.where instanceof Object ||
+                possibleOptions.join instanceof Object ||
+                possibleOptions.order instanceof Object ||
+                typeof possibleOptions.skip === "number" ||
+                typeof possibleOptions.take === "number");
+    };
+    /**
      * Checks if given object is really instance of FindOptions interface.
      */
-    FindOptionsUtils.isFindOptions = function (object) {
-        var possibleOptions = object;
-        return possibleOptions && !!possibleOptions.alias && typeof possibleOptions.alias === "string" && (!!possibleOptions.limit ||
-            !!possibleOptions.offset ||
-            !!possibleOptions.firstResult ||
-            !!possibleOptions.maxResults ||
-            !!possibleOptions.where ||
-            !!possibleOptions.having ||
-            !!possibleOptions.whereConditions ||
-            !!possibleOptions.havingConditions ||
-            !!possibleOptions.orderBy ||
-            !!possibleOptions.groupBy ||
-            !!possibleOptions.leftJoinAndSelect ||
-            !!possibleOptions.innerJoinAndSelect ||
-            !!possibleOptions.leftJoin ||
-            !!possibleOptions.innerJoin ||
-            !!possibleOptions.parameters ||
-            !!possibleOptions.enabledOptions);
+    FindOptionsUtils.extractFindOneOptionsAlias = function (object) {
+        if (this.isFindOneOptions(object) && object.join)
+            return object.join.alias;
+        return undefined;
+    };
+    /**
+     * Checks if given object is really instance of FindOptions interface.
+     */
+    FindOptionsUtils.extractFindManyOptionsAlias = function (object) {
+        if (this.isFindManyOptions(object) && object.join)
+            return object.join.alias;
+        return undefined;
+    };
+    /**
+     * Applies give find one options to the given query builder.
+     */
+    FindOptionsUtils.applyFindOneOptionsOrConditionsToQueryBuilder = function (qb, options) {
+        if (this.isFindOneOptions(options))
+            return this.applyOptionsToQueryBuilder(qb, options);
+        if (options)
+            return this.applyConditions(qb, options);
+        return qb;
+    };
+    /**
+     * Applies give find many options to the given query builder.
+     */
+    FindOptionsUtils.applyFindManyOptionsOrConditionsToQueryBuilder = function (qb, options) {
+        if (this.isFindManyOptions(options))
+            return this.applyOptionsToQueryBuilder(qb, options);
+        if (options)
+            return this.applyConditions(qb, options);
+        return qb;
     };
     /**
      * Applies give find options to the given query builder.
      */
     FindOptionsUtils.applyOptionsToQueryBuilder = function (qb, options) {
-        if (options.limit)
-            qb.setLimit(options.limit);
-        if (options.offset)
-            qb.setOffset(options.offset);
-        if (options.firstResult)
-            qb.setFirstResult(options.firstResult);
-        if (options.maxResults)
-            qb.setMaxResults(options.maxResults);
+        // if options are not set then simply return query builder. This is made for simplicity of usage.
+        if (!options || !this.isFindOneOptions(options))
+            return qb;
+        // apply all options from FindOptions
         if (options.where)
-            qb.where(options.where);
-        if (options.having)
-            qb.having(options.having);
-        if (options.whereConditions) {
-            Object.keys(options.whereConditions).forEach(function (key, index) {
-                var name = key.indexOf(".") === -1 ? options.alias + "." + key : key;
-                if (options.whereConditions[key] === null) {
-                    qb.andWhere(name + " IS NULL");
-                }
-                else {
-                    var parameterName = "whereConditions_" + index;
-                    qb.andWhere(name + "=:" + parameterName, (_a = {}, _a[parameterName] = options.whereConditions[key], _a));
-                }
-                var _a;
+            this.applyConditions(qb, options.where);
+        if (options.skip)
+            qb.skip(options.skip);
+        if (options.take)
+            qb.take(options.take);
+        if (options.order)
+            Object.keys(options.order).forEach(function (key) {
+                qb.addOrderBy(qb.alias + "." + key, options.order[key]);
             });
+        if (options.join) {
+            if (options.join.leftJoin)
+                Object.keys(options.join.leftJoin).forEach(function (key) {
+                    qb.leftJoin(options.join.leftJoin[key], key);
+                });
+            if (options.join.innerJoin)
+                Object.keys(options.join.innerJoin).forEach(function (key) {
+                    qb.innerJoin(options.join.innerJoin[key], key);
+                });
+            if (options.join.leftJoinAndSelect)
+                Object.keys(options.join.leftJoinAndSelect).forEach(function (key) {
+                    qb.leftJoinAndSelect(options.join.leftJoinAndSelect[key], key);
+                });
+            if (options.join.innerJoinAndSelect)
+                Object.keys(options.join.innerJoinAndSelect).forEach(function (key) {
+                    qb.innerJoinAndSelect(options.join.innerJoinAndSelect[key], key);
+                });
         }
-        if (options.havingConditions) {
-            Object.keys(options.havingConditions).forEach(function (key, index) {
-                var name = key.indexOf(".") === -1 ? options.alias + "." + key : key;
-                if (options.havingConditions[key] === null) {
-                    qb.andHaving(name + " IS NULL");
-                }
-                else {
-                    var parameterName = "havingConditions_" + index;
-                    qb.andHaving(name + "=:" + parameterName, (_a = {}, _a[parameterName] = options.whereConditions[key], _a));
-                }
-                var _a;
-            });
-        }
-        if (options.orderBy)
-            Object.keys(options.orderBy).forEach(function (columnName) { return qb.addOrderBy(columnName, options.orderBy[columnName]); });
-        if (options.groupBy)
-            options.groupBy.forEach(function (groupBy) { return qb.addGroupBy(groupBy); });
-        if (options.leftJoin)
-            Object.keys(options.leftJoin).forEach(function (key) {
-                if (options.leftJoin)
-                    qb.leftJoin(options.leftJoin[key], key);
-            });
-        if (options.innerJoin)
-            Object.keys(options.innerJoin).forEach(function (key) {
-                if (options.innerJoin)
-                    qb.innerJoin(options.innerJoin[key], key);
-            });
-        if (options.leftJoinAndSelect)
-            Object.keys(options.leftJoinAndSelect).forEach(function (key) {
-                if (options.leftJoinAndSelect)
-                    qb.leftJoinAndSelect(options.leftJoinAndSelect[key], key);
-            });
-        if (options.innerJoinAndSelect)
-            Object.keys(options.innerJoinAndSelect).forEach(function (key) {
-                if (options.innerJoinAndSelect)
-                    qb.innerJoinAndSelect(options.innerJoinAndSelect[key], key);
-            });
-        if (options.parameters)
-            qb.setParameters(options.parameters);
-        if (options.enabledOptions) {
-            options.enabledOptions.forEach(function (option) {
-                qb.enableOption(option);
-            });
-        }
+        return qb;
+    };
+    /**
+     * Applies given simple conditions set to a given query builder.
+     */
+    FindOptionsUtils.applyConditions = function (qb, conditions) {
+        Object.keys(conditions).forEach(function (key, index) {
+            if (conditions[key] === null) {
+                qb.andWhere(qb.alias + "." + key + " IS NULL");
+            }
+            else {
+                var parameterName = "where_" + index;
+                qb.andWhere(qb.alias + "." + key + "=:" + parameterName)
+                    .setParameter(parameterName, conditions[key]);
+            }
+        });
         return qb;
     };
     return FindOptionsUtils;
