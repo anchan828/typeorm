@@ -1,8 +1,27 @@
-# TypeORM
-
-[![Build Status](https://travis-ci.org/typeorm/typeorm.svg?branch=master)](https://travis-ci.org/typeorm/typeorm)
-[![npm version](https://badge.fury.io/js/typeorm.svg)](https://badge.fury.io/js/typeorm)
-[![Join the chat at https://gitter.im/typeorm/typeorm](https://badges.gitter.im/typeorm/typeorm.svg)](https://gitter.im/typeorm/typeorm?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+<div align="center">
+  <a href="https://typeorm.github.io/">
+    <img src="./resources/logo_big.png" width="492" height="228">
+  </a>
+  <br>
+  <br>
+	<a href="https://travis-ci.org/typeorm/typeorm">
+		<img src="https://travis-ci.org/typeorm/typeorm.svg?branch=master">
+	</a>
+	<a href="https://badge.fury.io/js/typeorm">
+		<img src="https://badge.fury.io/js/typeorm.svg">
+	</a>
+	<a href="https://david-dm.org/typeorm/typeorm">
+		<img src="https://david-dm.org/typeorm/typeorm.svg">
+	</a>
+	<a href="https://david-dm.org/typeorm/typeorm#info=devDependencies">
+		<img src="https://david-dm.org/typeorm/typeorm/dev-status.svg">
+	</a>
+	<a href="https://gitter.im/typeorm/typeorm?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge">
+		<img src="https://badges.gitter.im/typeorm/typeorm.svg">
+	</a>
+  <br>
+  <br>
+</div>
 
 > Please support a project by simply putting a github star. 
 Share this library with friends on twitter and everywhere else you can.
@@ -11,7 +30,7 @@ Share this library with friends on twitter and everywhere else you can.
 If you notice bug or have something not working please report an issue, we'll try to fix it as soon as possible.
 More documentation and features expected to be soon. Feel free to contribute.
 
-> 0.0.8 is released! Most notable changes are in the [changelog](./CHANGELOG.md).
+> For the latest release changes see [changelog](./CHANGELOG.md).
 
 TypeORM is an [Object Relational Mapper](1) (ORM) for node.js written in
 TypeScript that can be used with TypeScript or JavaScript (ES5, ES6, ES7).
@@ -1065,6 +1084,8 @@ There are few repositories which you can clone and start with:
 * [Example how to use TypeORM with JavaScript](https://github.com/typeorm/javascript-example)
 * [Example how to use TypeORM with JavaScript and Babel](https://github.com/typeorm/babel-example)
 * [Example how to use TypeORM with TypeScript and SystemJS in Browser](https://github.com/typeorm/browser-example)
+* [Example how to use Express and TypeORM with TypeScript](https://github.com/typeorm/typescript-express-example)
+* [Example how to use Koa and TypeORM with TypeScript](https://github.com/typeorm/typescript-koa-example)
 
 ## Extensions
 

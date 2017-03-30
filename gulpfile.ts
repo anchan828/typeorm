@@ -1,3 +1,7 @@
+///<reference path="node_modules/@types/node/index.d.ts"/>
+///<reference path="node_modules/@types/chai/index.d.ts"/>
+///<reference path="node_modules/@types/mocha/index.d.ts"/>
+
 import {Gulpclass, Task, SequenceTask, MergedTask} from "gulpclass";
 
 const gulp = require("gulp");
@@ -15,6 +19,7 @@ const sourcemaps = require("gulp-sourcemaps");
 const istanbul = require("gulp-istanbul");
 const remapIstanbul = require("remap-istanbul/lib/gulpRemapIstanbul");
 const ts = require("gulp-typescript");
+const args = require('yargs').argv;
 
 @Gulpclass()
 export class Gulpfile {
@@ -292,6 +297,8 @@ export class Gulpfile {
 
         return gulp.src(["./build/compiled/test/**/*.js"])
             .pipe(mocha({
+                bail: true,
+                grep: !!args.grep ? new RegExp(args.grep) : undefined,
                 timeout: 15000
             }))
             .pipe(istanbul.writeReports());
@@ -300,15 +307,16 @@ export class Gulpfile {
     /**
      * Runs tests the quick way.
      */
-    @Task("ts-node-tests")
+    @Task()
     quickTests() {
         chai.should();
         chai.use(require("sinon-chai"));
         chai.use(require("chai-as-promised"));
 
-        return gulp.src(["./test/**/*.ts"])
+        return gulp.src(["./build/compiled/test/**/*.js"])
             .pipe(mocha({
-                timeout: 10000
+                bail: true,
+                timeout: 15000
             }));
     }
 
@@ -320,11 +328,19 @@ export class Gulpfile {
     }
 
     /**
-     * Compiles the code and runs tests.
+     * Compiles the code and runs tests + makes coverage report.
      */
     @SequenceTask()
     tests() {
         return ["compile", "tslint", "coveragePost", "coverageRemap"];
+    }
+
+    /**
+     * Compiles the code and runs only mocha tests.
+     */
+    @SequenceTask()
+    mocha() {
+        return ["compile", "quickTests"];
     }
 
     // -------------------------------------------------------------------------

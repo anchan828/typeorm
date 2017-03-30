@@ -67,9 +67,11 @@ export class JoinColumnMetadata {
      */
     get referencedColumn(): ColumnMetadata {
         if (this.referencedColumnName) {
-            const referencedColumn = this.relation.inverseEntityMetadata.allColumns.find(column => column.name === this.referencedColumnName);
+            const referencedColumn = this.relation.inverseEntityMetadata.allColumns.find(column => column.fullName === this.referencedColumnName);
             if (!referencedColumn)
                 throw new Error(`Referenced column ${this.referencedColumnName} was not found in entity ${this.name}`);
+
+            return referencedColumn;
         }
 
         const inverseEntityMetadata = this.relation.inverseEntityMetadata;

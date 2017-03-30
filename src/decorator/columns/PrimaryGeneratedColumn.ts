@@ -1,8 +1,9 @@
 import {ColumnOptions} from "../options/ColumnOptions";
-import {ColumnTypes} from "../../metadata/types/ColumnTypes";
 import {getMetadataArgsStorage} from "../../index";
 import {PrimaryColumnCannotBeNullableError} from "../error/PrimaryColumnCannotBeNullableError";
 import {ColumnMetadataArgs} from "../../metadata-args/ColumnMetadataArgs";
+
+// todo: add overloads for PrimaryGeneratedColumn(generationType: "sequence"|"uuid" = "sequence", options?: ColumnOptions)
 
 /**
  * Column decorator is used to mark a specific class property as a table column.

@@ -7,6 +7,8 @@ import {ColumnType} from "../metadata/types/ColumnTypes";
 
 /**
  * Runs queries on a single database connection.
+ *
+ * todo: extract schema build operations out of query runner.
  */
 export interface QueryRunner {
 
@@ -77,7 +79,7 @@ export interface QueryRunner {
     /**
      * Converts a column type of the metadata to the database column's type.
      */
-    normalizeType(typeOptions: { type: ColumnType, length?: string|number, precision?: number, scale?: number, timezone?: boolean }): any;
+    normalizeType(typeOptions: { type: ColumnType, length?: string|number, precision?: number, scale?: number, timezone?: boolean, fixedLength?: boolean }): string;
 
     /**
      * Checks if "DEFAULT" values in the column metadata and in the database schema are equal.
@@ -231,6 +233,8 @@ export interface QueryRunner {
 
     /**
      * Truncates table.
+     *
+     * todo: probably this should be renamed to drop or clear?
      */
     truncate(tableName: string): Promise<void>;
 

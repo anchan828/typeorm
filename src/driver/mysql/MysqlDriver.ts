@@ -59,7 +59,7 @@ export class MysqlDriver implements Driver {
     protected databaseConnectionPool: DatabaseConnection[] = [];
 
     /**
-     * Logger used go log queries and errors.
+     * Logger used to log queries and errors.
      */
     protected logger: Logger;
 
@@ -192,21 +192,21 @@ export class MysqlDriver implements Driver {
      * Escapes a column name.
      */
     escapeColumnName(columnName: string): string {
-        return columnName; // "`" + columnName + "`";
+        return "`" + columnName + "`";
     }
 
     /**
      * Escapes an alias.
      */
     escapeAliasName(aliasName: string): string {
-        return aliasName; // "`" + aliasName + "`";
+        return "`" + aliasName + "`";
     }
 
     /**
      * Escapes a table name.
      */
     escapeTableName(tableName: string): string {
-        return tableName; // "`" + tableName + "`";
+        return "`" + tableName + "`";
     }
 
     /**

@@ -77,12 +77,19 @@ export interface ConnectionOptions {
      * Be careful with this option and don't use this in production - otherwise you can loose production data.
      * This option is useful during debug and development.
      * Alternative to it, you can use CLI and run schema:sync command.
+     *
+     * Note that for MongoDB database it does not create schema, because MongoDB is schemaless.
+     * Instead, it syncs just by creating indices.
+     *
+     * todo: rename it simply to synchronize: boolean ?
      */
     readonly autoSchemaSync?: boolean;
 
     /**
      * Indicates if migrations should be auto run on every application launch.
      * Alternative to it, you can use CLI and run migration:create command.
+     *
+     * todo: rename it simply to runMigrations: boolean ?
      */
     readonly autoMigrationsRun?: boolean;
 
