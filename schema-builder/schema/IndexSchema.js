@@ -7,11 +7,13 @@ var IndexSchema = (function () {
     // -------------------------------------------------------------------------
     // Constructor
     // -------------------------------------------------------------------------
-    function IndexSchema(tableName, name, columnNames, isUnique) {
+    function IndexSchema(tableName, name, columnNames, isUnique, length) {
         this.tableName = tableName;
         this.name = name;
         this.columnNames = columnNames;
         this.isUnique = isUnique;
+        if (length)
+            this.length = length;
     }
     // -------------------------------------------------------------------------
     // Public Methods

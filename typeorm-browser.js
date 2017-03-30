@@ -2334,11 +2334,13 @@ System.register("typeorm/schema-builder/schema/IndexSchema", [], function (expor
                 // -------------------------------------------------------------------------
                 // Constructor
                 // -------------------------------------------------------------------------
-                function IndexSchema(tableName, name, columnNames, isUnique) {
+                function IndexSchema(tableName, name, columnNames, isUnique, length) {
                     this.tableName = tableName;
                     this.name = name;
                     this.columnNames = columnNames;
                     this.isUnique = isUnique;
+                    if (length)
+                        this.length = length;
                 }
                 // -------------------------------------------------------------------------
                 // Public Methods
@@ -6500,7 +6502,13 @@ System.register("typeorm/driver/mysql/MysqlQueryRunner", ["typeorm/driver/error/
                                 case 0:
                                     if (this.isReleased)
                                         throw new QueryRunnerAlreadyReleasedError_3.QueryRunnerAlreadyReleasedError();
-                                    columns = index.columnNames.map(function (columnName) { return "`" + columnName + "`"; }).join(", ");
+                                    columns = index.columnNames.map(function (columnName) {
+                                        columnName = "`" + columnName + "`";
+                                        if (index.length) {
+                                            columnName += "(" + index.length + ")";
+                                        }
+                                        return columnName;
+                                    }).join(", ");
                                     sql = "CREATE " + (index.isUnique ? "UNIQUE " : "") + "INDEX `" + index.name + "` ON `" + tableName + "`(" + columns + ")";
                                     return [4 /*yield*/, this.query(sql)];
                                 case 1:
