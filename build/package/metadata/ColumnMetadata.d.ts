@@ -9,7 +9,7 @@ import { RelationMetadata } from "./RelationMetadata";
  * For example, "primary" means that it will be a primary column, or "createDate" means that it will create a create
  * date column.
  */
-export declare type ColumnMode = "regular" | "virtual" | "createDate" | "updateDate" | "version" | "treeChildrenCount" | "treeLevel" | "discriminator" | "parentId";
+export declare type ColumnMode = "regular" | "virtual" | "createDate" | "updateDate" | "version" | "treeChildrenCount" | "treeLevel" | "discriminator" | "parentId" | "objectId" | "array";
 /**
  * This metadata contains all information about entity's column.
  */
@@ -96,6 +96,11 @@ export declare class ColumnMetadata {
      */
     readonly localTimezone?: boolean;
     /**
+     * Indicates if column's type will be set as a fixed-length data type.
+     * Works only with "string" columns.
+     */
+    readonly fixedLength?: boolean;
+    /**
      * Column name to be used in the database.
      */
     private _name;
@@ -109,8 +114,16 @@ export declare class ColumnMetadata {
     readonly entityTarget: Function | string;
     /**
      * Column name in the database.
+     *
+     * todo: rename to originalName
      */
     readonly name: string;
+    /**
+     * Column name in the database including its embedded prefixes.
+     *
+     * todo: rename to databaseName
+     */
+    readonly fullName: string;
     /**
      * Indicates if this column is in embedded, not directly in the table.
      */
@@ -119,6 +132,13 @@ export declare class ColumnMetadata {
      * Indicates if column is virtual. Virtual columns are not mapped to the entity.
      */
     readonly isVirtual: boolean;
+    /**
+     * Indicates if column is array.
+     * Array columns are now only supported by Mongodb driver.
+     *
+     * todo: implement array serialization functionality for relational databases as well
+     */
+    readonly isArray: boolean;
     /**
      * Indicates if column is a parent id. Parent id columns are not mapped to the entity.
      */
@@ -139,6 +159,10 @@ export declare class ColumnMetadata {
      * Indicates if this column contains an entity version.
      */
     readonly isVersion: boolean;
+    /**
+     * Indicates if this column contains an object id.
+     */
+    readonly isObjectId: boolean;
     /**
      * If this column references some column, it gets the first referenced column of this column.
      */

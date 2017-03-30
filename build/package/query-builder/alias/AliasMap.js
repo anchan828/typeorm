@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 /**
  */
 var AliasMap = (function () {
@@ -49,10 +50,13 @@ var AliasMap = (function () {
             return alias.parentAliasName === parentAliasName && alias.parentPropertyName === parentPropertyName;
         });
     };
+    /**
+     * @deprecated
+     */
     AliasMap.prototype.getEntityMetadataByAlias = function (alias) {
-        if (alias.target) {
+        if (alias.metadata) {
             // todo: use connection.getMetadata instead?
-            return this.connection.getMetadata(alias.target);
+            return alias.metadata;
         }
         else if (alias.parentAliasName && alias.parentPropertyName) {
             var parentAlias = this.findAliasByName(alias.parentAliasName);

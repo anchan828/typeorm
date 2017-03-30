@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var QueryBuilder_1 = require("../query-builder/QueryBuilder");
 /**
  * This class wraps entities and provides functions there to lazily load its relations.
@@ -74,7 +75,7 @@ var LazyRelationsWrapper = (function () {
                         qb.select(relation.propertyName)
                             .from(relation.inverseRelation.entityMetadata.target, relation.propertyName)
                             .innerJoin(relation.propertyName + "." + relation.inverseRelation.propertyName, relation.entityMetadata.targetName)
-                            .where(relation.entityMetadata.targetName + "." + relation.joinColumn.referencedColumn.name + "=:id", { id: relation.entityMetadata.getEntityIdMixedMap(this) }); // is referenced column usage is correct here?
+                            .where(relation.entityMetadata.targetName + "." + relation.joinColumn.referencedColumn.fullName + "=:id", { id: relation.entityMetadata.getEntityIdMixedMap(this) }); // is referenced column usage is correct here?
                     }
                     else {
                         // (ow) post.category<=>category.post
@@ -84,7 +85,7 @@ var LazyRelationsWrapper = (function () {
                         qb.select(relation.propertyName) // category
                             .from(relation.type, relation.propertyName) // Category, category
                             .innerJoin(relation.entityMetadata.target, relation.entityMetadata.name, escapeAlias(relation.entityMetadata.name) + "." + escapeColumn(relation.propertyName) + "=" + escapeAlias(relation.propertyName) + "." + escapeColumn(relation.referencedColumn.propertyName))
-                            .where(relation.entityMetadata.name + "." + relation.joinColumn.referencedColumn.name + "=:id", { id: relation.entityMetadata.getEntityIdMixedMap(this) }); // is referenced column usage is correct here?
+                            .where(relation.entityMetadata.name + "." + relation.joinColumn.referencedColumn.fullName + "=:id", { id: relation.entityMetadata.getEntityIdMixedMap(this) }); // is referenced column usage is correct here?
                     }
                     this[promiseIndex] = qb.getOne().then(function (result) {
                         _this[index] = result;

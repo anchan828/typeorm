@@ -14,6 +14,8 @@ import { SchemaBuilder } from "../schema-builder/SchemaBuilder";
 import { Logger } from "../logger/Logger";
 import { QueryRunnerProvider } from "../query-runner/QueryRunnerProvider";
 import { MigrationInterface } from "../migration/MigrationInterface";
+import { MongoRepository } from "../repository/MongoRepository";
+import { MongoEntityManager } from "../entity-manager/MongoEntityManager";
 /**
  * Connection is a single database connection to a specific database of a database management system.
  * You can have multiple connections to multiple databases in your application.
@@ -96,6 +98,11 @@ export declare class Connection {
      * Gets entity manager that allows to perform repository operations with any entity in this connection.
      */
     readonly entityManager: EntityManager;
+    /**
+     * Gets the mongodb entity manager that allows to perform mongodb-specific repository operations
+     * with any entity in this connection.
+     */
+    readonly mongoEntityManager: MongoEntityManager;
     /**
      * Performs connection to the database.
      */
@@ -217,18 +224,36 @@ export declare class Connection {
      */
     getTreeRepository<Entity>(entityName: string): TreeRepository<Entity>;
     /**
+     * Gets mongodb-specific repository for the given entity class.
+     */
+    getMongoRepository<Entity>(entityClass: ObjectType<Entity>): MongoRepository<Entity>;
+    /**
+     * Gets mongodb-specific repository for the given entity name.
+     */
+    getMongoRepository<Entity>(entityName: string): MongoRepository<Entity>;
+    /**
+     * Gets mongodb-specific repository for the given entity name.
+     */
+    getMongoRepository<Entity>(entityClassOrName: ObjectType<Entity> | string): MongoRepository<Entity>;
+    /**
      * Gets specific repository for the given entity class.
      * SpecificRepository is a special repository that contains specific and non standard repository methods.
+     *
+     * @experimental
      */
     getSpecificRepository<Entity>(entityClass: ObjectType<Entity>): SpecificRepository<Entity>;
     /**
      * Gets specific repository for the given entity name.
      * SpecificRepository is a special repository that contains specific and non standard repository methods.
+     *
+     * @experimental
      */
     getSpecificRepository<Entity>(entityName: string): SpecificRepository<Entity>;
     /**
      * Gets specific repository for the given entity class or name.
      * SpecificRepository is a special repository that contains specific and non standard repository methods.
+     *
+     * @experimental
      */
     getSpecificRepository<Entity>(entityClassOrName: ObjectType<Entity> | string): SpecificRepository<Entity>;
     /**

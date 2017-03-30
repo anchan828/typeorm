@@ -1,5 +1,5 @@
 "use strict";
-var ColumnTypeUndefinedError_1 = require("../error/ColumnTypeUndefinedError");
+Object.defineProperty(exports, "__esModule", { value: true });
 var GeneratedOnlyForPrimaryError_1 = require("../error/GeneratedOnlyForPrimaryError");
 var index_1 = require("../../index");
 var ColumnTypes_1 = require("../../metadata/types/ColumnTypes");
@@ -32,8 +32,8 @@ function Column(typeOrOptions, options) {
         if (!options.type && type)
             options = Object.assign({ type: type }, options);
         // if we still don't have a type then we need to give error to user that type is required
-        if (!options.type)
-            throw new ColumnTypeUndefinedError_1.ColumnTypeUndefinedError(object, propertyName);
+        // if (!options.type)
+        //     throw new ColumnTypeUndefinedError(object, propertyName);
         // check if auto increment is not set for simple column
         if (options.generated)
             throw new GeneratedOnlyForPrimaryError_1.GeneratedOnlyForPrimaryError(object, propertyName);

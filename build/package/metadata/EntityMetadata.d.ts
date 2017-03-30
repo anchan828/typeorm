@@ -79,8 +79,13 @@ export declare class EntityMetadata {
     readonly name: string;
     /**
      * Columns of the entity, including columns that are coming from the embeddeds of this entity.
+     * @deprecated
      */
     readonly columns: ColumnMetadata[];
+    /**
+     * Gets columns without embedded columns.
+     */
+    readonly columnsWithoutEmbeddeds: ColumnMetadata[];
     /**
      * All columns of the entity, including columns that are coming from the embeddeds of this entity,
      * and including columns from the parent entities.
@@ -182,6 +187,14 @@ export declare class EntityMetadata {
     readonly hasParentIdColumn: boolean;
     readonly parentIdColumn: ColumnMetadata;
     readonly parentIdColumns: ColumnMetadata[];
+    /**
+     * Checks if entity has an object id column.
+     */
+    readonly hasObjectIdColumn: boolean;
+    /**
+     * Gets the object id column used with mongodb database.
+     */
+    readonly objectIdColumn: ColumnMetadata;
     /**
      * Gets single (values of which does not contain arrays) relations.
      */

@@ -34,8 +34,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+Object.defineProperty(exports, "__esModule", { value: true });
 var Subject_1 = require("./Subject");
 var SpecificRepository_1 = require("../repository/SpecificRepository");
+var MongoDriver_1 = require("../driver/mongodb/MongoDriver");
 /**
  * To be able to execute persistence operations we need to load all entities from the database we need.
  * Loading should be efficient - we need to load entities in as few queries as possible + load as less data as we can.
@@ -285,14 +287,23 @@ var SubjectBuilder = (function () {
                                         // if there no ids found (which means all entities are new and have generated ids) - then nothing to load there
                                         if (!allIds.length)
                                             return [2 /*return*/];
+                                        if (!(this.connection.driver instanceof MongoDriver_1.MongoDriver)) return [3 /*break*/, 2];
                                         return [4 /*yield*/, this.connection
-                                                .getRepository(subjectGroup.target)
-                                                .createQueryBuilder("operateSubject", this.queryRunnerProvider)
-                                                .andWhereInIds(allIds)
-                                                .enableOption("RELATION_ID_VALUES")
-                                                .getMany()];
+                                                .getMongoRepository(subjectGroup.target)
+                                                .findByIds(allIds)];
                                     case 1:
                                         entities = _a.sent();
+                                        return [3 /*break*/, 4];
+                                    case 2: return [4 /*yield*/, this.connection
+                                            .getRepository(subjectGroup.target)
+                                            .createQueryBuilder("operateSubject", this.queryRunnerProvider)
+                                            .andWhereInIds(allIds)
+                                            .enableOption("RELATION_ID_VALUES")
+                                            .getMany()];
+                                    case 3:
+                                        entities = _a.sent();
+                                        _a.label = 4;
+                                    case 4:
                                         // now when we have entities we need to find subject of each entity
                                         // and insert that entity into database entity of the found subject
                                         entities.forEach(function (entity) {
@@ -378,7 +389,7 @@ var SubjectBuilder = (function () {
                                         if (!!alreadyLoadedRelatedDatabaseSubject) return [3 /*break*/, 2];
                                         return [4 /*yield*/, this.connection
                                                 .getRepository(valueMetadata.target)
-                                                .createQueryBuilder(qbAlias, this.queryRunnerProvider)
+                                                .createQueryBuilder(qbAlias, this.queryRunnerProvider) // todo: this wont work for mongodb. implement this in some method and call it here instead?
                                                 .where(qbAlias + "." + relation.joinColumn.referencedColumn.propertyName + "=:id")
                                                 .setParameter("id", relationIdInDatabaseEntity_1) // (example) subject.entity is a post here
                                                 .enableOption("RELATION_ID_VALUES")
@@ -430,7 +441,7 @@ var SubjectBuilder = (function () {
                                         if (!!alreadyLoadedRelatedDatabaseSubject) return [3 /*break*/, 6];
                                         return [4 /*yield*/, this.connection
                                                 .getRepository(valueMetadata.target)
-                                                .createQueryBuilder(qbAlias, this.queryRunnerProvider)
+                                                .createQueryBuilder(qbAlias, this.queryRunnerProvider) // todo: this wont work for mongodb. implement this in some method and call it here instead?
                                                 .where(qbAlias + "." + relation.inverseSideProperty + "=:id")
                                                 .setParameter("id", relationIdInDatabaseEntity_2) // (example) subject.entity is a details here, and the value is details.id
                                                 .enableOption("RELATION_ID_VALUES")
@@ -476,8 +487,8 @@ var SubjectBuilder = (function () {
                                             return [2 /*return*/];
                                         return [4 /*yield*/, this.connection
                                                 .getRepository(valueMetadata.target)
-                                                .createQueryBuilder(qbAlias, this.queryRunnerProvider)
-                                                .innerJoin(relation.junctionEntityMetadata.table.name, "persistenceJoinedRelation", escapeAlias("persistenceJoinedRelation") + "." + escapeColumn(relation.joinTable.inverseJoinColumnName) + "=" + escapeAlias(qbAlias) + "." + escapeColumn(relation.joinTable.inverseReferencedColumn.name) +
+                                                .createQueryBuilder(qbAlias, this.queryRunnerProvider) // todo: this wont work for mongodb. implement this in some method and call it here instead?
+                                                .innerJoin(relation.junctionEntityMetadata.table.name, "persistenceJoinedRelation", escapeAlias("persistenceJoinedRelation") + "." + escapeColumn(relation.joinTable.inverseJoinColumnName) + "=" + escapeAlias(qbAlias) + "." + escapeColumn(relation.joinTable.inverseReferencedColumn.fullName) +
                                                 " AND " + escapeAlias("persistenceJoinedRelation") + "." + escapeColumn(relation.joinTable.joinColumnName) + "=:id")
                                                 .setParameter("id", relationIdInDatabaseEntity)
                                                 .enableOption("RELATION_ID_VALUES")
@@ -494,8 +505,8 @@ var SubjectBuilder = (function () {
                                             return [2 /*return*/];
                                         return [4 /*yield*/, this.connection
                                                 .getRepository(valueMetadata.target)
-                                                .createQueryBuilder(qbAlias, this.queryRunnerProvider)
-                                                .innerJoin(relation.junctionEntityMetadata.table.name, "persistenceJoinedRelation", escapeAlias("persistenceJoinedRelation") + "." + escapeColumn(relation.joinTable.joinColumnName) + "=" + escapeAlias(qbAlias) + "." + escapeColumn(relation.joinTable.referencedColumn.name) +
+                                                .createQueryBuilder(qbAlias, this.queryRunnerProvider) // todo: this wont work for mongodb. implement this in some method and call it here instead?
+                                                .innerJoin(relation.junctionEntityMetadata.table.name, "persistenceJoinedRelation", escapeAlias("persistenceJoinedRelation") + "." + escapeColumn(relation.joinTable.joinColumnName) + "=" + escapeAlias(qbAlias) + "." + escapeColumn(relation.joinTable.referencedColumn.fullName) +
                                                 " AND " + escapeAlias("persistenceJoinedRelation") + "." + escapeColumn(relation.inverseRelation.joinTable.inverseJoinColumnName) + "=:id")
                                                 .setParameter("id", relationIdInDatabaseEntity)
                                                 .enableOption("RELATION_ID_VALUES")
@@ -507,7 +518,7 @@ var SubjectBuilder = (function () {
                                         relationIdInDatabaseEntity = subject.databaseEntity[relation.inverseRelation.joinColumn.referencedColumn.propertyName];
                                         return [4 /*yield*/, this.connection
                                                 .getRepository(valueMetadata.target)
-                                                .createQueryBuilder(qbAlias, this.queryRunnerProvider)
+                                                .createQueryBuilder(qbAlias, this.queryRunnerProvider) // todo: this wont work for mongodb. implement this in some method and call it here instead?
                                                 .where(qbAlias + "." + relation.inverseSideProperty + "=:id")
                                                 .setParameter("id", relationIdInDatabaseEntity)
                                                 .enableOption("RELATION_ID_VALUES")
@@ -546,7 +557,7 @@ var SubjectBuilder = (function () {
                                                         if (!id) return [3 /*break*/, 2];
                                                         return [4 /*yield*/, this.connection
                                                                 .getRepository(valueMetadata.target)
-                                                                .createQueryBuilder(qbAlias, this.queryRunnerProvider)
+                                                                .createQueryBuilder(qbAlias, this.queryRunnerProvider) // todo: this wont work for mongodb. implement this in some method and call it here instead?
                                                                 .andWhereInIds([id])
                                                                 .enableOption("RELATION_ID_VALUES")
                                                                 .getOne()];

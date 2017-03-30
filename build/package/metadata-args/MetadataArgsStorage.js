@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var TargetMetadataArgsCollection_1 = require("./collection/TargetMetadataArgsCollection");
 var PropertyMetadataArgsCollection_1 = require("./collection/PropertyMetadataArgsCollection");
 /**
@@ -217,6 +218,7 @@ var MetadataArgsStorage = (function () {
     MetadataArgsStorage.prototype.mergeWithEmbeddable = function (allTableMetadatas, tableMetadata) {
         var _this = this;
         var columns = this.columns.filterByTarget(tableMetadata.target);
+        var embeddeds = this.embeddeds.filterByTarget(tableMetadata.target);
         allTableMetadatas
             .filter(function (metadata) {
             if (!tableMetadata.target || !metadata.target)
@@ -232,10 +234,15 @@ var MetadataArgsStorage = (function () {
                 .filterRepeatedMetadatas(columns.toArray())
                 .toArray()
                 .forEach(function (metadata) { return columns.add(metadata); });
+            metadatasFromParents.embeddeds
+                .filterRepeatedMetadatas(embeddeds.toArray())
+                .toArray()
+                .forEach(function (metadata) { return embeddeds.add(metadata); });
         });
         return {
             table: tableMetadata,
-            columns: columns
+            columns: columns,
+            embeddeds: embeddeds
         };
     };
     /**

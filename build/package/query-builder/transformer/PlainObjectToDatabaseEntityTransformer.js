@@ -34,81 +34,137 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ */
+var LoadMapItem = (function () {
+    function LoadMapItem(plainEntity, metadata, parentLoadMapItem, relation) {
+        this.plainEntity = plainEntity;
+        this.metadata = metadata;
+        this.parentLoadMapItem = parentLoadMapItem;
+        this.relation = relation;
+    }
+    Object.defineProperty(LoadMapItem.prototype, "target", {
+        get: function () {
+            return this.metadata.target;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(LoadMapItem.prototype, "id", {
+        get: function () {
+            return this.metadata.getEntityIdMixedMap(this.plainEntity);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    LoadMapItem.prototype.compareEntities = function (entity1, entity2) {
+        return this.metadata.compareEntities(entity1, entity2);
+    };
+    return LoadMapItem;
+}());
+var LoadMap = (function () {
+    function LoadMap() {
+        this.loadMapItems = [];
+    }
+    Object.defineProperty(LoadMap.prototype, "mainLoadMapItem", {
+        get: function () {
+            return this.loadMapItems.find(function (item) { return !item.relation && !item.parentLoadMapItem; });
+        },
+        enumerable: true,
+        configurable: true
+    });
+    LoadMap.prototype.addLoadMap = function (newLoadMap) {
+        var item = this.loadMapItems.find(function (item) { return item.target === newLoadMap.target && item.id === newLoadMap.id; });
+        if (!item)
+            this.loadMapItems.push(newLoadMap);
+    };
+    LoadMap.prototype.fillEntities = function (target, entities) {
+        var _this = this;
+        entities.forEach(function (entity) {
+            var item = _this.loadMapItems.find(function (loadMapItem) {
+                return loadMapItem.target === target && loadMapItem.compareEntities(entity, loadMapItem.plainEntity);
+            });
+            if (item)
+                item.entity = entity;
+        });
+    };
+    LoadMap.prototype.groupByTargetIds = function () {
+        var groups = [];
+        this.loadMapItems.forEach(function (loadMapItem) {
+            var group = groups.find(function (group) { return group.target === loadMapItem.target; });
+            if (!group) {
+                group = { target: loadMapItem.target, ids: [] };
+                groups.push(group);
+            }
+            group.ids.push(loadMapItem.id);
+        });
+        return groups;
+    };
+    return LoadMap;
+}());
 /**
  * Transforms plain old javascript object
  * Entity is constructed based on its entity metadata.
  */
 var PlainObjectToDatabaseEntityTransformer = (function () {
-    function PlainObjectToDatabaseEntityTransformer() {
+    function PlainObjectToDatabaseEntityTransformer(entityManager) {
+        this.entityManager = entityManager;
     }
-    // constructor(protected namingStrategy: NamingStrategyInterface) {
-    // }
     // -------------------------------------------------------------------------
     // Public Methods
     // -------------------------------------------------------------------------
-    PlainObjectToDatabaseEntityTransformer.prototype.transform = function (plainObject, metadata, queryBuilder) {
+    PlainObjectToDatabaseEntityTransformer.prototype.transform = function (plainObject, metadata) {
         return __awaiter(this, void 0, void 0, function () {
-            var alias, needToLoad;
+            var _this = this;
+            var loadMap, fillLoadMap;
             return __generator(this, function (_a) {
-                // if plain object does not have id then nothing to load really
-                if (!metadata.checkIfObjectContainsAllPrimaryKeys(plainObject))
-                    return [2 /*return*/, Promise.reject("Given object does not have a primary column, cannot transform it to database entity.")];
-                alias = queryBuilder.alias;
-                needToLoad = this.buildLoadMap(plainObject, metadata, true);
-                this.join(queryBuilder, needToLoad, alias);
-                metadata.primaryColumns.forEach(function (primaryColumn) {
-                    queryBuilder
-                        .andWhere(alias + "." + primaryColumn.propertyName + "=:" + primaryColumn.propertyName)
-                        .setParameter(primaryColumn.propertyName, plainObject[primaryColumn.propertyName]);
-                });
-                if (metadata.parentEntityMetadata) {
-                    metadata.parentEntityMetadata.primaryColumns.forEach(function (primaryColumn) {
-                        var parentIdColumn = metadata.parentIdColumns.find(function (parentIdColumn) {
-                            return parentIdColumn.propertyName === primaryColumn.propertyName;
+                switch (_a.label) {
+                    case 0:
+                        // if plain object does not have id then nothing to load really
+                        if (!metadata.checkIfObjectContainsAllPrimaryKeys(plainObject))
+                            return [2 /*return*/, Promise.reject("Given object does not have a primary column, cannot transform it to database entity.")];
+                        loadMap = new LoadMap();
+                        fillLoadMap = function (entity, entityMetadata, parentLoadMapItem, relation) {
+                            var item = new LoadMapItem(entity, entityMetadata, parentLoadMapItem, relation);
+                            loadMap.addLoadMap(item);
+                            entityMetadata
+                                .extractRelationValuesFromEntity(entity, metadata.relations)
+                                .filter(function (value) { return value !== null && value !== undefined; })
+                                .forEach(function (_a) {
+                                var relation = _a[0], value = _a[1], inverseEntityMetadata = _a[2];
+                                return fillLoadMap(value, inverseEntityMetadata, item, relation);
+                            });
+                        };
+                        fillLoadMap(plainObject, metadata);
+                        // load all entities and store them in the load map
+                        return [4 /*yield*/, Promise.all(loadMap.groupByTargetIds().map(function (targetWithIds) {
+                                return _this.entityManager
+                                    .findByIds(targetWithIds.target, targetWithIds.ids)
+                                    .then(function (entities) { return loadMap.fillEntities(targetWithIds.target, entities); });
+                            }))];
+                    case 1:
+                        // load all entities and store them in the load map
+                        _a.sent();
+                        // go through each item in the load map and set their entity relationship using metadata stored in load map
+                        loadMap.loadMapItems.forEach(function (loadMapItem) {
+                            if (!loadMapItem.relation ||
+                                !loadMapItem.entity ||
+                                !loadMapItem.parentLoadMapItem ||
+                                !loadMapItem.parentLoadMapItem.entity)
+                                return;
+                            if (loadMapItem.relation.isManyToMany || loadMapItem.relation.isOneToMany) {
+                                if (!loadMapItem.parentLoadMapItem.entity[loadMapItem.relation.propertyName])
+                                    loadMapItem.parentLoadMapItem.entity[loadMapItem.relation.propertyName] = [];
+                                loadMapItem.parentLoadMapItem.entity[loadMapItem.relation.propertyName].push(loadMapItem.entity);
+                            }
+                            else {
+                                loadMapItem.parentLoadMapItem.entity[loadMapItem.relation.propertyName] = loadMapItem.entity;
+                            }
                         });
-                        if (!parentIdColumn)
-                            throw new Error("Prent id column for the given primary column was not found.");
-                        queryBuilder
-                            .andWhere(alias + "." + parentIdColumn.propertyName + "=:" + primaryColumn.propertyName)
-                            .setParameter(primaryColumn.propertyName, plainObject[primaryColumn.propertyName]);
-                    });
+                        return [2 /*return*/, loadMap.mainLoadMapItem ? loadMap.mainLoadMapItem.entity : undefined];
                 }
-                return [2 /*return*/, queryBuilder.getOne()];
             });
-        });
-    };
-    // -------------------------------------------------------------------------
-    // Private Methods
-    // -------------------------------------------------------------------------
-    PlainObjectToDatabaseEntityTransformer.prototype.join = function (qb, needToLoad, parentAlias) {
-        var _this = this;
-        needToLoad.forEach(function (i) {
-            var alias = parentAlias + "_" + i.name;
-            qb.leftJoinAndSelect(parentAlias + "." + i.name, alias);
-            if (i.child && i.child.length)
-                _this.join(qb, i.child, alias);
-        });
-    };
-    PlainObjectToDatabaseEntityTransformer.prototype.buildLoadMap = function (object, metadata, isFirstLevelDepth) {
-        var _this = this;
-        if (isFirstLevelDepth === void 0) { isFirstLevelDepth = false; }
-        // todo: rething the way we are trying to load things using left joins cause there are situations when same
-        // todo: entities are loaded multiple times and become different objects (problem with duplicate entities in dbEntities)
-        return metadata.relations
-            .filter(function (relation) { return object.hasOwnProperty(relation.propertyName); })
-            .filter(function (relation) {
-            // we only need to load empty relations for first-level depth objects, otherwise removal can break
-            // this is not reliable, refactor this part later
-            var value = (object[relation.propertyName] instanceof Promise && relation.isLazy) ? object["__" + relation.propertyName + "__"] : object[relation.propertyName];
-            return isFirstLevelDepth || !(value instanceof Array) || value.length > 0;
-        })
-            .map(function (relation) {
-            var value = (object[relation.propertyName] instanceof Promise && relation.isLazy) ? object["__" + relation.propertyName + "__"] : object[relation.propertyName];
-            // let value = object[relation.propertyName];
-            if (value instanceof Array)
-                value = Object.assign.apply(Object, [{}].concat(value));
-            var child = value ? _this.buildLoadMap(value, relation.inverseEntityMetadata) : [];
-            return { name: relation.propertyName, child: child };
         });
     };
     return PlainObjectToDatabaseEntityTransformer;

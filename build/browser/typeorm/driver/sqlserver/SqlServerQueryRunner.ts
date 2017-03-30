@@ -227,11 +227,11 @@ export class SqlServerQueryRunner implements QueryRunner {
         const parameters = keys.map(key => keyValues[key]);
 
         const sql = columns.length > 0
-            ? `INSERT INTO ${this.driver.escapeTableName(tableName)}(${columns}) ${ generatedColumn ? "OUTPUT INSERTED." + generatedColumn.name + " " : "" }VALUES (${values})`
-            : `INSERT INTO ${this.driver.escapeTableName(tableName)} ${ generatedColumn ? "OUTPUT INSERTED." + generatedColumn.name + " " : "" }DEFAULT VALUES `;
+            ? `INSERT INTO ${this.driver.escapeTableName(tableName)}(${columns}) ${ generatedColumn ? "OUTPUT INSERTED." + generatedColumn.fullName + " " : "" }VALUES (${values})`
+            : `INSERT INTO ${this.driver.escapeTableName(tableName)} ${ generatedColumn ? "OUTPUT INSERTED." + generatedColumn.fullName + " " : "" }DEFAULT VALUES `;
 
         const result = await this.query(sql, parameters);
-        return generatedColumn ? result instanceof Array ? result[0][generatedColumn.name] : result[generatedColumn.name] : undefined;
+        return generatedColumn ? result instanceof Array ? result[0][generatedColumn.fullName] : result[generatedColumn.fullName] : undefined;
     }
 
     /**
@@ -791,10 +791,14 @@ WHERE columnUsages.TABLE_CATALOG = '${this.dbName}' AND tableConstraints.TABLE_C
     /**
      * Creates a database type from a given column metadata.
      */
-    normalizeType(typeOptions: { type: ColumnType, length?: string|number, precision?: number, scale?: number, timezone?: boolean }) {
+    normalizeType(typeOptions: { type: ColumnType, length?: string|number, precision?: number, scale?: number, timezone?: boolean, fixedLength?: boolean }): string {
         switch (typeOptions.type) {
             case "string":
-                return "nvarchar(" + (typeOptions.length ? typeOptions.length : 255) + ")";
+                if (typeOptions.fixedLength) {
+                    return "nchar(" + (typeOptions.length ? typeOptions.length : 255) + ")";
+                } else {
+                    return "nvarchar(" + (typeOptions.length ? typeOptions.length : 255) + ")";
+                }
             case "text":
             case "mediumtext":
                 return "ntext";

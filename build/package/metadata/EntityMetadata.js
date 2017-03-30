@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var RelationTypes_1 = require("./types/RelationTypes");
 // todo: IDEA. store all entity metadata in the EntityMetadata too? (this will open more features for metadata objects + no need to access connection in lot of places)
 /**
@@ -32,10 +33,14 @@ var EntityMetadata = (function () {
         this.relations.forEach(function (relation) { return relation.entityMetadata = _this; });
         this.foreignKeys.forEach(function (foreignKey) { return foreignKey.entityMetadata = _this; });
         this.indices.forEach(function (index) { return index.entityMetadata = _this; });
-        this.embeddeds.forEach(function (embedded) {
-            embedded.entityMetadata = _this;
-            embedded.columns.forEach(function (column) { return column.entityMetadata = _this; });
-        });
+        var setEmbeddedEntityMetadataRecursively = function (embeddeds) {
+            embeddeds.forEach(function (embedded) {
+                embedded.entityMetadata = _this;
+                embedded.columns.forEach(function (column) { return column.entityMetadata = _this; });
+                setEmbeddedEntityMetadataRecursively(embedded.embeddeds);
+            });
+        };
+        setEmbeddedEntityMetadataRecursively(this.embeddeds);
     }
     Object.defineProperty(EntityMetadata.prototype, "name", {
         // -------------------------------------------------------------------------
@@ -55,6 +60,7 @@ var EntityMetadata = (function () {
     Object.defineProperty(EntityMetadata.prototype, "columns", {
         /**
          * Columns of the entity, including columns that are coming from the embeddeds of this entity.
+         * @deprecated
          */
         get: function () {
             var allColumns = [].concat(this._columns);
@@ -62,6 +68,16 @@ var EntityMetadata = (function () {
                 allColumns = allColumns.concat(embedded.columns);
             });
             return allColumns;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(EntityMetadata.prototype, "columnsWithoutEmbeddeds", {
+        /**
+         * Gets columns without embedded columns.
+         */
+        get: function () {
+            return this._columns;
         },
         enumerable: true,
         configurable: true
@@ -373,6 +389,29 @@ var EntityMetadata = (function () {
         enumerable: true,
         configurable: true
     });
+    Object.defineProperty(EntityMetadata.prototype, "hasObjectIdColumn", {
+        /**
+         * Checks if entity has an object id column.
+         */
+        get: function () {
+            return !!this._columns.find(function (column) { return column.mode === "objectId"; });
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(EntityMetadata.prototype, "objectIdColumn", {
+        /**
+         * Gets the object id column used with mongodb database.
+         */
+        get: function () {
+            var column = this._columns.find(function (column) { return column.mode === "objectId"; });
+            if (!column)
+                throw new Error("ObjectId was not found in entity " + this.name);
+            return column;
+        },
+        enumerable: true,
+        configurable: true
+    });
     Object.defineProperty(EntityMetadata.prototype, "singleValueRelations", {
         /**
          * Gets single (values of which does not contain arrays) relations.
@@ -606,13 +645,13 @@ var EntityMetadata = (function () {
                 // if entity id is a relation, then extract referenced column from that relation
                 var columnRelation = _this.relations.find(function (relation) { return relation.propertyName === column.propertyName; });
                 if (columnRelation && columnRelation.joinColumn) {
-                    map[column.name] = entityValue[columnRelation.joinColumn.referencedColumn.propertyName];
+                    map[column.fullName] = entityValue[columnRelation.joinColumn.referencedColumn.propertyName];
                 }
                 else if (columnRelation && columnRelation.inverseRelation.joinColumn) {
-                    map[column.name] = entityValue[columnRelation.inverseRelation.joinColumn.referencedColumn.propertyName];
+                    map[column.fullName] = entityValue[columnRelation.inverseRelation.joinColumn.referencedColumn.propertyName];
                 }
                 else {
-                    map[column.name] = entityValue;
+                    map[column.fullName] = entityValue;
                 }
             });
         }
@@ -624,13 +663,13 @@ var EntityMetadata = (function () {
                 // if entity id is a relation, then extract referenced column from that relation
                 var columnRelation = _this.relations.find(function (relation) { return relation.propertyName === column.propertyName; });
                 if (columnRelation && columnRelation.joinColumn) {
-                    map[column.name] = entityValue[columnRelation.joinColumn.referencedColumn.propertyName];
+                    map[column.fullName] = entityValue[columnRelation.joinColumn.referencedColumn.propertyName];
                 }
                 else if (columnRelation && columnRelation.inverseRelation.joinColumn) {
-                    map[column.name] = entityValue[columnRelation.inverseRelation.joinColumn.referencedColumn.propertyName];
+                    map[column.fullName] = entityValue[columnRelation.inverseRelation.joinColumn.referencedColumn.propertyName];
                 }
                 else {
-                    map[column.name] = entityValue;
+                    map[column.fullName] = entityValue;
                 }
             });
         }
@@ -703,7 +742,7 @@ var EntityMetadata = (function () {
         Object.keys(idMap).forEach(function (propertyName) {
             var column = _this.getColumnByPropertyName(propertyName);
             if (column) {
-                map[column.name] = idMap[propertyName];
+                map[column.fullName] = idMap[propertyName];
             }
         });
         return map;
@@ -721,7 +760,7 @@ var EntityMetadata = (function () {
      * Checks if column with the given database name exist.
      */
     EntityMetadata.prototype.hasColumnWithDbName = function (name) {
-        return !!this._columns.find(function (column) { return column.name === name; });
+        return !!this._columns.find(function (column) { return column.fullName === name; });
     };
     /**
      * Checks if relation with the given property name exist.
@@ -798,6 +837,8 @@ var EntityMetadata = (function () {
         if (firstId === undefined || firstId === null || secondId === undefined || secondId === null)
             return false;
         return Object.keys(firstId).every(function (key) {
+            if (firstId[key] instanceof Object && secondId[key] instanceof Object)
+                return firstId[key].equals(secondId[key]);
             return firstId[key] === secondId[key];
         });
     };

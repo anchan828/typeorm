@@ -34,8 +34,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+Object.defineProperty(exports, "__esModule", { value: true });
 var OrmUtils_1 = require("../util/OrmUtils");
 var PromiseUtils_1 = require("../util/PromiseUtils");
+var MongoDriver_1 = require("../driver/mongodb/MongoDriver");
 /**
  * Executes all database operations (inserts, updated, deletes) that must be executed
  * with given persistence subjects.
@@ -229,6 +231,10 @@ var SubjectOperationExecutor = (function () {
                                             if (referencedColumn.isGenerated) {
                                                 relationId = insertSubject.newlyGeneratedId;
                                             }
+                                            else if (referencedColumn.isObjectId) {
+                                                relationId = insertSubject.generatedObjectId;
+                                            }
+                                            // todo: handle other special types too
                                         }
                                     }
                                 }
@@ -243,6 +249,10 @@ var SubjectOperationExecutor = (function () {
                                             if (referencedColumn.isGenerated) {
                                                 relationId = insertSubject.newlyGeneratedId;
                                             }
+                                            else if (referencedColumn.isObjectId) {
+                                                relationId = insertSubject.generatedObjectId;
+                                            }
+                                            // todo: handle other special types too
                                         }
                                     }
                                 }
@@ -263,21 +273,29 @@ var SubjectOperationExecutor = (function () {
                                         var relationIdOfEntityValue = entityValue[columnRelation.joinColumn.referencedColumn.propertyName];
                                         if (!relationIdOfEntityValue) {
                                             var entityValueInsertSubject = _this.insertSubjects.find(function (subject) { return subject.entity === entityValue; });
-                                            if (entityValueInsertSubject && columnRelation.joinColumn.referencedColumn.isGenerated) {
-                                                relationIdOfEntityValue = entityValueInsertSubject.newlyGeneratedId;
+                                            if (entityValueInsertSubject) {
+                                                if (columnRelation.joinColumn.referencedColumn.isGenerated) {
+                                                    relationIdOfEntityValue = entityValueInsertSubject.newlyGeneratedId;
+                                                }
+                                                else if (columnRelation.joinColumn.referencedColumn.isObjectId) {
+                                                    relationIdOfEntityValue = entityValueInsertSubject.generatedObjectId;
+                                                }
                                             }
                                         }
                                         if (relationIdOfEntityValue) {
-                                            conditions_1[column.name] = relationIdOfEntityValue;
+                                            conditions_1[column.fullName] = relationIdOfEntityValue;
                                         }
                                     }
                                     else {
                                         if (entityValue) {
-                                            conditions_1[column.name] = entityValue;
+                                            conditions_1[column.fullName] = entityValue;
                                         }
                                         else {
                                             if (subject.newlyGeneratedId) {
-                                                conditions_1[column.name] = subject.newlyGeneratedId;
+                                                conditions_1[column.fullName] = subject.newlyGeneratedId;
+                                            }
+                                            else if (subject.generatedObjectId) {
+                                                conditions_1[column.fullName] = subject.generatedObjectId;
                                             }
                                         }
                                     }
@@ -304,22 +322,30 @@ var SubjectOperationExecutor = (function () {
                                         var relationIdOfEntityValue = entityValue[columnRelation.joinColumn.referencedColumn.propertyName];
                                         if (!relationIdOfEntityValue) {
                                             var entityValueInsertSubject = _this.insertSubjects.find(function (subject) { return subject.entity === entityValue; });
-                                            if (entityValueInsertSubject && columnRelation.joinColumn.referencedColumn.isGenerated) {
-                                                relationIdOfEntityValue = entityValueInsertSubject.newlyGeneratedId;
+                                            if (entityValueInsertSubject) {
+                                                if (columnRelation.joinColumn.referencedColumn.isGenerated) {
+                                                    relationIdOfEntityValue = entityValueInsertSubject.newlyGeneratedId;
+                                                }
+                                                else if (columnRelation.joinColumn.referencedColumn.isObjectId) {
+                                                    relationIdOfEntityValue = entityValueInsertSubject.generatedObjectId;
+                                                }
                                             }
                                         }
                                         if (relationIdOfEntityValue) {
-                                            conditions[column.name] = relationIdOfEntityValue;
+                                            conditions[column.fullName] = relationIdOfEntityValue;
                                         }
                                     }
                                     else {
                                         var entityValueInsertSubject = _this.insertSubjects.find(function (subject) { return subject.entity === subRelatedEntity; });
                                         if (entityValue) {
-                                            conditions[column.name] = entityValue;
+                                            conditions[column.fullName] = entityValue;
                                         }
                                         else {
                                             if (entityValueInsertSubject && entityValueInsertSubject.newlyGeneratedId) {
-                                                conditions[column.name] = entityValueInsertSubject.newlyGeneratedId;
+                                                conditions[column.fullName] = entityValueInsertSubject.newlyGeneratedId;
+                                            }
+                                            else if (entityValueInsertSubject && entityValueInsertSubject.generatedObjectId) {
+                                                conditions[column.fullName] = entityValueInsertSubject.generatedObjectId;
                                             }
                                         }
                                     }
@@ -333,13 +359,18 @@ var SubjectOperationExecutor = (function () {
                                     if (!id) {
                                         var insertSubject = _this.insertSubjects.find(function (subject) { return subject.entity === subject.entity[referencedColumn.propertyName]; });
                                         if (insertSubject) {
-                                            id = insertSubject.newlyGeneratedId;
+                                            if (insertSubject.newlyGeneratedId) {
+                                                id = insertSubject.newlyGeneratedId;
+                                            }
+                                            else if (insertSubject.generatedObjectId) {
+                                                id = insertSubject.generatedObjectId;
+                                            }
                                         }
                                     }
                                     updateOptions[relation.inverseRelation.joinColumn.name] = id;
                                 }
                                 else {
-                                    updateOptions[relation.inverseRelation.joinColumn.name] = subject.entity[referencedColumn.propertyName] || subject.newlyGeneratedId;
+                                    updateOptions[relation.inverseRelation.joinColumn.name] = subject.entity[referencedColumn.propertyName] || subject.newlyGeneratedId || subRelatedEntity.generatedObjectId;
                                 }
                                 var updatePromise = _this.queryRunner.update(relation.inverseEntityMetadata.table.name, updateOptions, conditions);
                                 updatePromises.push(updatePromise);
@@ -388,8 +419,15 @@ var SubjectOperationExecutor = (function () {
                     case 5:
                         if (parentGeneratedId)
                             subject.parentGeneratedId = parentGeneratedId;
-                        if (newlyGeneratedId && metadata.hasGeneratedColumn)
-                            subject.newlyGeneratedId = newlyGeneratedId;
+                        // todo: better if insert method will return object with all generated ids, object id, etc.
+                        if (newlyGeneratedId) {
+                            if (metadata.hasGeneratedColumn) {
+                                subject.newlyGeneratedId = newlyGeneratedId;
+                            }
+                            else if (metadata.hasObjectIdColumn) {
+                                subject.generatedObjectId = newlyGeneratedId;
+                            }
+                        }
                         return [2 /*return*/];
                 }
             });
@@ -400,12 +438,48 @@ var SubjectOperationExecutor = (function () {
      */
     SubjectOperationExecutor.prototype.collectColumnsAndValues = function (metadata, entity, date, parentIdColumnValue, discriminatorValue, alreadyInsertedSubjects) {
         var _this = this;
-        // extract all columns
-        var columns = metadata.columns.filter(function (column) {
+        var columnNames = [];
+        var columnValues = [];
+        var columnsAndValuesMap = {};
+        metadata.columnsWithoutEmbeddeds
+            .filter(function (column) {
             return !column.isVirtual && !column.isParentId && !column.isDiscriminator && column.hasEntityValue(entity);
+        })
+            .forEach(function (column) {
+            var value = _this.connection.driver.preparePersistentValue(entity[column.propertyName], column);
+            columnNames.push(column.fullName);
+            columnValues.push(value);
+            columnsAndValuesMap[column.name] = value;
         });
-        var relationColumns = [];
-        var relationValues = [];
+        var collectFromEmbeddeds = function (entity, columnsAndValues, embeddeds) {
+            embeddeds.forEach(function (embedded) {
+                if (!entity[embedded.propertyName])
+                    return;
+                if (embedded.isArray) {
+                    columnsAndValues[embedded.propertyName] = entity[embedded.propertyName].map(function (subValue) {
+                        var newItem = {};
+                        embedded.columns.forEach(function (column) {
+                            var value = _this.connection.driver.preparePersistentValue(subValue[column.propertyName], column);
+                            columnNames.push(column.fullName); // todo: probably we dont need it right now because relational databases dont support array embeddedables yet
+                            columnValues.push(value);
+                            newItem[column.propertyName] = value;
+                        });
+                        return newItem;
+                    });
+                }
+                else {
+                    columnsAndValues[embedded.propertyName] = {};
+                    embedded.columns.forEach(function (column) {
+                        var value = _this.connection.driver.preparePersistentValue(entity[embedded.propertyName][column.propertyName], column);
+                        columnNames.push(column.fullName);
+                        columnValues.push(value);
+                        columnsAndValues[embedded.propertyName][column.propertyName] = value;
+                    });
+                }
+                collectFromEmbeddeds(entity[embedded.propertyName], columnsAndValues[embedded.propertyName], embedded.embeddeds);
+            });
+        };
+        collectFromEmbeddeds(entity, columnsAndValuesMap, metadata.embeddeds);
         metadata.relationsWithJoinColumns.forEach(function (relation) {
             var relationValue;
             var value = relation.getEntityValue(entity);
@@ -426,9 +500,13 @@ var SubjectOperationExecutor = (function () {
                         if (referencedColumn.isParentId) {
                             relationValue = alreadyInsertedSubject.parentGeneratedId;
                         }
+                        // todo: what if reference column is not generated?
+                        // todo: what if reference column is not related to table inheritance?
                     }
                     if (referencedColumn.isGenerated)
                         relationValue = alreadyInsertedSubject.newlyGeneratedId;
+                    if (referencedColumn.isObjectId)
+                        relationValue = alreadyInsertedSubject.generatedObjectId;
                     // if it references to create or update date columns
                     if (referencedColumn.isCreateDate || referencedColumn.isUpdateDate)
                         relationValue = _this.connection.driver.preparePersistentValue(alreadyInsertedSubject.date, referencedColumn);
@@ -456,50 +534,57 @@ var SubjectOperationExecutor = (function () {
                 }
             }
             if (relationValue) {
-                relationColumns.push(relation);
-                relationValues.push(relationValue);
+                columnNames.push(relation.name);
+                columnValues.push(relationValue);
+                columnsAndValuesMap[relation.propertyName] = entity[relation.name];
             }
         });
-        var columnNames = columns.map(function (column) { return column.name; });
-        var relationColumnNames = relationColumns.map(function (relation) { return relation.name; });
-        var allColumnNames = columnNames.concat(relationColumnNames);
-        var columnValues = columns.map(function (column) {
-            return _this.connection.driver.preparePersistentValue(column.getEntityValue(entity), column);
-        });
-        var allValues = columnValues.concat(relationValues);
         // add special column and value - date of creation
         if (metadata.hasCreateDateColumn) {
-            allColumnNames.push(metadata.createDateColumn.name);
-            allValues.push(this.connection.driver.preparePersistentValue(date, metadata.createDateColumn));
+            var value = this.connection.driver.preparePersistentValue(date, metadata.createDateColumn);
+            columnNames.push(metadata.createDateColumn.fullName);
+            columnValues.push(value);
+            columnsAndValuesMap[metadata.createDateColumn.fullName] = value;
         }
         // add special column and value - date of updating
         if (metadata.hasUpdateDateColumn) {
-            allColumnNames.push(metadata.updateDateColumn.name);
-            allValues.push(this.connection.driver.preparePersistentValue(date, metadata.updateDateColumn));
+            var value = this.connection.driver.preparePersistentValue(date, metadata.updateDateColumn);
+            columnNames.push(metadata.updateDateColumn.fullName);
+            columnValues.push(value);
+            columnsAndValuesMap[metadata.updateDateColumn.fullName] = value;
         }
         // add special column and value - version column
         if (metadata.hasVersionColumn) {
-            allColumnNames.push(metadata.versionColumn.name);
-            allValues.push(this.connection.driver.preparePersistentValue(1, metadata.versionColumn));
+            var value = this.connection.driver.preparePersistentValue(1, metadata.versionColumn);
+            columnNames.push(metadata.versionColumn.fullName);
+            columnValues.push(value);
+            columnsAndValuesMap[metadata.versionColumn.fullName] = value;
         }
         // add special column and value - discriminator value (for tables using table inheritance)
         if (metadata.hasDiscriminatorColumn) {
-            allColumnNames.push(metadata.discriminatorColumn.name);
-            allValues.push(this.connection.driver.preparePersistentValue(discriminatorValue || metadata.discriminatorValue, metadata.discriminatorColumn));
+            var value = this.connection.driver.preparePersistentValue(discriminatorValue || metadata.discriminatorValue, metadata.discriminatorColumn);
+            columnNames.push(metadata.discriminatorColumn.fullName);
+            columnValues.push(value);
+            columnsAndValuesMap[metadata.discriminatorColumn.fullName] = value;
         }
         // add special column and value - tree level and tree parents (for tree-type tables)
         if (metadata.hasTreeLevelColumn && metadata.hasTreeParentRelation) {
             var parentEntity = entity[metadata.treeParentRelation.propertyName];
             var parentLevel = parentEntity ? (parentEntity[metadata.treeLevelColumn.propertyName] || 0) : 0;
-            allColumnNames.push(metadata.treeLevelColumn.name);
-            allValues.push(parentLevel + 1);
+            columnNames.push(metadata.treeLevelColumn.fullName);
+            columnValues.push(parentLevel + 1);
         }
         // add special column and value - parent id column (for tables using table inheritance)
         if (metadata.parentEntityMetadata && metadata.hasParentIdColumn) {
-            allColumnNames.push(metadata.parentIdColumn.name); // todo: should be array of primary keys
-            allValues.push(parentIdColumnValue || entity[metadata.parentEntityMetadata.firstPrimaryColumn.propertyName]); // todo: should be array of primary keys
+            columnNames.push(metadata.parentIdColumn.fullName); // todo: should be array of primary keys
+            columnValues.push(parentIdColumnValue || entity[metadata.parentEntityMetadata.firstPrimaryColumn.propertyName]); // todo: should be array of primary keys
         }
-        return OrmUtils_1.OrmUtils.zipObject(allColumnNames, allValues);
+        if (this.connection.driver instanceof MongoDriver_1.MongoDriver) {
+            return columnsAndValuesMap;
+        }
+        else {
+            return OrmUtils_1.OrmUtils.zipObject(columnNames, columnValues);
+        }
     };
     // -------------------------------------------------------------------------
     // Private Methods: Insertion into closure tables
@@ -542,6 +627,7 @@ var SubjectOperationExecutor = (function () {
                         newEntityId = subject.entity[referencedColumn.propertyName];
                         if (!newEntityId && referencedColumn.isGenerated) {
                             newEntityId = subject.newlyGeneratedId;
+                            // we should not handle object id here because closure tables are not supported by mongodb driver.
                         } // todo: implement other special column types too
                         parentEntity = subject.entity[subject.metadata.treeParentRelation.propertyName];
                         parentEntityId = 0;
@@ -575,8 +661,8 @@ var SubjectOperationExecutor = (function () {
                         // if parent entity exist then insert a new row into closure table
                         _a.treeLevel = _d.sent();
                         if (!subject.metadata.hasTreeLevelColumn) return [3 /*break*/, 3];
-                        values = (_b = {}, _b[subject.metadata.treeLevelColumn.name] = subject.treeLevel, _b);
-                        return [4 /*yield*/, this.queryRunner.update(subject.metadata.table.name, values, (_c = {}, _c[referencedColumn.name] = newEntityId, _c))];
+                        values = (_b = {}, _b[subject.metadata.treeLevelColumn.fullName] = subject.treeLevel, _b);
+                        return [4 /*yield*/, this.queryRunner.update(subject.metadata.table.name, values, (_c = {}, _c[referencedColumn.fullName] = newEntityId, _c))];
                     case 2:
                         _d.sent();
                         _d.label = 3;
@@ -610,11 +696,53 @@ var SubjectOperationExecutor = (function () {
     SubjectOperationExecutor.prototype.update = function (subject) {
         return __awaiter(this, void 0, void 0, function () {
             var _this = this;
-            var entity, valueMaps, valueMap, valueMap, valueMap, valueMap;
+            var entity, idMap, addEmbeddedValuesRecursively_1, value_1, valueMaps, valueMap, valueMap, valueMap, valueMap;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         entity = subject.entity;
+                        if (this.connection.driver instanceof MongoDriver_1.MongoDriver) {
+                            idMap = subject.metadata.getDatabaseEntityIdMap(entity);
+                            if (!idMap)
+                                throw new Error("Internal error. Cannot get id of the updating entity.");
+                            addEmbeddedValuesRecursively_1 = function (entity, value, embeddeds) {
+                                embeddeds.forEach(function (embedded) {
+                                    if (!entity[embedded.propertyName])
+                                        return;
+                                    if (embedded.isArray) {
+                                        value[embedded.prefix] = entity[embedded.propertyName].map(function (subValue) {
+                                            var newItem = {};
+                                            embedded.columns.forEach(function (column) {
+                                                newItem[column.name] = subValue[column.propertyName];
+                                            });
+                                            return newItem;
+                                        });
+                                    }
+                                    else {
+                                        embedded.columns.forEach(function (column) {
+                                            if (!value[embedded.prefix])
+                                                value[embedded.prefix] = {};
+                                            value[embedded.prefix][column.name] = entity[embedded.propertyName][column.propertyName];
+                                        });
+                                    }
+                                    addEmbeddedValuesRecursively_1(entity[embedded.propertyName], value[embedded.prefix], embedded.embeddeds);
+                                });
+                            };
+                            value_1 = {};
+                            subject.metadata.columnsWithoutEmbeddeds.forEach(function (column) {
+                                if (entity[column.propertyName] !== undefined)
+                                    value_1[column.fullName] = entity[column.propertyName];
+                            });
+                            addEmbeddedValuesRecursively_1(entity, value_1, subject.metadata.embeddeds);
+                            // if number of updated columns = 0 no need to update updated date and version columns
+                            if (Object.keys(value_1).length === 0)
+                                return [2 /*return*/];
+                            if (subject.metadata.hasUpdateDateColumn)
+                                value_1[subject.metadata.updateDateColumn.fullName] = this.connection.driver.preparePersistentValue(new Date(), subject.metadata.updateDateColumn);
+                            if (subject.metadata.hasVersionColumn)
+                                value_1[subject.metadata.versionColumn.fullName] = this.connection.driver.preparePersistentValue(entity[subject.metadata.versionColumn.propertyName] + 1, subject.metadata.versionColumn);
+                            return [2 /*return*/, this.queryRunner.update(subject.metadata.table.name, value_1, idMap)];
+                        }
                         valueMaps = [];
                         subject.diffColumns.forEach(function (column) {
                             if (!column.entityTarget)
@@ -625,7 +753,7 @@ var SubjectOperationExecutor = (function () {
                                 valueMap = { tableName: metadata.table.name, metadata: metadata, values: {} };
                                 valueMaps.push(valueMap);
                             }
-                            valueMap.values[column.name] = _this.connection.driver.preparePersistentValue(column.getEntityValue(entity), column);
+                            valueMap.values[column.fullName] = _this.connection.driver.preparePersistentValue(column.getEntityValue(entity), column);
                         });
                         subject.diffRelations.forEach(function (relation) {
                             var metadata = _this.connection.getMetadata(relation.entityTarget);
@@ -646,7 +774,7 @@ var SubjectOperationExecutor = (function () {
                                 valueMap = { tableName: subject.metadata.table.name, metadata: subject.metadata, values: {} };
                                 valueMaps.push(valueMap);
                             }
-                            valueMap.values[subject.metadata.updateDateColumn.name] = this.connection.driver.preparePersistentValue(new Date(), subject.metadata.updateDateColumn);
+                            valueMap.values[subject.metadata.updateDateColumn.fullName] = this.connection.driver.preparePersistentValue(new Date(), subject.metadata.updateDateColumn);
                         }
                         if (subject.metadata.hasVersionColumn) {
                             valueMap = valueMaps.find(function (valueMap) { return valueMap.tableName === subject.metadata.table.name; });
@@ -654,7 +782,7 @@ var SubjectOperationExecutor = (function () {
                                 valueMap = { tableName: subject.metadata.table.name, metadata: subject.metadata, values: {} };
                                 valueMaps.push(valueMap);
                             }
-                            valueMap.values[subject.metadata.versionColumn.name] = this.connection.driver.preparePersistentValue(entity[subject.metadata.versionColumn.propertyName] + 1, subject.metadata.versionColumn);
+                            valueMap.values[subject.metadata.versionColumn.fullName] = this.connection.driver.preparePersistentValue(entity[subject.metadata.versionColumn.propertyName] + 1, subject.metadata.versionColumn);
                         }
                         if (subject.metadata.parentEntityMetadata) {
                             if (subject.metadata.parentEntityMetadata.hasUpdateDateColumn) {
@@ -667,7 +795,7 @@ var SubjectOperationExecutor = (function () {
                                     };
                                     valueMaps.push(valueMap);
                                 }
-                                valueMap.values[subject.metadata.parentEntityMetadata.updateDateColumn.name] = this.connection.driver.preparePersistentValue(new Date(), subject.metadata.parentEntityMetadata.updateDateColumn);
+                                valueMap.values[subject.metadata.parentEntityMetadata.updateDateColumn.fullName] = this.connection.driver.preparePersistentValue(new Date(), subject.metadata.parentEntityMetadata.updateDateColumn);
                             }
                             if (subject.metadata.parentEntityMetadata.hasVersionColumn) {
                                 valueMap = valueMaps.find(function (valueMap) { return valueMap.tableName === subject.metadata.parentEntityMetadata.table.name; });
@@ -679,7 +807,7 @@ var SubjectOperationExecutor = (function () {
                                     };
                                     valueMaps.push(valueMap);
                                 }
-                                valueMap.values[subject.metadata.parentEntityMetadata.versionColumn.name] = this.connection.driver.preparePersistentValue(entity[subject.metadata.parentEntityMetadata.versionColumn.propertyName] + 1, subject.metadata.parentEntityMetadata.versionColumn);
+                                valueMap.values[subject.metadata.parentEntityMetadata.versionColumn.fullName] = this.connection.driver.preparePersistentValue(entity[subject.metadata.parentEntityMetadata.versionColumn.propertyName] + 1, subject.metadata.parentEntityMetadata.versionColumn);
                             }
                         }
                         return [4 /*yield*/, Promise.all(valueMaps.map(function (valueMap) {
@@ -760,14 +888,14 @@ var SubjectOperationExecutor = (function () {
                         if (!subject.metadata.parentEntityMetadata) return [3 /*break*/, 3];
                         parentConditions_1 = {};
                         subject.metadata.parentPrimaryColumns.forEach(function (column) {
-                            parentConditions_1[column.name] = subject.databaseEntity[column.propertyName];
+                            parentConditions_1[column.fullName] = subject.databaseEntity[column.propertyName];
                         });
                         return [4 /*yield*/, this.queryRunner.delete(subject.metadata.parentEntityMetadata.table.name, parentConditions_1)];
                     case 1:
                         _a.sent();
                         childConditions_1 = {};
                         subject.metadata.primaryColumnsWithParentIdColumns.forEach(function (column) {
-                            childConditions_1[column.name] = subject.databaseEntity[column.propertyName];
+                            childConditions_1[column.fullName] = subject.databaseEntity[column.propertyName];
                         });
                         return [4 /*yield*/, this.queryRunner.delete(subject.metadata.table.name, childConditions_1)];
                     case 2:
@@ -828,6 +956,10 @@ var SubjectOperationExecutor = (function () {
                             if (firstColumn.isGenerated) {
                                 ownId = subject.newlyGeneratedId;
                             }
+                            else if (firstColumn.isObjectId) {
+                                ownId = subject.generatedObjectId;
+                            }
+                            // todo: implement other special referenced column types (update date, create date, version, discriminator column, etc.)
                         }
                         if (!ownId)
                             throw new Error("Cannot insert object of " + subject.entityTarget + " type. Looks like its not persisted yet, or cascades are not set on the relation."); // todo: better error message
@@ -848,12 +980,16 @@ var SubjectOperationExecutor = (function () {
                                     if (secondColumn.isGenerated) {
                                         relationId = insertSubject.newlyGeneratedId;
                                     }
+                                    else if (secondColumn.isObjectId) {
+                                        relationId = insertSubject.generatedObjectId;
+                                    }
+                                    // todo: implement other special values too
                                 }
                             }
                             // if relation id still does not exist - we arise an error
                             if (!relationId)
                                 throw new Error("Cannot insert object of " + newBindEntity.constructor.name + " type. Looks like its not persisted yet, or cascades are not set on the relation."); // todo: better error message
-                            var columns = relation.junctionEntityMetadata.columns.map(function (column) { return column.name; });
+                            var columns = relation.junctionEntityMetadata.columnsWithoutEmbeddeds.map(function (column) { return column.fullName; });
                             var values = relation.isOwning ? [ownId, relationId] : [relationId, ownId];
                             return _this.queryRunner.insert(relation.junctionEntityMetadata.table.name, OrmUtils_1.OrmUtils.zipObject(columns, values));
                         });
@@ -909,8 +1045,8 @@ var SubjectOperationExecutor = (function () {
                         relateColumn = junctionRemove.relation.isOwning ? junctionMetadata.columns[1] : junctionMetadata.columns[0];
                         removePromises = junctionRemove.junctionRelationIds.map(function (relationId) {
                             return _this.queryRunner.delete(junctionMetadata.table.name, (_a = {},
-                                _a[ownColumn.name] = ownId,
-                                _a[relateColumn.name] = relationId,
+                                _a[ownColumn.fullName] = ownId,
+                                _a[relateColumn.fullName] = relationId,
                                 _a));
                             var _a;
                         });
@@ -931,6 +1067,8 @@ var SubjectOperationExecutor = (function () {
     SubjectOperationExecutor.prototype.updateSpecialColumnsInPersistedEntities = function () {
         // update entity columns that gets updated on each entity insert
         this.insertSubjects.forEach(function (subject) {
+            if (subject.generatedObjectId && subject.metadata.hasObjectIdColumn)
+                subject.entity[subject.metadata.objectIdColumn.propertyName] = subject.generatedObjectId;
             subject.metadata.primaryColumns.forEach(function (primaryColumn) {
                 if (subject.newlyGeneratedId)
                     subject.entity[primaryColumn.propertyName] = subject.newlyGeneratedId;
@@ -944,7 +1082,7 @@ var SubjectOperationExecutor = (function () {
             if (subject.metadata.hasCreateDateColumn)
                 subject.entity[subject.metadata.createDateColumn.propertyName] = subject.date;
             if (subject.metadata.hasVersionColumn)
-                subject.entity[subject.metadata.versionColumn.propertyName]++;
+                subject.entity[subject.metadata.versionColumn.propertyName] = 1;
             if (subject.metadata.hasTreeLevelColumn) {
                 // const parentEntity = insertOperation.entity[metadata.treeParentMetadata.propertyName];
                 // const parentLevel = parentEntity ? (parentEntity[metadata.treeLevelColumn.propertyName] || 0) : 0;

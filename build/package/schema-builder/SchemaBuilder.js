@@ -34,6 +34,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+Object.defineProperty(exports, "__esModule", { value: true });
 var TableSchema_1 = require("./schema/TableSchema");
 var ColumnSchema_1 = require("./schema/ColumnSchema");
 var ForeignKeySchema_1 = require("./schema/ForeignKeySchema");
@@ -247,7 +248,7 @@ var SchemaBuilder = (function () {
                         if (!tableSchema)
                             return [2 /*return*/];
                         droppedColumnSchemas = tableSchema.columns.filter(function (columnSchema) {
-                            return !metadata.columns.find(function (columnMetadata) { return columnMetadata.name === columnSchema.name; });
+                            return !metadata.columns.find(function (columnMetadata) { return columnMetadata.fullName === columnSchema.name; });
                         });
                         if (droppedColumnSchemas.length === 0)
                             return [2 /*return*/];
@@ -294,11 +295,11 @@ var SchemaBuilder = (function () {
                         if (!tableSchema)
                             return [2 /*return*/];
                         newColumnMetadatas = metadata.columns.filter(function (columnMetadata) {
-                            return !tableSchema.columns.find(function (columnSchema) { return columnSchema.name === columnMetadata.name; });
+                            return !tableSchema.columns.find(function (columnSchema) { return columnSchema.name === columnMetadata.fullName; });
                         });
                         if (newColumnMetadatas.length === 0)
                             return [2 /*return*/];
-                        this.logger.logSchemaBuild("new columns added: " + newColumnMetadatas.map(function (column) { return column.name; }).join(", "));
+                        this.logger.logSchemaBuild("new columns added: " + newColumnMetadatas.map(function (column) { return column.fullName; }).join(", "));
                         newColumnSchemas = this.metadataColumnsToColumnSchemas(newColumnMetadatas);
                         return [4 /*yield*/, this.queryRunner.addColumns(tableSchema, newColumnSchemas)];
                     case 1:
@@ -329,7 +330,7 @@ var SchemaBuilder = (function () {
                             return [2 /*return*/];
                         this.logger.logSchemaBuild("columns changed in " + tableSchema.name + ". updating: " + updatedColumnSchemas.map(function (column) { return column.name; }).join(", "));
                         dropRelatedForeignKeysPromises = updatedColumnSchemas
-                            .filter(function (changedColumnSchema) { return !!metadata.columns.find(function (columnMetadata) { return columnMetadata.name === changedColumnSchema.name; }); })
+                            .filter(function (changedColumnSchema) { return !!metadata.columns.find(function (columnMetadata) { return columnMetadata.fullName === changedColumnSchema.name; }); })
                             .map(function (changedColumnSchema) { return _this.dropColumnReferencedForeignKeys(metadata.table.name, changedColumnSchema.name); });
                         // wait until all related foreign keys are dropped
                         return [4 /*yield*/, Promise.all(dropRelatedForeignKeysPromises)];
@@ -337,7 +338,7 @@ var SchemaBuilder = (function () {
                         // wait until all related foreign keys are dropped
                         _a.sent();
                         dropRelatedIndicesPromises = updatedColumnSchemas
-                            .filter(function (changedColumnSchema) { return !!metadata.columns.find(function (columnMetadata) { return columnMetadata.name === changedColumnSchema.name; }); })
+                            .filter(function (changedColumnSchema) { return !!metadata.columns.find(function (columnMetadata) { return columnMetadata.fullName === changedColumnSchema.name; }); })
                             .map(function (changedColumnSchema) { return _this.dropColumnReferencedIndices(metadata.table.name, changedColumnSchema.name); });
                         // wait until all related indices are dropped
                         return [4 /*yield*/, Promise.all(dropRelatedIndicesPromises)];
@@ -345,7 +346,7 @@ var SchemaBuilder = (function () {
                         // wait until all related indices are dropped
                         _a.sent();
                         newAndOldColumnSchemas = updatedColumnSchemas.map(function (changedColumnSchema) {
-                            var columnMetadata = metadata.columns.find(function (column) { return column.name === changedColumnSchema.name; });
+                            var columnMetadata = metadata.columns.find(function (column) { return column.fullName === changedColumnSchema.name; });
                             var newColumnSchema = ColumnSchema_1.ColumnSchema.create(columnMetadata, _this.queryRunner.normalizeType(columnMetadata));
                             tableSchema.replaceColumn(changedColumnSchema, newColumnSchema);
                             return {
@@ -374,11 +375,11 @@ var SchemaBuilder = (function () {
                         metadataPrimaryColumns = metadata.columns.filter(function (column) { return column.isPrimary && !column.isGenerated; });
                         addedKeys = metadataPrimaryColumns
                             .filter(function (primaryKey) {
-                            return !tableSchema.primaryKeysWithoutGenerated.find(function (dbPrimaryKey) { return dbPrimaryKey.columnName === primaryKey.name; });
+                            return !tableSchema.primaryKeysWithoutGenerated.find(function (dbPrimaryKey) { return dbPrimaryKey.columnName === primaryKey.fullName; });
                         })
-                            .map(function (primaryKey) { return new PrimaryKeySchema_1.PrimaryKeySchema("", primaryKey.name); });
+                            .map(function (primaryKey) { return new PrimaryKeySchema_1.PrimaryKeySchema("", primaryKey.fullName); });
                         droppedKeys = tableSchema.primaryKeysWithoutGenerated.filter(function (primaryKeySchema) {
-                            return !metadataPrimaryColumns.find(function (primaryKeyMetadata) { return primaryKeyMetadata.name === primaryKeySchema.columnName; });
+                            return !metadataPrimaryColumns.find(function (primaryKeyMetadata) { return primaryKeyMetadata.fullName === primaryKeySchema.columnName; });
                         });
                         if (addedKeys.length === 0 && droppedKeys.length === 0)
                             return [2 /*return*/];
@@ -531,12 +532,12 @@ var SchemaBuilder = (function () {
                         dependForeignKeys = allForeignKeyMetadatas.filter(function (foreignKey) {
                             if (foreignKey.tableName === tableName) {
                                 return !!foreignKey.columns.find(function (fkColumn) {
-                                    return fkColumn.name === columnName;
+                                    return fkColumn.fullName === columnName;
                                 });
                             }
                             else if (foreignKey.referencedTableName === tableName) {
                                 return !!foreignKey.referencedColumns.find(function (fkColumn) {
-                                    return fkColumn.name === columnName;
+                                    return fkColumn.fullName === columnName;
                                 });
                             }
                             return false;

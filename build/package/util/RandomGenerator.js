@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var RandomGenerator = (function () {
     function RandomGenerator() {
     }

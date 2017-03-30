@@ -1,7 +1,11 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var index_1 = require("../index");
 /**
  * Decorator registers a new naming strategy to be used in naming things.
+ *
+ * todo: deprecate using naming strategies this way. use it without decorators
+ * todo: but add multiple default naming strategies for use
  */
 function NamingStrategy(name) {
     return function (target) {

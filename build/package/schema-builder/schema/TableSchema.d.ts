@@ -5,6 +5,7 @@ import { PrimaryKeySchema } from "./PrimaryKeySchema";
 import { ColumnMetadata } from "../../metadata/ColumnMetadata";
 import { QueryRunner } from "../../query-runner/QueryRunner";
 import { ObjectLiteral } from "../../common/ObjectLiteral";
+import { EntityMetadata } from "../../metadata/EntityMetadata";
 /**
  * Table schema in the database represented in this class.
  */
@@ -94,4 +95,10 @@ export declare class TableSchema {
      * and returns only changed.
      */
     findChangedColumns(queryRunner: QueryRunner, columnMetadatas: ColumnMetadata[]): ColumnSchema[];
+    /**
+     * Creates table schema from a given entity metadata.
+     *
+     * todo: need deeper implementation
+     */
+    static create(entityMetadata: EntityMetadata, queryRunner: QueryRunner): TableSchema;
 }

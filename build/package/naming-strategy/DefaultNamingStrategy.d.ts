@@ -5,7 +5,7 @@ import { NamingStrategyInterface } from "./NamingStrategyInterface";
 export declare class DefaultNamingStrategy implements NamingStrategyInterface {
     tableName(className: string, customName: string): string;
     columnName(propertyName: string, customName: string): string;
-    embeddedColumnName(embeddedPropertyName: string, columnPropertyName: string, columnCustomName?: string): string;
+    embeddedColumnName(prefixes: string[], columnPropertyName: string, columnCustomName?: string): string;
     relationName(propertyName: string): string;
     indexName(customName: string | undefined, tableName: string, columns: string[]): string;
     joinColumnInverseSideName(joinColumnName: string, propertyName: string): string;

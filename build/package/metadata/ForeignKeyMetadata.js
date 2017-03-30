@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 /**
  * Contains all information about entity's foreign key.
  */
@@ -51,7 +52,7 @@ var ForeignKeyMetadata = (function () {
          * Gets array of column names.
          */
         get: function () {
-            return this.columns.map(function (column) { return column.name; });
+            return this.columns.map(function (column) { return column.fullName; });
         },
         enumerable: true,
         configurable: true
@@ -61,7 +62,7 @@ var ForeignKeyMetadata = (function () {
          * Gets array of referenced column names.
          */
         get: function () {
-            return this.referencedColumns.map(function (column) { return column.name; });
+            return this.referencedColumns.map(function (column) { return column.fullName; });
         },
         enumerable: true,
         configurable: true

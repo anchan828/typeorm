@@ -34,6 +34,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+Object.defineProperty(exports, "__esModule", { value: true });
 var TransactionAlreadyStartedError_1 = require("../error/TransactionAlreadyStartedError");
 var TransactionNotStartedError_1 = require("../error/TransactionNotStartedError");
 var DataTypeNotSupportedByDriverError_1 = require("../error/DataTypeNotSupportedByDriverError");
@@ -261,12 +262,12 @@ var SqlServerQueryRunner = (function () {
                         values = keys.map(function (key, index) { return "@" + index; }).join(",");
                         parameters = keys.map(function (key) { return keyValues[key]; });
                         sql = columns.length > 0
-                            ? "INSERT INTO " + this.driver.escapeTableName(tableName) + "(" + columns + ") " + (generatedColumn ? "OUTPUT INSERTED." + generatedColumn.name + " " : "") + "VALUES (" + values + ")"
-                            : "INSERT INTO " + this.driver.escapeTableName(tableName) + " " + (generatedColumn ? "OUTPUT INSERTED." + generatedColumn.name + " " : "") + "DEFAULT VALUES ";
+                            ? "INSERT INTO " + this.driver.escapeTableName(tableName) + "(" + columns + ") " + (generatedColumn ? "OUTPUT INSERTED." + generatedColumn.fullName + " " : "") + "VALUES (" + values + ")"
+                            : "INSERT INTO " + this.driver.escapeTableName(tableName) + " " + (generatedColumn ? "OUTPUT INSERTED." + generatedColumn.fullName + " " : "") + "DEFAULT VALUES ";
                         return [4 /*yield*/, this.query(sql, parameters)];
                     case 1:
                         result = _a.sent();
-                        return [2 /*return*/, generatedColumn ? result instanceof Array ? result[0][generatedColumn.name] : result[generatedColumn.name] : undefined];
+                        return [2 /*return*/, generatedColumn ? result instanceof Array ? result[0][generatedColumn.fullName] : result[generatedColumn.fullName] : undefined];
                 }
             });
         });
@@ -897,7 +898,12 @@ var SqlServerQueryRunner = (function () {
     SqlServerQueryRunner.prototype.normalizeType = function (typeOptions) {
         switch (typeOptions.type) {
             case "string":
-                return "nvarchar(" + (typeOptions.length ? typeOptions.length : 255) + ")";
+                if (typeOptions.fixedLength) {
+                    return "nchar(" + (typeOptions.length ? typeOptions.length : 255) + ")";
+                }
+                else {
+                    return "nvarchar(" + (typeOptions.length ? typeOptions.length : 255) + ")";
+                }
             case "text":
             case "mediumtext":
                 return "ntext";

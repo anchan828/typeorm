@@ -7,6 +7,10 @@ import { QueryBuilder } from "../query-builder/QueryBuilder";
  */
 export declare class TreeRepository<Entity> extends Repository<Entity> {
     /**
+     * Gets complete trees for all roots in the table.
+     */
+    findTrees(): Promise<Entity[]>;
+    /**
      * Roots are entities that have no ancestors. Finds them all.
      */
     findRoots(): Promise<Entity[]>;

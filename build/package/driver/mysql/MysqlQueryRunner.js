@@ -34,6 +34,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+Object.defineProperty(exports, "__esModule", { value: true });
 var TransactionAlreadyStartedError_1 = require("../error/TransactionAlreadyStartedError");
 var TransactionNotStartedError_1 = require("../error/TransactionNotStartedError");
 var DataTypeNotSupportedByDriverError_1 = require("../error/DataTypeNotSupportedByDriverError");
@@ -716,7 +717,7 @@ var MysqlQueryRunner = (function () {
                 tableName = tableSchemaOrName instanceof TableSchema_1.TableSchema ? tableSchemaOrName.name : tableSchemaOrName;
                 columnNames = foreignKey.columnNames.map(function (column) { return "`" + column + "`"; }).join(", ");
                 referencedColumnNames = foreignKey.referencedColumnNames.map(function (column) { return "`" + column + "`"; }).join(",");
-                sql = "ALTER TABLE " + tableName + " ADD CONSTRAINT `" + foreignKey.name + "` " +
+                sql = "ALTER TABLE `" + tableName + "` ADD CONSTRAINT `" + foreignKey.name + "` " +
                     ("FOREIGN KEY (" + columnNames + ") ") +
                     ("REFERENCES `" + foreignKey.referencedTableName + "`(" + referencedColumnNames + ")");
                 if (foreignKey.onDelete)
@@ -828,7 +829,12 @@ var MysqlQueryRunner = (function () {
     MysqlQueryRunner.prototype.normalizeType = function (typeOptions) {
         switch (typeOptions.type) {
             case "string":
-                return "varchar(" + (typeOptions.length ? typeOptions.length : 255) + ")";
+                if (typeOptions.fixedLength) {
+                    return "char(" + (typeOptions.length ? typeOptions.length : 255) + ")";
+                }
+                else {
+                    return "varchar(" + (typeOptions.length ? typeOptions.length : 255) + ")";
+                }
             case "text":
                 return "text";
             case "mediumtext":

@@ -2,7 +2,7 @@
  * All data types that column can be.
  */
 export type ColumnType = "string"|"text"|"mediumtext"|"number"|"integer"|"int"|"smallint"|"bigint"|"float"|"double"|
-                         "decimal"|"date"|"time"|"datetime"|"boolean"|"json"|"jsonb"|"simple_array";
+                         "decimal"|"date"|"time"|"datetime"|"boolean"|"json"|"jsonb"|"simple_array"|"uuid";
 
 /**
  * All data types that column can be.
@@ -101,6 +101,11 @@ export class ColumnTypes {
     static SIMPLE_ARRAY: ColumnType = "simple_array";
 
     /**
+     * UUID type. Serialized to a string in typescript or javascript
+     */
+    static UUID: ColumnType = "uuid";
+
+    /**
      * Checks if given type in a string format is supported by ORM.
      */
     static isTypeSupported(type: string) {
@@ -129,14 +134,15 @@ export class ColumnTypes {
             this.BOOLEAN,
             this.JSON,
             this.JSONB,
-            this.SIMPLE_ARRAY
+            this.SIMPLE_ARRAY,
+            this.UUID
         ];
     }
 
     /**
      * Tries to guess a column type from the given function.
      */
-    static determineTypeFromFunction(type: Function): ColumnType {
+    static determineTypeFromFunction(type: Function): ColumnType|undefined {
         if (type instanceof Date) {
             return ColumnTypes.DATETIME;
 
@@ -159,8 +165,8 @@ export class ColumnTypes {
             return ColumnTypes.JSON;
 
         }
-        throw new Error(`Column type of ${type} cannot be determined.`);
-        // return undefined;
+
+        return undefined;
     }
 
     static typeToString(type: Function): string {

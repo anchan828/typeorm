@@ -16,6 +16,15 @@ export interface Driver {
      */
     readonly options: DriverOptions;
     /**
+     * Creates repository instance of this driver.
+     */
+    /**
+     * Creates tree repository instance of this driver.
+     */
+    /**
+     * Creates specific repository instance of this driver.
+     */
+    /**
      * Performs connection to the database.
      * Based on pooling options, it can either create connection immediately,
      * either create a pool and create connection when needed.

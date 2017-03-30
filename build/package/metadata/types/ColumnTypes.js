@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 /**
  * All data types that column can be.
  */
@@ -34,7 +35,8 @@ var ColumnTypes = (function () {
                 this.BOOLEAN,
                 this.JSON,
                 this.JSONB,
-                this.SIMPLE_ARRAY
+                this.SIMPLE_ARRAY,
+                this.UUID
             ];
         },
         enumerable: true,
@@ -65,8 +67,7 @@ var ColumnTypes = (function () {
         else if (type instanceof Object) {
             return ColumnTypes.JSON;
         }
-        throw new Error("Column type of " + type + " cannot be determined.");
-        // return undefined;
+        return undefined;
     };
     ColumnTypes.typeToString = function (type) {
         return type.name.toLowerCase();
@@ -158,6 +159,10 @@ ColumnTypes.JSONB = "jsonb";
  * a comma (",") since this symbol is used to create a string from the array, using .join(",") operator.
  */
 ColumnTypes.SIMPLE_ARRAY = "simple_array";
+/**
+ * UUID type. Serialized to a string in typescript or javascript
+ */
+ColumnTypes.UUID = "uuid";
 exports.ColumnTypes = ColumnTypes;
 
 //# sourceMappingURL=ColumnTypes.js.map

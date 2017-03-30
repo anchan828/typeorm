@@ -18,8 +18,12 @@ export declare function Index(fields: string[], options?: IndexOptions): Functio
 /**
  * Composite index must be set on entity classes and must specify entity's fields to be indexed.
  */
-export declare function Index(fields: (object: any) => any[], options?: IndexOptions): Function;
+export declare function Index(fields: (object?: any) => (any[] | {
+    [key: string]: number;
+}), options?: IndexOptions): Function;
 /**
  * Composite index must be set on entity classes and must specify entity's fields to be indexed.
  */
-export declare function Index(name: string, fields: (object: any) => any[], options?: IndexOptions): Function;
+export declare function Index(name: string, fields: (object?: any) => (any[] | {
+    [key: string]: number;
+}), options?: IndexOptions): Function;

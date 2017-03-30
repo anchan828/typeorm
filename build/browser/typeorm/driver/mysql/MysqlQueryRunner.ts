@@ -13,7 +13,6 @@ import {ForeignKeySchema} from "../../schema-builder/schema/ForeignKeySchema";
 import {PrimaryKeySchema} from "../../schema-builder/schema/PrimaryKeySchema";
 import {IndexSchema} from "../../schema-builder/schema/IndexSchema";
 import {QueryRunnerAlreadyReleasedError} from "../../query-runner/error/QueryRunnerAlreadyReleasedError";
-import {NamingStrategyInterface} from "../../naming-strategy/NamingStrategyInterface";
 import {ColumnType} from "../../metadata/types/ColumnTypes";
 
 /**
@@ -590,7 +589,7 @@ export class MysqlQueryRunner implements QueryRunner {
         const tableName = tableSchemaOrName instanceof TableSchema ? tableSchemaOrName.name : tableSchemaOrName;
         const columnNames = foreignKey.columnNames.map(column => "`" + column + "`").join(", ");
         const referencedColumnNames = foreignKey.referencedColumnNames.map(column => "`" + column + "`").join(",");
-        let sql = `ALTER TABLE ${tableName} ADD CONSTRAINT \`${foreignKey.name}\` ` +
+        let sql = `ALTER TABLE \`${tableName}\` ADD CONSTRAINT \`${foreignKey.name}\` ` +
             `FOREIGN KEY (${columnNames}) ` +
             `REFERENCES \`${foreignKey.referencedTableName}\`(${referencedColumnNames})`;
         if (foreignKey.onDelete) sql += " ON DELETE " + foreignKey.onDelete;
@@ -686,11 +685,15 @@ export class MysqlQueryRunner implements QueryRunner {
     /**
      * Creates a database type from a given column metadata.
      */
-    normalizeType(typeOptions: { type: ColumnType, length?: string|number, precision?: number, scale?: number, timezone?: boolean }) {
+    normalizeType(typeOptions: { type: ColumnType, length?: string|number, precision?: number, scale?: number, timezone?: boolean, fixedLength?: boolean }): string {
 
         switch (typeOptions.type) {
             case "string":
-                return "varchar(" + (typeOptions.length ? typeOptions.length : 255) + ")";
+                if (typeOptions.fixedLength) {
+                    return "char(" + (typeOptions.length ? typeOptions.length : 255) + ")";
+                } else {
+                    return "varchar(" + (typeOptions.length ? typeOptions.length : 255) + ")";
+                }
             case "text":
                 return "text";
             case "mediumtext":

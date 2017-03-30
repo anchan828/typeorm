@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var index_1 = require("../../index");
 /**
  * Holds a number of children in the closure table of the column.

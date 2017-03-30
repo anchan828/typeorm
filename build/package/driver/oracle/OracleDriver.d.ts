@@ -37,7 +37,7 @@ export declare class OracleDriver implements Driver {
      */
     protected databaseConnectionPool: DatabaseConnection[];
     /**
-     * Logger used go log queries and errors.
+     * Logger used to log queries and errors.
      */
     protected logger: Logger;
     constructor(options: DriverOptions, logger: Logger, oracle?: any);

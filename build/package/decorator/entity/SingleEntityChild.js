@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var index_1 = require("../../index");
 /**
  * Special type of the table used in the single-table inherited tables.

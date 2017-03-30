@@ -34,6 +34,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+Object.defineProperty(exports, "__esModule", { value: true });
 var TransactionAlreadyStartedError_1 = require("../error/TransactionAlreadyStartedError");
 var TransactionNotStartedError_1 = require("../error/TransactionNotStartedError");
 var DataTypeNotSupportedByDriverError_1 = require("../error/DataTypeNotSupportedByDriverError");
@@ -230,14 +231,14 @@ var PostgresQueryRunner = (function () {
                         columns = keys.map(function (key) { return _this.driver.escapeColumnName(key); }).join(", ");
                         values = keys.map(function (key, index) { return "$" + (index + 1); }).join(",");
                         sql = columns.length > 0
-                            ? "INSERT INTO " + this.driver.escapeTableName(tableName) + "(" + columns + ") VALUES (" + values + ") " + (generatedColumn ? " RETURNING " + this.driver.escapeColumnName(generatedColumn.name) : "")
-                            : "INSERT INTO " + this.driver.escapeTableName(tableName) + " DEFAULT VALUES " + (generatedColumn ? " RETURNING " + this.driver.escapeColumnName(generatedColumn.name) : "");
+                            ? "INSERT INTO " + this.driver.escapeTableName(tableName) + "(" + columns + ") VALUES (" + values + ") " + (generatedColumn ? " RETURNING " + this.driver.escapeColumnName(generatedColumn.fullName) : "")
+                            : "INSERT INTO " + this.driver.escapeTableName(tableName) + " DEFAULT VALUES " + (generatedColumn ? " RETURNING " + this.driver.escapeColumnName(generatedColumn.fullName) : "");
                         parameters = keys.map(function (key) { return keyValues[key]; });
                         return [4 /*yield*/, this.query(sql, parameters)];
                     case 1:
                         result = _a.sent();
                         if (generatedColumn)
-                            return [2 /*return*/, result[0][generatedColumn.name]];
+                            return [2 /*return*/, result[0][generatedColumn.fullName]];
                         return [2 /*return*/, result];
                 }
             });
@@ -381,7 +382,9 @@ var PostgresQueryRunner = (function () {
                                     .filter(function (dbColumn) { return dbColumn["table_name"] === tableSchema.name; })
                                     .map(function (dbColumn) {
                                     var columnType = dbColumn["data_type"].toLowerCase() + (dbColumn["character_maximum_length"] !== undefined && dbColumn["character_maximum_length"] !== null ? ("(" + dbColumn["character_maximum_length"] + ")") : "");
-                                    var isGenerated = dbColumn["column_default"] === "nextval('" + dbColumn["table_name"] + "_id_seq'::regclass)" || dbColumn["column_default"] === "nextval('\"" + dbColumn["table_name"] + "_id_seq\"'::regclass)";
+                                    var isGenerated = dbColumn["column_default"] === "nextval('" + dbColumn["table_name"] + "_id_seq'::regclass)"
+                                        || dbColumn["column_default"] === "nextval('\"" + dbColumn["table_name"] + "_id_seq\"'::regclass)"
+                                        || /^uuid\_generate\_v\d\(\)/.test(dbColumn["column_default"]);
                                     var columnSchema = new ColumnSchema_1.ColumnSchema();
                                     columnSchema.name = dbColumn["column_name"];
                                     columnSchema.type = columnType;
@@ -632,7 +635,7 @@ var PostgresQueryRunner = (function () {
                         _a.label = 7;
                     case 7:
                         if (!(oldColumn.isGenerated !== newColumn.isGenerated)) return [3 /*break*/, 13];
-                        if (!!oldColumn.isGenerated) return [3 /*break*/, 10];
+                        if (!(!oldColumn.isGenerated && newColumn.type !== "uuid")) return [3 /*break*/, 10];
                         return [4 /*yield*/, this.query("CREATE SEQUENCE \"" + tableSchema.name + "_id_seq\" OWNED BY \"" + tableSchema.name + "\".\"" + oldColumn.name + "\"")];
                     case 8:
                         _a.sent();
@@ -888,7 +891,12 @@ var PostgresQueryRunner = (function () {
     PostgresQueryRunner.prototype.normalizeType = function (typeOptions) {
         switch (typeOptions.type) {
             case "string":
-                return "character varying(" + (typeOptions.length ? typeOptions.length : 255) + ")";
+                if (typeOptions.fixedLength) {
+                    return "character(" + (typeOptions.length ? typeOptions.length : 255) + ")";
+                }
+                else {
+                    return "character varying(" + (typeOptions.length ? typeOptions.length : 255) + ")";
+                }
             case "text":
             case "mediumtext":
                 return "text";
@@ -941,6 +949,8 @@ var PostgresQueryRunner = (function () {
                 return "jsonb";
             case "simple_array":
                 return typeOptions.length ? "character varying(" + typeOptions.length + ")" : "text";
+            case "uuid":
+                return "uuid";
         }
         throw new DataTypeNotSupportedByDriverError_1.DataTypeNotSupportedByDriverError(typeOptions.type, "Postgres");
     };
@@ -997,9 +1007,9 @@ var PostgresQueryRunner = (function () {
      */
     PostgresQueryRunner.prototype.buildCreateColumnSql = function (column, skipPrimary) {
         var c = "\"" + column.name + "\"";
-        if (column.isGenerated === true)
+        if (column.isGenerated === true && column.type !== "uuid")
             c += " SERIAL";
-        if (!column.isGenerated)
+        if (!column.isGenerated || column.type === "uuid")
             c += " " + column.type;
         if (column.isNullable !== true)
             c += " NOT NULL";
@@ -1022,6 +1032,8 @@ var PostgresQueryRunner = (function () {
                 c += " DEFAULT " + column.default + "";
             }
         }
+        if (column.isGenerated && column.type === "uuid" && !column.default)
+            c += " DEFAULT uuid_generate_v4()";
         return c;
     };
     return PostgresQueryRunner;

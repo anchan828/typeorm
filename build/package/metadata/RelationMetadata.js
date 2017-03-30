@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var RelationTypes_1 = require("./types/RelationTypes");
 /**
  * Contains all information about some entity's relation.
@@ -85,7 +86,7 @@ var RelationMetadata = (function () {
                     return this.inverseRelation.joinTable.inverseJoinColumnName;
                 }
                 else if (this.inverseRelation.joinColumn && this.inverseRelation.joinColumn.referencedColumn) {
-                    return this.inverseRelation.joinColumn.referencedColumn.name;
+                    return this.inverseRelation.joinColumn.referencedColumn.fullName;
                 }
             }
             throw new Error("Relation name cannot be retrieved.");
@@ -116,15 +117,15 @@ var RelationMetadata = (function () {
             }*/
             if (this.isOwning) {
                 if (this.joinTable) {
-                    return this.joinTable.referencedColumn.name;
+                    return this.joinTable.referencedColumn.fullName;
                 }
                 else if (this.joinColumn) {
-                    return this.joinColumn.referencedColumn.name;
+                    return this.joinColumn.referencedColumn.fullName;
                 }
             }
             else if (this.hasInverseSide) {
                 if (this.inverseRelation.joinTable) {
-                    return this.inverseRelation.joinTable.inverseReferencedColumn.name;
+                    return this.inverseRelation.joinTable.inverseReferencedColumn.fullName;
                 }
                 else if (this.inverseRelation.joinColumn) {
                     return this.inverseRelation.joinColumn.name; // todo: didn't get this logic here

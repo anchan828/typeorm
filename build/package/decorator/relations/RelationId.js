@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var index_1 = require("../../index");
 /**
  * Special decorator used to extract relation id into separate entity property.

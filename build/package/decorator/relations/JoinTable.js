@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var index_1 = require("../../index");
 /**
  * JoinTable decorator is used in many-to-many relationship to specify owner side of relationship.

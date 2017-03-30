@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var index_1 = require("../../index");
 /**
  * JoinColumn decorator used on one-to-one relations to specify owner side of relationship.

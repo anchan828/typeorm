@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 /**
  * JoinColumnMetadata contains all information about relation's join column.
  */
@@ -32,9 +33,10 @@ var JoinColumnMetadata = (function () {
         get: function () {
             var _this = this;
             if (this.referencedColumnName) {
-                var referencedColumn = this.relation.inverseEntityMetadata.allColumns.find(function (column) { return column.name === _this.referencedColumnName; });
+                var referencedColumn = this.relation.inverseEntityMetadata.allColumns.find(function (column) { return column.fullName === _this.referencedColumnName; });
                 if (!referencedColumn)
                     throw new Error("Referenced column " + this.referencedColumnName + " was not found in entity " + this.name);
+                return referencedColumn;
             }
             var inverseEntityMetadata = this.relation.inverseEntityMetadata;
             var primaryColumns = inverseEntityMetadata.primaryColumnsWithParentIdColumns;

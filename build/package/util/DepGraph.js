@@ -4,6 +4,7 @@
  * We cant use a package itself because we want to package "everything-in-it" for the frontend users of TypeORM.
  */
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 /**
  * A simple dependency graph
  */

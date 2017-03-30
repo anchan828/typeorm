@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 require("reflect-metadata");
 var SchemaSyncCommand_1 = require("./commands/SchemaSyncCommand");
 var SchemaDropCommand_1 = require("./commands/SchemaDropCommand");

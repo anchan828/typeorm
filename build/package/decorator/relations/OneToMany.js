@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var RelationTypes_1 = require("../../metadata/types/RelationTypes");
 var index_1 = require("../../index");
 // todo: make decorators which use inverse side string separate

@@ -34,6 +34,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+Object.defineProperty(exports, "__esModule", { value: true });
 var TableSchema_1 = require("../schema-builder/schema/TableSchema");
 var ColumnSchema_1 = require("../schema-builder/schema/ColumnSchema");
 var ColumnTypes_1 = require("../metadata/types/ColumnTypes");
@@ -280,7 +281,7 @@ var MigrationExecutor = (function () {
     MigrationExecutor.prototype.getMigrations = function () {
         var migrations = this.connection.getMigrations().map(function (migration) {
             var migrationClassName = migration.constructor.name;
-            var migrationTimestamp = parseInt(migrationClassName.substr(-10));
+            var migrationTimestamp = parseInt(migrationClassName.substr(-13));
             if (!migrationTimestamp)
                 throw new Error("Migration class name should contain a class name at the end of the file. " + migrationClassName + " migration name is wrong.");
             return new Migration_1.Migration(migrationTimestamp, migrationClassName, migration);

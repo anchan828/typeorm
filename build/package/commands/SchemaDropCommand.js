@@ -34,6 +34,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+Object.defineProperty(exports, "__esModule", { value: true });
 var index_1 = require("../index");
 /**
  * Drops all tables of the database from the given connection.
@@ -66,44 +67,41 @@ var SchemaDropCommand = (function () {
                         connection = undefined, connections = [];
                         _a.label = 1;
                     case 1:
-                        _a.trys.push([1, 9, 10, 14]);
+                        _a.trys.push([1, 8, 9, 13]);
                         process.env.LOGGER_CLI_SCHEMA_SYNC = true;
                         process.env.SKIP_SCHEMA_CREATION = true;
-                        if (!argv.connection) return [3 /*break*/, 5];
+                        if (!argv.connection) return [3 /*break*/, 4];
                         return [4 /*yield*/, index_1.createConnection(argv.connection, process.cwd() + "/" + argv.config)];
                     case 2:
                         connection = _a.sent();
                         return [4 /*yield*/, connection.dropDatabase()];
                     case 3:
                         _a.sent();
-                        return [4 /*yield*/, connection.close()];
-                    case 4:
-                        _a.sent();
-                        return [3 /*break*/, 8];
-                    case 5: return [4 /*yield*/, index_1.createConnections()];
-                    case 6:
+                        return [3 /*break*/, 7];
+                    case 4: return [4 /*yield*/, index_1.createConnections()];
+                    case 5:
                         connections = _a.sent();
                         return [4 /*yield*/, Promise.all(connections.map(function (connection) { return connection.dropDatabase(); }))];
-                    case 7:
+                    case 6:
                         _a.sent();
-                        _a.label = 8;
-                    case 8: return [3 /*break*/, 14];
-                    case 9:
+                        _a.label = 7;
+                    case 7: return [3 /*break*/, 13];
+                    case 8:
                         err_1 = _a.sent();
                         if (connection)
                             connection.logger.log("error", err_1);
                         throw err_1;
-                    case 10:
-                        if (!connection) return [3 /*break*/, 12];
+                    case 9:
+                        if (!connection) return [3 /*break*/, 11];
                         return [4 /*yield*/, connection.close()];
-                    case 11:
+                    case 10:
                         _a.sent();
-                        _a.label = 12;
-                    case 12: return [4 /*yield*/, Promise.all(connections.map(function (connection) { return connection.close(); }))];
-                    case 13:
+                        _a.label = 11;
+                    case 11: return [4 /*yield*/, Promise.all(connections.map(function (connection) { return connection.close(); }))];
+                    case 12:
                         _a.sent();
                         return [7 /*endfinally*/];
-                    case 14: return [2 /*return*/];
+                    case 13: return [2 /*return*/];
                 }
             });
         });

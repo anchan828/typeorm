@@ -34,6 +34,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+Object.defineProperty(exports, "__esModule", { value: true });
 var ConnectionIsNotSetError_1 = require("../error/ConnectionIsNotSetError");
 var DriverPackageNotInstalledError_1 = require("../error/DriverPackageNotInstalledError");
 var DriverUtils_1 = require("../DriverUtils");
@@ -174,19 +175,19 @@ var MysqlDriver = (function () {
      * Escapes a column name.
      */
     MysqlDriver.prototype.escapeColumnName = function (columnName) {
-        return columnName; // "`" + columnName + "`";
+        return "`" + columnName + "`";
     };
     /**
      * Escapes an alias.
      */
     MysqlDriver.prototype.escapeAliasName = function (aliasName) {
-        return aliasName; // "`" + aliasName + "`";
+        return "`" + aliasName + "`";
     };
     /**
      * Escapes a table name.
      */
     MysqlDriver.prototype.escapeTableName = function (tableName) {
-        return tableName; // "`" + tableName + "`";
+        return "`" + tableName + "`";
     };
     /**
      * Prepares given value to a value to be persisted, based on its column type and metadata.
