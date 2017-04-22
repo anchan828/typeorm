@@ -666,7 +666,13 @@ export class MysqlQueryRunner implements QueryRunner {
         if (this.isReleased)
             throw new QueryRunnerAlreadyReleasedError();
 
-        const columns = index.columnNames.map(columnName => "`" + columnName + "`").join(", ");
+        const columns = index.columnNames.map(columnName => {
+            columnName = "`" + columnName + "`"
+            if (index.length) {
+                columnName += `(${index.length})`
+            }
+            return columnName;
+        }).join(", ");
         const sql = `CREATE ${index.isUnique ? "UNIQUE " : ""}INDEX \`${index.name}\` ON \`${tableName}\`(${columns})`;
         await this.query(sql);
     }

@@ -8,8 +8,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t;
-    return { next: verb(0), "throw": verb(1), "return": verb(2) };
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
@@ -163,9 +163,8 @@ var ConnectionManager = (function () {
     ConnectionManager.prototype.createAndConnectToAll = function (optionsOrOrmConfigFilePath) {
         return __awaiter(this, void 0, void 0, function () {
             var _this = this;
-            var _a;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
                     case 0:
                         // if connection options are given, then create connection from them
                         if (optionsOrOrmConfigFilePath && optionsOrOrmConfigFilePath instanceof Array)
@@ -180,7 +179,7 @@ var ConnectionManager = (function () {
                             return [2 /*return*/, this.createFromConfigAndConnectToAll()];
                         if (!this.hasDefaultConfigurationInEnvironmentVariables()) return [3 /*break*/, 2];
                         return [4 /*yield*/, this.createFromEnvAndConnect()];
-                    case 1: return [2 /*return*/, [_b.sent()]];
+                    case 1: return [2 /*return*/, [_a.sent()]];
                     case 2: throw new CannotDetermineConnectionOptionsError_1.CannotDetermineConnectionOptionsError();
                 }
             });

@@ -19,7 +19,8 @@ export declare class IndexSchema {
      * Indicates if this index is unique.
      */
     isUnique: boolean;
-    constructor(tableName: string, name: string, columnNames: string[], isUnique: boolean);
+    length: number;
+    constructor(tableName: string, name: string, columnNames: string[], isUnique: boolean, length?: number);
     /**
      * Creates a new copy of this index with exactly same properties.
      */

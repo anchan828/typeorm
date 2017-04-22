@@ -29,15 +29,19 @@ export class IndexSchema {
      */
     isUnique: boolean;
 
+
+    length: number;
+
     // -------------------------------------------------------------------------
     // Constructor
     // -------------------------------------------------------------------------
 
-    constructor(tableName: string, name: string, columnNames: string[], isUnique: boolean) {
+    constructor(tableName: string, name: string, columnNames: string[], isUnique: boolean, length?: number) {
         this.tableName = tableName;
         this.name = name;
         this.columnNames = columnNames;
         this.isUnique = isUnique;
+        if (length) this.length = length;
     }
 
     // -------------------------------------------------------------------------

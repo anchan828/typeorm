@@ -1,9 +1,9 @@
+"use strict";
 /**
  * This source code is from https://github.com/jriecken/dependency-graph
  * Just added "any" types here, wrapper everything into exported class.
  * We cant use a package itself because we want to package "everything-in-it" for the frontend users of TypeORM.
  */
-"use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 /**
  * A simple dependency graph
