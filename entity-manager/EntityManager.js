@@ -45,7 +45,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var BaseEntityManager_1 = require("./BaseEntityManager.d");
+var BaseEntityManager_1 = require("./BaseEntityManager");
 var QueryRunnerProviderAlreadyReleasedError_1 = require("../query-runner/error/QueryRunnerProviderAlreadyReleasedError");
 var QueryRunnerProvider_1 = require("../query-runner/QueryRunnerProvider");
 /**

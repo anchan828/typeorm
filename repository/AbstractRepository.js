@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var CustomRepositoryDoesNotHaveEntityError_1 = require("./error/CustomRepositoryDoesNotHaveEntityError.d");
+var CustomRepositoryDoesNotHaveEntityError_1 = require("./error/CustomRepositoryDoesNotHaveEntityError");
 /**
  * Provides abstract class for custom repositories that do not inherit from original orm Repository.
  * Contains all most-necessary methods to simplify code in the custom repository.

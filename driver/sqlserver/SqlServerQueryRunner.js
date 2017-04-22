@@ -35,9 +35,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var TransactionAlreadyStartedError_1 = require("../error/TransactionAlreadyStartedError.d");
-var TransactionNotStartedError_1 = require("../error/TransactionNotStartedError.d");
-var DataTypeNotSupportedByDriverError_1 = require("../error/DataTypeNotSupportedByDriverError.d");
+var TransactionAlreadyStartedError_1 = require("../error/TransactionAlreadyStartedError");
+var TransactionNotStartedError_1 = require("../error/TransactionNotStartedError");
+var DataTypeNotSupportedByDriverError_1 = require("../error/DataTypeNotSupportedByDriverError");
 var ColumnSchema_1 = require("../../schema-builder/schema/ColumnSchema");
 var TableSchema_1 = require("../../schema-builder/schema/TableSchema");
 var ForeignKeySchema_1 = require("../../schema-builder/schema/ForeignKeySchema");

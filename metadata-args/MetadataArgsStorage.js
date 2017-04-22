@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var TargetMetadataArgsCollection_1 = require("./collection/TargetMetadataArgsCollection.d");
-var PropertyMetadataArgsCollection_1 = require("./collection/PropertyMetadataArgsCollection.d");
+var TargetMetadataArgsCollection_1 = require("./collection/TargetMetadataArgsCollection");
+var PropertyMetadataArgsCollection_1 = require("./collection/PropertyMetadataArgsCollection");
 /**
  * Storage all metadatas of all available types: tables, fields, subscribers, relations, etc.
  * Each metadata represents some specifications of what it represents.

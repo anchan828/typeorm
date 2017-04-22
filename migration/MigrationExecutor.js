@@ -37,10 +37,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var TableSchema_1 = require("../schema-builder/schema/TableSchema");
 var ColumnSchema_1 = require("../schema-builder/schema/ColumnSchema");
-var ColumnTypes_1 = require("../metadata/types/ColumnTypes.d");
+var ColumnTypes_1 = require("../metadata/types/ColumnTypes");
 var QueryBuilder_1 = require("../query-builder/QueryBuilder");
 var QueryRunnerProvider_1 = require("../query-runner/QueryRunnerProvider");
-var Migration_1 = require("./Migration.d");
+var Migration_1 = require("./Migration");
 var PromiseUtils_1 = require("../util/PromiseUtils");
 /**
  * Executes migrations: runs pending and reverts previously executed migrations.

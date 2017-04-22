@@ -36,8 +36,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var RepositoryAggregator_1 = require("../repository/RepositoryAggregator");
-var RepositoryNotTreeError_1 = require("../connection/error/RepositoryNotTreeError.d");
-var NoNeedToReleaseEntityManagerError_1 = require("./error/NoNeedToReleaseEntityManagerError.d");
+var RepositoryNotTreeError_1 = require("../connection/error/RepositoryNotTreeError");
+var NoNeedToReleaseEntityManagerError_1 = require("./error/NoNeedToReleaseEntityManagerError");
 var QueryRunnerProviderAlreadyReleasedError_1 = require("../query-runner/error/QueryRunnerProviderAlreadyReleasedError");
 /**
  * Common functions shared between different entity manager types.

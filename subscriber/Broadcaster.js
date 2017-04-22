@@ -35,7 +35,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var EventListenerTypes_1 = require("../metadata/types/EventListenerTypes.d");
+var EventListenerTypes_1 = require("../metadata/types/EventListenerTypes");
 /**
  * Broadcaster provides a helper methods to broadcast events to the subscribers.
  */

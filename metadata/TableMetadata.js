@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var TableTypes_1 = require("./types/TableTypes.d");
-var EntityMetadataAlreadySetError_1 = require("./error/EntityMetadataAlreadySetError.d");
-var EntityMetadataNotSetError_1 = require("./error/EntityMetadataNotSetError.d");
+var TableTypes_1 = require("./types/TableTypes");
+var EntityMetadataAlreadySetError_1 = require("./error/EntityMetadataAlreadySetError");
+var EntityMetadataNotSetError_1 = require("./error/EntityMetadataNotSetError");
 /**
  * TableMetadata contains all entity's table metadata and information.
  */

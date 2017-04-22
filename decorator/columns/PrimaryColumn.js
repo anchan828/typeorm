@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ColumnTypes_1 = require("../../metadata/types/ColumnTypes");
-var ColumnTypeUndefinedError_1 = require("../error/ColumnTypeUndefinedError.d");
+var ColumnTypeUndefinedError_1 = require("../error/ColumnTypeUndefinedError");
 var index_1 = require("../../index");
-var PrimaryColumnCannotBeNullableError_1 = require("../error/PrimaryColumnCannotBeNullableError.d");
+var PrimaryColumnCannotBeNullableError_1 = require("../error/PrimaryColumnCannotBeNullableError");
 /**
  * Column decorator is used to mark a specific class property as a table column.
  * Only properties decorated with this decorator will be persisted to the database when entity be saved.

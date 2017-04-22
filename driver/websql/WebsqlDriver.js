@@ -35,12 +35,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var ConnectionIsNotSetError_1 = require("../error/ConnectionIsNotSetError.d");
-var DriverUtils_1 = require("../DriverUtils.d");
+var ConnectionIsNotSetError_1 = require("../error/ConnectionIsNotSetError");
+var DriverUtils_1 = require("../DriverUtils");
 var ColumnTypes_1 = require("../../metadata/types/ColumnTypes");
-var DriverOptionNotSetError_1 = require("../error/DriverOptionNotSetError.d");
+var DriverOptionNotSetError_1 = require("../error/DriverOptionNotSetError");
 var DataTransformationUtils_1 = require("../../util/DataTransformationUtils");
-var WebsqlQueryRunner_1 = require("./WebsqlQueryRunner.d");
+var WebsqlQueryRunner_1 = require("./WebsqlQueryRunner");
 /**
  * Organizes communication with WebSQL in the browser.
  */

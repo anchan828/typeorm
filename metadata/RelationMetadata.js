@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var RelationTypes_1 = require("./types/RelationTypes.d");
+var RelationTypes_1 = require("./types/RelationTypes");
 /**
  * Contains all information about some entity's relation.
  */

@@ -10,7 +10,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var TargetMetadataArgsCollection_1 = require("./TargetMetadataArgsCollection.d");
+var TargetMetadataArgsCollection_1 = require("./TargetMetadataArgsCollection");
 var PropertyMetadataArgsCollection = (function (_super) {
     __extends(PropertyMetadataArgsCollection, _super);
     function PropertyMetadataArgsCollection() {

@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var ColumnMetadata_1 = require("../metadata/ColumnMetadata.d");
-var ForeignKeyMetadata_1 = require("../metadata/ForeignKeyMetadata.d");
-var TableMetadata_1 = require("../metadata/TableMetadata.d");
-var IndexMetadata_1 = require("../metadata/IndexMetadata.d");
-var EntityMetadata_1 = require("../metadata/EntityMetadata.d");
+var ColumnMetadata_1 = require("../metadata/ColumnMetadata");
+var ForeignKeyMetadata_1 = require("../metadata/ForeignKeyMetadata");
+var TableMetadata_1 = require("../metadata/TableMetadata");
+var IndexMetadata_1 = require("../metadata/IndexMetadata");
+var EntityMetadata_1 = require("../metadata/EntityMetadata");
 /**
  * Helps to create EntityMetadatas for junction tables.
  */

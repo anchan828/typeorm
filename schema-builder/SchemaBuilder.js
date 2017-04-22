@@ -35,11 +35,11 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var TableSchema_1 = require("./schema/TableSchema.d");
-var ColumnSchema_1 = require("./schema/ColumnSchema.d");
-var ForeignKeySchema_1 = require("./schema/ForeignKeySchema.d");
-var IndexSchema_1 = require("./schema/IndexSchema.d");
-var PrimaryKeySchema_1 = require("./schema/PrimaryKeySchema.d");
+var TableSchema_1 = require("./schema/TableSchema");
+var ColumnSchema_1 = require("./schema/ColumnSchema");
+var ForeignKeySchema_1 = require("./schema/ForeignKeySchema");
+var IndexSchema_1 = require("./schema/IndexSchema");
+var PrimaryKeySchema_1 = require("./schema/PrimaryKeySchema");
 var PromiseUtils_1 = require("../util/PromiseUtils");
 /**
  * Creates complete tables schemas in the database based on the entity metadatas.

@@ -35,18 +35,18 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var Alias_1 = require("./alias/Alias.d");
-var AliasMap_1 = require("./alias/AliasMap.d");
-var RawSqlResultsToEntityTransformer_1 = require("./transformer/RawSqlResultsToEntityTransformer.d");
-var SqlServerDriver_1 = require("../driver/sqlserver/SqlServerDriver.d");
+var Alias_1 = require("./alias/Alias");
+var AliasMap_1 = require("./alias/AliasMap");
+var RawSqlResultsToEntityTransformer_1 = require("./transformer/RawSqlResultsToEntityTransformer");
+var SqlServerDriver_1 = require("../driver/sqlserver/SqlServerDriver");
 var QueryRunnerProvider_1 = require("../query-runner/QueryRunnerProvider");
-var PessimisticLockTransactionRequiredError_1 = require("./error/PessimisticLockTransactionRequiredError.d");
-var NoVersionOrUpdateDateColumnError_1 = require("./error/NoVersionOrUpdateDateColumnError.d");
-var OptimisticLockVersionMismatchError_1 = require("./error/OptimisticLockVersionMismatchError.d");
-var OptimisticLockCanNotBeUsedError_1 = require("./error/OptimisticLockCanNotBeUsedError.d");
-var PostgresDriver_1 = require("../driver/postgres/PostgresDriver.d");
-var MysqlDriver_1 = require("../driver/mysql/MysqlDriver.d");
-var LockNotSupportedOnGivenDriverError_1 = require("./error/LockNotSupportedOnGivenDriverError.d");
+var PessimisticLockTransactionRequiredError_1 = require("./error/PessimisticLockTransactionRequiredError");
+var NoVersionOrUpdateDateColumnError_1 = require("./error/NoVersionOrUpdateDateColumnError");
+var OptimisticLockVersionMismatchError_1 = require("./error/OptimisticLockVersionMismatchError");
+var OptimisticLockCanNotBeUsedError_1 = require("./error/OptimisticLockCanNotBeUsedError");
+var PostgresDriver_1 = require("../driver/postgres/PostgresDriver");
+var MysqlDriver_1 = require("../driver/mysql/MysqlDriver");
+var LockNotSupportedOnGivenDriverError_1 = require("./error/LockNotSupportedOnGivenDriverError");
 // todo: fix problem with long aliases eg getMaxIdentifierLength
 // todo: fix replacing in .select("COUNT(post.id) AS cnt") statement
 // todo: implement joinAlways in relations and relationId

@@ -35,10 +35,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var QueryRunnerProvider_1 = require("../query-runner/QueryRunnerProvider.d");
-var Subject_1 = require("../persistence/Subject.d");
-var RelationMetadata_1 = require("../metadata/RelationMetadata.d");
-var QueryBuilder_1 = require("../query-builder/QueryBuilder.d");
+var QueryRunnerProvider_1 = require("../query-runner/QueryRunnerProvider");
+var Subject_1 = require("../persistence/Subject");
+var RelationMetadata_1 = require("../metadata/RelationMetadata");
+var QueryBuilder_1 = require("../query-builder/QueryBuilder");
 /**
  * Repository for more specific operations.
  */

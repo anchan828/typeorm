@@ -45,7 +45,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var Repository_1 = require("./Repository.d");
+var Repository_1 = require("./Repository");
 /**
  * Repository with additional functions to work with trees.
  *

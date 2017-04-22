@@ -37,7 +37,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var OrmUtils_1 = require("../util/OrmUtils");
 var PromiseUtils_1 = require("../util/PromiseUtils");
-var MongoDriver_1 = require("../driver/mongodb/MongoDriver.d");
+var MongoDriver_1 = require("../driver/mongodb/MongoDriver");
 /**
  * Executes all database operations (inserts, updated, deletes) that must be executed
  * with given persistence subjects.

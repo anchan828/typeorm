@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var RelationTypes_1 = require("./types/RelationTypes.d");
+var RelationTypes_1 = require("./types/RelationTypes");
 // todo: IDEA. store all entity metadata in the EntityMetadata too? (this will open more features for metadata objects + no need to access connection in lot of places)
 /**
  * Contains all entity metadata.

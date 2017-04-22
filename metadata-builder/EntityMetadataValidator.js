@@ -1,13 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var UsingJoinTableIsNotAllowedError_1 = require("./error/UsingJoinTableIsNotAllowedError.d");
-var UsingJoinTableOnlyOnOneSideAllowedError_1 = require("./error/UsingJoinTableOnlyOnOneSideAllowedError.d");
-var UsingJoinColumnIsNotAllowedError_1 = require("./error/UsingJoinColumnIsNotAllowedError.d");
-var UsingJoinColumnOnlyOnOneSideAllowedError_1 = require("./error/UsingJoinColumnOnlyOnOneSideAllowedError.d");
-var MissingJoinColumnError_1 = require("./error/MissingJoinColumnError.d");
-var MissingJoinTableError_1 = require("./error/MissingJoinTableError.d");
-var MissingPrimaryColumnError_1 = require("./error/MissingPrimaryColumnError.d");
-var CircularRelationsError_1 = require("./error/CircularRelationsError.d");
+var UsingJoinTableIsNotAllowedError_1 = require("./error/UsingJoinTableIsNotAllowedError");
+var UsingJoinTableOnlyOnOneSideAllowedError_1 = require("./error/UsingJoinTableOnlyOnOneSideAllowedError");
+var UsingJoinColumnIsNotAllowedError_1 = require("./error/UsingJoinColumnIsNotAllowedError");
+var UsingJoinColumnOnlyOnOneSideAllowedError_1 = require("./error/UsingJoinColumnOnlyOnOneSideAllowedError");
+var MissingJoinColumnError_1 = require("./error/MissingJoinColumnError");
+var MissingJoinTableError_1 = require("./error/MissingJoinTableError");
+var MissingPrimaryColumnError_1 = require("./error/MissingPrimaryColumnError");
+var CircularRelationsError_1 = require("./error/CircularRelationsError");
 var DepGraph_1 = require("../util/DepGraph");
 /// todo: add check if there are multiple tables with the same name
 /// todo: add checks when generated column / table names are too long for the specific driver

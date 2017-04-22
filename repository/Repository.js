@@ -35,13 +35,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var QueryBuilder_1 = require("../query-builder/QueryBuilder.d");
-var PlainObjectToNewEntityTransformer_1 = require("../query-builder/transformer/PlainObjectToNewEntityTransformer.d");
-var PlainObjectToDatabaseEntityTransformer_1 = require("../query-builder/transformer/PlainObjectToDatabaseEntityTransformer.d");
-var FindOptionsUtils_1 = require("../find-options/FindOptionsUtils.d");
-var QueryRunnerProvider_1 = require("../query-runner/QueryRunnerProvider.d");
-var SubjectOperationExecutor_1 = require("../persistence/SubjectOperationExecutor.d");
-var SubjectBuilder_1 = require("../persistence/SubjectBuilder.d");
+var QueryBuilder_1 = require("../query-builder/QueryBuilder");
+var PlainObjectToNewEntityTransformer_1 = require("../query-builder/transformer/PlainObjectToNewEntityTransformer");
+var PlainObjectToDatabaseEntityTransformer_1 = require("../query-builder/transformer/PlainObjectToDatabaseEntityTransformer");
+var FindOptionsUtils_1 = require("../find-options/FindOptionsUtils");
+var QueryRunnerProvider_1 = require("../query-runner/QueryRunnerProvider");
+var SubjectOperationExecutor_1 = require("../persistence/SubjectOperationExecutor");
+var SubjectBuilder_1 = require("../persistence/SubjectBuilder");
 /**
  * Repository is supposed to work with your entity objects. Find entities, insert, update, delete, etc.
  */

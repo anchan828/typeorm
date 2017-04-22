@@ -85,6 +85,13 @@ export { InsertEvent } from "./subscriber/event/InsertEvent";
 export { UpdateEvent } from "./subscriber/event/UpdateEvent";
 export { RemoveEvent } from "./subscriber/event/RemoveEvent";
 export { EntitySubscriberInterface } from "./subscriber/EntitySubscriberInterface";
+/***
+ * Fixed:
+ *      typeorm/index has no exported member 'FindOptions'.
+ *      typeorm/index has no exported member 'JoinOptions'.
+ */
+export { FindOneOptions } from "./find-options/FindOneOptions";
+export { JoinOptions } from "./find-options/JoinOptions";
 /**
  * Gets metadata args storage.
  */

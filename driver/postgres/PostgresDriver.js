@@ -35,12 +35,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var ConnectionIsNotSetError_1 = require("../error/ConnectionIsNotSetError.d");
-var DriverPackageNotInstalledError_1 = require("../error/DriverPackageNotInstalledError.d");
-var DriverUtils_1 = require("../DriverUtils.d");
+var ConnectionIsNotSetError_1 = require("../error/ConnectionIsNotSetError");
+var DriverPackageNotInstalledError_1 = require("../error/DriverPackageNotInstalledError");
+var DriverUtils_1 = require("../DriverUtils");
 var ColumnTypes_1 = require("../../metadata/types/ColumnTypes");
-var PostgresQueryRunner_1 = require("./PostgresQueryRunner.d");
-var DriverOptionNotSetError_1 = require("../error/DriverOptionNotSetError.d");
+var PostgresQueryRunner_1 = require("./PostgresQueryRunner");
+var DriverOptionNotSetError_1 = require("../error/DriverOptionNotSetError");
 var DataTransformationUtils_1 = require("../../util/DataTransformationUtils");
 var PlatformTools_1 = require("../../platform/PlatformTools");
 // todo(tests):

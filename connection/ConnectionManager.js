@@ -35,18 +35,18 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var Connection_1 = require("./Connection.d");
-var ConnectionNotFoundError_1 = require("./error/ConnectionNotFoundError.d");
+var Connection_1 = require("./Connection");
+var ConnectionNotFoundError_1 = require("./error/ConnectionNotFoundError");
 var MysqlDriver_1 = require("../driver/mysql/MysqlDriver");
-var MissingDriverError_1 = require("./error/MissingDriverError.d");
+var MissingDriverError_1 = require("./error/MissingDriverError");
 var PostgresDriver_1 = require("../driver/postgres/PostgresDriver");
-var AlreadyHasActiveConnectionError_1 = require("./error/AlreadyHasActiveConnectionError.d");
+var AlreadyHasActiveConnectionError_1 = require("./error/AlreadyHasActiveConnectionError");
 var Logger_1 = require("../logger/Logger");
 var SqliteDriver_1 = require("../driver/sqlite/SqliteDriver");
 var OracleDriver_1 = require("../driver/oracle/OracleDriver");
 var SqlServerDriver_1 = require("../driver/sqlserver/SqlServerDriver");
 var OrmUtils_1 = require("../util/OrmUtils");
-var CannotDetermineConnectionOptionsError_1 = require("./error/CannotDetermineConnectionOptionsError.d");
+var CannotDetermineConnectionOptionsError_1 = require("./error/CannotDetermineConnectionOptionsError");
 var PlatformTools_1 = require("../platform/PlatformTools");
 var WebsqlDriver_1 = require("../driver/websql/WebsqlDriver");
 var MongoDriver_1 = require("../driver/mongodb/MongoDriver");

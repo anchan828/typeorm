@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var ColumnSchema_1 = require("./ColumnSchema.d");
+var ColumnSchema_1 = require("./ColumnSchema");
 /**
  * Table schema in the database represented in this class.
  */

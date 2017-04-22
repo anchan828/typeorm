@@ -35,9 +35,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var Subject_1 = require("./Subject.d");
+var Subject_1 = require("./Subject");
 var SpecificRepository_1 = require("../repository/SpecificRepository");
-var MongoDriver_1 = require("../driver/mongodb/MongoDriver.d");
+var MongoDriver_1 = require("../driver/mongodb/MongoDriver");
 /**
  * To be able to execute persistence operations we need to load all entities from the database we need.
  * Loading should be efficient - we need to load entities in as few queries as possible + load as less data as we can.

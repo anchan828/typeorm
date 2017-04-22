@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var GeneratedOnlyForPrimaryError_1 = require("../error/GeneratedOnlyForPrimaryError.d");
+var GeneratedOnlyForPrimaryError_1 = require("../error/GeneratedOnlyForPrimaryError");
 var index_1 = require("../../index");
 var ColumnTypes_1 = require("../../metadata/types/ColumnTypes");
 /**

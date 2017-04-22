@@ -45,9 +45,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var Repository_1 = require("./Repository.d");
-var DocumentToEntityTransformer_1 = require("../query-builder/transformer/DocumentToEntityTransformer.d");
-var FindOptionsUtils_1 = require("../find-options/FindOptionsUtils.d");
+var Repository_1 = require("./Repository");
+var DocumentToEntityTransformer_1 = require("../query-builder/transformer/DocumentToEntityTransformer");
+var FindOptionsUtils_1 = require("../find-options/FindOptionsUtils");
 var mongodb_1 = require("mongodb");
 /**
  * Repository used to manage mongodb documents of a single entity type.

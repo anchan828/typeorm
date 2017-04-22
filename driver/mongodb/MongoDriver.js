@@ -35,10 +35,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var ConnectionIsNotSetError_1 = require("../error/ConnectionIsNotSetError.d");
-var DriverPackageNotInstalledError_1 = require("../error/DriverPackageNotInstalledError.d");
-var MongoQueryRunner_1 = require("./MongoQueryRunner.d");
-var DriverOptionNotSetError_1 = require("../error/DriverOptionNotSetError.d");
+var ConnectionIsNotSetError_1 = require("../error/ConnectionIsNotSetError");
+var DriverPackageNotInstalledError_1 = require("../error/DriverPackageNotInstalledError");
+var MongoQueryRunner_1 = require("./MongoQueryRunner");
+var DriverOptionNotSetError_1 = require("../error/DriverOptionNotSetError");
 var PlatformTools_1 = require("../../platform/PlatformTools");
 /**
  * Organizes communication with MongoDB.
