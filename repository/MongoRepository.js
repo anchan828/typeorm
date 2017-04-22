@@ -18,8 +18,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t;
-    return { next: verb(0), "throw": verb(1), "return": verb(2) };
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
@@ -45,9 +45,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var Repository_1 = require("./Repository");
-var DocumentToEntityTransformer_1 = require("../query-builder/transformer/DocumentToEntityTransformer");
-var FindOptionsUtils_1 = require("../find-options/FindOptionsUtils");
+var Repository_1 = require("./Repository.d");
+var DocumentToEntityTransformer_1 = require("../query-builder/transformer/DocumentToEntityTransformer.d");
+var FindOptionsUtils_1 = require("../find-options/FindOptionsUtils.d");
 var mongodb_1 = require("mongodb");
 /**
  * Repository used to manage mongodb documents of a single entity type.

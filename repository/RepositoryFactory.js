@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var TreeRepository_1 = require("./TreeRepository");
-var Repository_1 = require("./Repository");
-var SpecificRepository_1 = require("./SpecificRepository");
-var MongoDriver_1 = require("../driver/mongodb/MongoDriver");
-var MongoRepository_1 = require("./MongoRepository");
+var TreeRepository_1 = require("./TreeRepository.d");
+var Repository_1 = require("./Repository.d");
+var SpecificRepository_1 = require("./SpecificRepository.d");
+var MongoDriver_1 = require("../driver/mongodb/MongoDriver.d");
+var MongoRepository_1 = require("./MongoRepository.d");
 /**
  * Factory used to create different types of repositories.
  */

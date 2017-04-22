@@ -4,9 +4,9 @@ function __export(m) {
 }
 Object.defineProperty(exports, "__esModule", { value: true });
 var ConnectionManager_1 = require("./connection/ConnectionManager");
-var MetadataArgsStorage_1 = require("./metadata-args/MetadataArgsStorage");
+var MetadataArgsStorage_1 = require("./metadata-args/MetadataArgsStorage.d");
 var container_1 = require("./container");
-var PlatformTools_1 = require("./platform/PlatformTools");
+var PlatformTools_1 = require("./platform/PlatformTools.d");
 // -----------------------------------------------------------------   --------
 // Commonly Used exports
 // -------------------------------------------------------------------------
@@ -54,30 +54,30 @@ __export(require("./decorator/NamingStrategy"));
 __export(require("./decorator/Embedded"));
 __export(require("./decorator/DiscriminatorValue"));
 __export(require("./decorator/EntityRepository"));
-__export(require("./schema-builder/schema/ColumnSchema"));
-__export(require("./schema-builder/schema/ForeignKeySchema"));
-__export(require("./schema-builder/schema/IndexSchema"));
-__export(require("./schema-builder/schema/PrimaryKeySchema"));
-__export(require("./schema-builder/schema/TableSchema"));
+__export(require("./schema-builder/schema/ColumnSchema.d"));
+__export(require("./schema-builder/schema/ForeignKeySchema.d"));
+__export(require("./schema-builder/schema/IndexSchema.d"));
+__export(require("./schema-builder/schema/PrimaryKeySchema.d"));
+__export(require("./schema-builder/schema/TableSchema.d"));
 var Connection_1 = require("./connection/Connection");
 exports.Connection = Connection_1.Connection;
 var ConnectionManager_2 = require("./connection/ConnectionManager");
 exports.ConnectionManager = ConnectionManager_2.ConnectionManager;
-var QueryBuilder_1 = require("./query-builder/QueryBuilder");
+var QueryBuilder_1 = require("./query-builder/QueryBuilder.d");
 exports.QueryBuilder = QueryBuilder_1.QueryBuilder;
 var EntityManager_1 = require("./entity-manager/EntityManager");
 exports.EntityManager = EntityManager_1.EntityManager;
 var MongoEntityManager_1 = require("./entity-manager/MongoEntityManager");
 exports.MongoEntityManager = MongoEntityManager_1.MongoEntityManager;
-var DefaultNamingStrategy_1 = require("./naming-strategy/DefaultNamingStrategy");
+var DefaultNamingStrategy_1 = require("./naming-strategy/DefaultNamingStrategy.d");
 exports.DefaultNamingStrategy = DefaultNamingStrategy_1.DefaultNamingStrategy;
-var Repository_1 = require("./repository/Repository");
+var Repository_1 = require("./repository/Repository.d");
 exports.Repository = Repository_1.Repository;
-var TreeRepository_1 = require("./repository/TreeRepository");
+var TreeRepository_1 = require("./repository/TreeRepository.d");
 exports.TreeRepository = TreeRepository_1.TreeRepository;
-var SpecificRepository_1 = require("./repository/SpecificRepository");
+var SpecificRepository_1 = require("./repository/SpecificRepository.d");
 exports.SpecificRepository = SpecificRepository_1.SpecificRepository;
-var MongoRepository_1 = require("./repository/MongoRepository");
+var MongoRepository_1 = require("./repository/MongoRepository.d");
 exports.MongoRepository = MongoRepository_1.MongoRepository;
 // -------------------------------------------------------------------------
 // Deprecated

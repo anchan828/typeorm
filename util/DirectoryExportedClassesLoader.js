@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var PlatformTools_1 = require("../platform/PlatformTools");
+var PlatformTools_1 = require("../platform/PlatformTools.d");
 /**
  * Loads all exported classes from the given directory.
  */

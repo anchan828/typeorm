@@ -1,19 +1,19 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var EntityMetadata_1 = require("../metadata/EntityMetadata");
-var ColumnMetadata_1 = require("../metadata/ColumnMetadata");
-var ForeignKeyMetadata_1 = require("../metadata/ForeignKeyMetadata");
-var EntityMetadataValidator_1 = require("./EntityMetadataValidator");
-var IndexMetadata_1 = require("../metadata/IndexMetadata");
-var JoinColumnMetadata_1 = require("../metadata/JoinColumnMetadata");
-var TableMetadata_1 = require("../metadata/TableMetadata");
-var index_1 = require("../index");
-var RelationMetadata_1 = require("../metadata/RelationMetadata");
-var JoinTableMetadata_1 = require("../metadata/JoinTableMetadata");
-var JunctionEntityMetadataBuilder_1 = require("./JunctionEntityMetadataBuilder");
-var ClosureJunctionEntityMetadataBuilder_1 = require("./ClosureJunctionEntityMetadataBuilder");
-var EmbeddedMetadata_1 = require("../metadata/EmbeddedMetadata");
-var MetadataArgsStorage_1 = require("../metadata-args/MetadataArgsStorage");
+var EntityMetadata_1 = require("../metadata/EntityMetadata.d");
+var ColumnMetadata_1 = require("../metadata/ColumnMetadata.d");
+var ForeignKeyMetadata_1 = require("../metadata/ForeignKeyMetadata.d");
+var EntityMetadataValidator_1 = require("./EntityMetadataValidator.d");
+var IndexMetadata_1 = require("../metadata/IndexMetadata.d");
+var JoinColumnMetadata_1 = require("../metadata/JoinColumnMetadata.d");
+var TableMetadata_1 = require("../metadata/TableMetadata.d");
+var index_1 = require("../index.d");
+var RelationMetadata_1 = require("../metadata/RelationMetadata.d");
+var JoinTableMetadata_1 = require("../metadata/JoinTableMetadata.d");
+var JunctionEntityMetadataBuilder_1 = require("./JunctionEntityMetadataBuilder.d");
+var ClosureJunctionEntityMetadataBuilder_1 = require("./ClosureJunctionEntityMetadataBuilder.d");
+var EmbeddedMetadata_1 = require("../metadata/EmbeddedMetadata.d");
+var MetadataArgsStorage_1 = require("../metadata-args/MetadataArgsStorage.d");
 /**
  * Aggregates all metadata: table, column, relation into one collection grouped by tables for a given set of classes.
  */

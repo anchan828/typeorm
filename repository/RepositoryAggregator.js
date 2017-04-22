@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var RepositoryFactory_1 = require("./RepositoryFactory");
-var container_1 = require("../container");
+var RepositoryFactory_1 = require("./RepositoryFactory.d");
+var container_1 = require("../container.d");
 /**
  * Aggregates all repositories of the specific metadata.
  */

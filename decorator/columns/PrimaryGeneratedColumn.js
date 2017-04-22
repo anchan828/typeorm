@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var index_1 = require("../../index");
-var PrimaryColumnCannotBeNullableError_1 = require("../error/PrimaryColumnCannotBeNullableError");
+var PrimaryColumnCannotBeNullableError_1 = require("../error/PrimaryColumnCannotBeNullableError.d");
 // todo: add overloads for PrimaryGeneratedColumn(generationType: "sequence"|"uuid" = "sequence", options?: ColumnOptions)
 /**
  * Column decorator is used to mark a specific class property as a table column.

@@ -8,8 +8,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t;
-    return { next: verb(0), "throw": verb(1), "return": verb(2) };
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
@@ -36,20 +36,20 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var Repository_1 = require("../repository/Repository");
-var RepositoryNotFoundError_1 = require("./error/RepositoryNotFoundError");
+var RepositoryNotFoundError_1 = require("./error/RepositoryNotFoundError.d");
 var EntityListenerMetadata_1 = require("../metadata/EntityListenerMetadata");
 var EntityManager_1 = require("../entity-manager/EntityManager");
 var DirectoryExportedClassesLoader_1 = require("../util/DirectoryExportedClassesLoader");
 var index_1 = require("../index");
 var EntityMetadataBuilder_1 = require("../metadata-builder/EntityMetadataBuilder");
 var DefaultNamingStrategy_1 = require("../naming-strategy/DefaultNamingStrategy");
-var CannotImportAlreadyConnectedError_1 = require("./error/CannotImportAlreadyConnectedError");
-var CannotCloseNotConnectedError_1 = require("./error/CannotCloseNotConnectedError");
-var CannotConnectAlreadyConnectedError_1 = require("./error/CannotConnectAlreadyConnectedError");
-var NamingStrategyNotFoundError_1 = require("./error/NamingStrategyNotFoundError");
-var RepositoryNotTreeError_1 = require("./error/RepositoryNotTreeError");
-var CannotSyncNotConnectedError_1 = require("./error/CannotSyncNotConnectedError");
-var CannotUseNamingStrategyNotConnectedError_1 = require("./error/CannotUseNamingStrategyNotConnectedError");
+var CannotImportAlreadyConnectedError_1 = require("./error/CannotImportAlreadyConnectedError.d");
+var CannotCloseNotConnectedError_1 = require("./error/CannotCloseNotConnectedError.d");
+var CannotConnectAlreadyConnectedError_1 = require("./error/CannotConnectAlreadyConnectedError.d");
+var NamingStrategyNotFoundError_1 = require("./error/NamingStrategyNotFoundError.d");
+var RepositoryNotTreeError_1 = require("./error/RepositoryNotTreeError.d");
+var CannotSyncNotConnectedError_1 = require("./error/CannotSyncNotConnectedError.d");
+var CannotUseNamingStrategyNotConnectedError_1 = require("./error/CannotUseNamingStrategyNotConnectedError.d");
 var Broadcaster_1 = require("../subscriber/Broadcaster");
 var LazyRelationsWrapper_1 = require("../lazy-loading/LazyRelationsWrapper");
 var RepositoryAggregator_1 = require("../repository/RepositoryAggregator");
@@ -57,7 +57,7 @@ var SchemaBuilder_1 = require("../schema-builder/SchemaBuilder");
 var QueryRunnerProvider_1 = require("../query-runner/QueryRunnerProvider");
 var EntityMetadataNotFound_1 = require("../metadata-args/error/EntityMetadataNotFound");
 var MigrationExecutor_1 = require("../migration/MigrationExecutor");
-var CannotRunMigrationNotConnectedError_1 = require("./error/CannotRunMigrationNotConnectedError");
+var CannotRunMigrationNotConnectedError_1 = require("./error/CannotRunMigrationNotConnectedError.d");
 var PlatformTools_1 = require("../platform/PlatformTools");
 var AbstractRepository_1 = require("../repository/AbstractRepository");
 var CustomRepositoryNotFoundError_1 = require("../repository/error/CustomRepositoryNotFoundError");
@@ -341,7 +341,7 @@ var Connection = (function () {
      * Imports naming strategies from the given paths (directories) and registers them in the current connection.
      */
     Connection.prototype.importNamingStrategiesFromDirectories = function (paths) {
-        this.importEntities(DirectoryExportedClassesLoader_1.importClassesFromDirectories(paths));
+        this.importNamingStrategies(DirectoryExportedClassesLoader_1.importClassesFromDirectories(paths));
         return this;
     };
     /**

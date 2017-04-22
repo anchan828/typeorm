@@ -8,8 +8,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t;
-    return { next: verb(0), "throw": verb(1), "return": verb(2) };
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
@@ -35,9 +35,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var TransactionAlreadyStartedError_1 = require("../error/TransactionAlreadyStartedError");
-var TransactionNotStartedError_1 = require("../error/TransactionNotStartedError");
-var DataTypeNotSupportedByDriverError_1 = require("../error/DataTypeNotSupportedByDriverError");
+var TransactionAlreadyStartedError_1 = require("../error/TransactionAlreadyStartedError.d");
+var TransactionNotStartedError_1 = require("../error/TransactionNotStartedError.d");
+var DataTypeNotSupportedByDriverError_1 = require("../error/DataTypeNotSupportedByDriverError.d");
 var ColumnSchema_1 = require("../../schema-builder/schema/ColumnSchema");
 var TableSchema_1 = require("../../schema-builder/schema/TableSchema");
 var ForeignKeySchema_1 = require("../../schema-builder/schema/ForeignKeySchema");

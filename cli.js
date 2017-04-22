@@ -2,14 +2,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 require("reflect-metadata");
-var SchemaSyncCommand_1 = require("./commands/SchemaSyncCommand");
-var SchemaDropCommand_1 = require("./commands/SchemaDropCommand");
-var QueryCommand_1 = require("./commands/QueryCommand");
-var EntityCreateCommand_1 = require("./commands/EntityCreateCommand");
-var MigrationCreateCommand_1 = require("./commands/MigrationCreateCommand");
-var MigrationRunCommand_1 = require("./commands/MigrationRunCommand");
-var MigrationRevertCommand_1 = require("./commands/MigrationRevertCommand");
-var SubscriberCreateCommand_1 = require("./commands/SubscriberCreateCommand");
+var SchemaSyncCommand_1 = require("./commands/SchemaSyncCommand.d");
+var SchemaDropCommand_1 = require("./commands/SchemaDropCommand.d");
+var QueryCommand_1 = require("./commands/QueryCommand.d");
+var EntityCreateCommand_1 = require("./commands/EntityCreateCommand.d");
+var MigrationCreateCommand_1 = require("./commands/MigrationCreateCommand.d");
+var MigrationRunCommand_1 = require("./commands/MigrationRunCommand.d");
+var MigrationRevertCommand_1 = require("./commands/MigrationRevertCommand.d");
+var SubscriberCreateCommand_1 = require("./commands/SubscriberCreateCommand.d");
 require("yargonaut")
     .style("blue")
     .style("yellow", "required")

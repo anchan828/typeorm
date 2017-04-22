@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var ColumnTypes_1 = require("../metadata/types/ColumnTypes");
+var ColumnTypes_1 = require("../metadata/types/ColumnTypes.d");
 var DataTransformationUtils_1 = require("../util/DataTransformationUtils");
 /**
  * Subject is a subject of persistence.

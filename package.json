@@ -9,8 +9,8 @@
     "name": "Umed Khudoiberdiev",
     "email": "pleerock.me@gmail.com"
   },
-  "main": "./index.js",
-  "types": "./index.d.ts",
+  "main": "./build/package/index.js",
+  "types": "./build/package/index.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/typeorm/typeorm.git"
@@ -60,6 +60,7 @@
     "gulp-uglify": "^2.0.0",
     "gulpclass": "0.1.1",
     "mocha": "^3.2.0",
+    "mongodb": "^2.2.24",
     "mssql": "^3.3.0",
     "mysql": "^2.12.0",
     "mysql2": "^1.2.0",
@@ -77,7 +78,6 @@
     "@types/mongodb": "^2.1.41",
     "app-root-path": "^2.0.1",
     "glob": "^7.1.1",
-    "mongodb": "^2.2.24",
     "reflect-metadata": "^0.1.9",
     "yargonaut": "^1.1.2",
     "yargs": "^6.6.0"

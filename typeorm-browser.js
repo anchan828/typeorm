@@ -17,8 +17,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t;
-    return { next: verb(0), "throw": verb(1), "return": verb(2) };
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
@@ -4706,10 +4706,10 @@ System.register("typeorm/driver/postgres/PostgresQueryRunner", ["typeorm/driver/
                                     tableNamesString = tableNames.map(function (name) { return "'" + name + "'"; }).join(", ");
                                     tablesSql = "SELECT * FROM information_schema.tables WHERE table_catalog = '" + this.dbName + "' AND table_schema = '" + this.schemaName + "' AND table_name IN (" + tableNamesString + ")";
                                     columnsSql = "SELECT * FROM information_schema.columns WHERE table_catalog = '" + this.dbName + "' AND table_schema = '" + this.schemaName + "'";
-                                    indicesSql = "SELECT t.relname AS table_name, i.relname AS index_name, a.attname AS column_name  FROM pg_class t, pg_class i, pg_index ix, pg_attribute a\nWHERE t.oid = ix.indrelid AND i.oid = ix.indexrelid AND a.attrelid = t.oid\nAND a.attnum = ANY(ix.indkey) AND t.relkind = 'r' AND t.relname IN (" + tableNamesString + ") ORDER BY t.relname, i.relname";
-                                    foreignKeysSql = "SELECT table_name, constraint_name FROM information_schema.table_constraints WHERE table_catalog = '" + this.dbName + "' AND constraint_type = 'FOREIGN KEY'";
-                                    uniqueKeysSql = "SELECT * FROM information_schema.table_constraints WHERE table_catalog = '" + this.dbName + "' AND constraint_type = 'UNIQUE'";
-                                    primaryKeysSql = "SELECT c.column_name, tc.table_name, tc.constraint_name FROM information_schema.table_constraints tc\nJOIN information_schema.constraint_column_usage AS ccu USING (constraint_schema, constraint_name)\nJOIN information_schema.columns AS c ON c.table_schema = tc.constraint_schema AND tc.table_name = c.table_name AND ccu.column_name = c.column_name\nwhere constraint_type = 'PRIMARY KEY' and tc.table_catalog = '" + this.dbName + "'";
+                                    indicesSql = "SELECT t.relname AS table_name, i.relname AS index_name, a.attname AS column_name  FROM pg_class t, pg_class i, pg_index ix, pg_attribute a, pg_namespace ns\nWHERE t.oid = ix.indrelid AND i.oid = ix.indexrelid AND a.attrelid = t.oid\nAND a.attnum = ANY(ix.indkey) AND t.relkind = 'r' AND t.relname IN (" + tableNamesString + ") AND t.relnamespace = ns.OID AND ns.nspname ='" + this.schemaName + "' ORDER BY t.relname, i.relname";
+                                    foreignKeysSql = "SELECT table_name, constraint_name FROM information_schema.table_constraints WHERE table_catalog = '" + this.dbName + "' AND table_schema = '" + this.schemaName + "' AND constraint_type = 'FOREIGN KEY'";
+                                    uniqueKeysSql = "SELECT * FROM information_schema.table_constraints WHERE table_catalog = '" + this.dbName + "' AND table_schema = '" + this.schemaName + "' AND constraint_type = 'UNIQUE'";
+                                    primaryKeysSql = "SELECT c.column_name, tc.table_name, tc.constraint_name FROM information_schema.table_constraints tc\nJOIN information_schema.constraint_column_usage AS ccu USING (constraint_schema, constraint_name)\nJOIN information_schema.columns AS c ON c.table_schema = tc.constraint_schema AND tc.table_name = c.table_name AND ccu.column_name = c.column_name\nwhere constraint_type = 'PRIMARY KEY' AND c.table_schema = '" + this.schemaName + "' and tc.table_catalog = '" + this.dbName + "'";
                                     return [4 /*yield*/, Promise.all([
                                             this.query(tablesSql),
                                             this.query(columnsSql),
@@ -20996,7 +20996,7 @@ System.register("typeorm/connection/Connection", ["typeorm/repository/Repository
                  * Imports naming strategies from the given paths (directories) and registers them in the current connection.
                  */
                 Connection.prototype.importNamingStrategiesFromDirectories = function (paths) {
-                    this.importEntities(DirectoryExportedClassesLoader_1.importClassesFromDirectories(paths));
+                    this.importNamingStrategies(DirectoryExportedClassesLoader_1.importClassesFromDirectories(paths));
                     return this;
                 };
                 /**
@@ -25424,9 +25424,8 @@ System.register("typeorm/connection/ConnectionManager", ["typeorm/connection/Con
                 ConnectionManager.prototype.createAndConnectToAll = function (optionsOrOrmConfigFilePath) {
                     return __awaiter(this, void 0, void 0, function () {
                         var _this = this;
-                        var _a;
-                        return __generator(this, function (_b) {
-                            switch (_b.label) {
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
                                 case 0:
                                     // if connection options are given, then create connection from them
                                     if (optionsOrOrmConfigFilePath && optionsOrOrmConfigFilePath instanceof Array)
@@ -25441,7 +25440,7 @@ System.register("typeorm/connection/ConnectionManager", ["typeorm/connection/Con
                                         return [2 /*return*/, this.createFromConfigAndConnectToAll()];
                                     if (!this.hasDefaultConfigurationInEnvironmentVariables()) return [3 /*break*/, 2];
                                     return [4 /*yield*/, this.createFromEnvAndConnect()];
-                                case 1: return [2 /*return*/, [_b.sent()]];
+                                case 1: return [2 /*return*/, [_a.sent()]];
                                 case 2: throw new CannotDetermineConnectionOptionsError_1.CannotDetermineConnectionOptionsError();
                             }
                         });
