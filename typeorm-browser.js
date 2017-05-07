@@ -25676,9 +25676,52 @@ System.register("typeorm/connection/ConnectionManager", ["typeorm/connection/Con
         }
     };
 });
-System.register("typeorm/decorator/error/GeneratedOnlyForPrimaryError", [], function (exports_168, context_168) {
+System.register("typeorm/decorator/options/IndexOptions", [], function (exports_168, context_168) {
     "use strict";
     var __moduleName = context_168 && context_168.id;
+    return {
+        setters: [],
+        execute: function () {
+        }
+    };
+});
+System.register("typeorm/decorator/Index", ["typeorm/index"], function (exports_169, context_169) {
+    "use strict";
+    var __moduleName = context_169 && context_169.id;
+    /**
+     * Composite index must be set on entity classes and must specify entity's fields to be indexed.
+     */
+    function Index(nameOrFieldsOrOptions, maybeFieldsOrOptions, maybeOptions) {
+        var name = typeof nameOrFieldsOrOptions === "string" ? nameOrFieldsOrOptions : undefined;
+        var fields = typeof nameOrFieldsOrOptions === "string" ? maybeFieldsOrOptions : nameOrFieldsOrOptions;
+        var options = (typeof nameOrFieldsOrOptions === "object" && !Array.isArray(nameOrFieldsOrOptions)) ? nameOrFieldsOrOptions : maybeOptions;
+        if (!options)
+            options = (typeof maybeFieldsOrOptions === "object" && !Array.isArray(maybeFieldsOrOptions)) ? nameOrFieldsOrOptions : maybeOptions;
+        return function (clsOrObject, propertyName) {
+            var args = {
+                target: propertyName ? clsOrObject.constructor : clsOrObject,
+                name: name,
+                columns: propertyName ? [propertyName] : fields,
+                unique: options && options.unique ? true : false
+            };
+            index_3.getMetadataArgsStorage().indices.add(args);
+        };
+    }
+    exports_169("Index", Index);
+    var index_3;
+    return {
+        setters: [
+            function (index_3_1) {
+                index_3 = index_3_1;
+            }
+        ],
+        execute: function () {
+        }
+    };
+});
+System.register("typeorm/decorator/error/GeneratedOnlyForPrimaryError", [], function (exports_170, context_170) {
+    "use strict";
+    var __moduleName = context_170 && context_170.id;
     var GeneratedOnlyForPrimaryError;
     return {
         setters: [],
@@ -25694,13 +25737,13 @@ System.register("typeorm/decorator/error/GeneratedOnlyForPrimaryError", [], func
                 }
                 return GeneratedOnlyForPrimaryError;
             }(Error));
-            exports_168("GeneratedOnlyForPrimaryError", GeneratedOnlyForPrimaryError);
+            exports_170("GeneratedOnlyForPrimaryError", GeneratedOnlyForPrimaryError);
         }
     };
 });
-System.register("typeorm/decorator/columns/Column", ["typeorm/decorator/error/GeneratedOnlyForPrimaryError", "typeorm/index", "typeorm/metadata/types/ColumnTypes"], function (exports_169, context_169) {
+System.register("typeorm/decorator/columns/Column", ["typeorm/decorator/error/GeneratedOnlyForPrimaryError", "typeorm/index", "typeorm/metadata/types/ColumnTypes"], function (exports_171, context_171) {
     "use strict";
-    var __moduleName = context_169 && context_169.id;
+    var __moduleName = context_171 && context_171.id;
     /**
      * Column decorator is used to mark a specific class property as a table column.
      * Only properties decorated with this decorator will be persisted to the database when entity be saved.
@@ -25743,18 +25786,18 @@ System.register("typeorm/decorator/columns/Column", ["typeorm/decorator/error/Ge
                 mode: "regular",
                 options: options
             };
-            index_3.getMetadataArgsStorage().columns.add(args);
+            index_4.getMetadataArgsStorage().columns.add(args);
         };
     }
-    exports_169("Column", Column);
-    var GeneratedOnlyForPrimaryError_1, index_3, ColumnTypes_10;
+    exports_171("Column", Column);
+    var GeneratedOnlyForPrimaryError_1, index_4, ColumnTypes_10;
     return {
         setters: [
             function (GeneratedOnlyForPrimaryError_1_1) {
                 GeneratedOnlyForPrimaryError_1 = GeneratedOnlyForPrimaryError_1_1;
             },
-            function (index_3_1) {
-                index_3 = index_3_1;
+            function (index_4_1) {
+                index_4 = index_4_1;
             },
             function (ColumnTypes_10_1) {
                 ColumnTypes_10 = ColumnTypes_10_1;
@@ -25764,9 +25807,9 @@ System.register("typeorm/decorator/columns/Column", ["typeorm/decorator/error/Ge
         }
     };
 });
-System.register("typeorm/decorator/columns/CreateDateColumn", ["typeorm/metadata/types/ColumnTypes", "typeorm/index"], function (exports_170, context_170) {
+System.register("typeorm/decorator/columns/CreateDateColumn", ["typeorm/metadata/types/ColumnTypes", "typeorm/index"], function (exports_172, context_172) {
     "use strict";
-    var __moduleName = context_170 && context_170.id;
+    var __moduleName = context_172 && context_172.id;
     /**
      * This column will store a creation date of the inserted object.
      * Creation date is generated and inserted only once,
@@ -25788,27 +25831,27 @@ System.register("typeorm/decorator/columns/CreateDateColumn", ["typeorm/metadata
                 mode: "createDate",
                 options: options
             };
-            index_4.getMetadataArgsStorage().columns.add(args);
+            index_5.getMetadataArgsStorage().columns.add(args);
         };
     }
-    exports_170("CreateDateColumn", CreateDateColumn);
-    var ColumnTypes_11, index_4;
+    exports_172("CreateDateColumn", CreateDateColumn);
+    var ColumnTypes_11, index_5;
     return {
         setters: [
             function (ColumnTypes_11_1) {
                 ColumnTypes_11 = ColumnTypes_11_1;
             },
-            function (index_4_1) {
-                index_4 = index_4_1;
+            function (index_5_1) {
+                index_5 = index_5_1;
             }
         ],
         execute: function () {
         }
     };
 });
-System.register("typeorm/decorator/columns/DiscriminatorColumn", ["typeorm/index"], function (exports_171, context_171) {
+System.register("typeorm/decorator/columns/DiscriminatorColumn", ["typeorm/index"], function (exports_173, context_173) {
     "use strict";
-    var __moduleName = context_171 && context_171.id;
+    var __moduleName = context_173 && context_173.id;
     /**
      * DiscriminatorColumn is a special type column used on entity class (not entity property)
      * and creates a special column which will contain an entity type.
@@ -25828,24 +25871,24 @@ System.register("typeorm/decorator/columns/DiscriminatorColumn", ["typeorm/index
                 propertyName: discriminatorOptions.name,
                 options: options
             };
-            index_5.getMetadataArgsStorage().columns.add(args);
+            index_6.getMetadataArgsStorage().columns.add(args);
         };
     }
-    exports_171("DiscriminatorColumn", DiscriminatorColumn);
-    var index_5;
+    exports_173("DiscriminatorColumn", DiscriminatorColumn);
+    var index_6;
     return {
         setters: [
-            function (index_5_1) {
-                index_5 = index_5_1;
+            function (index_6_1) {
+                index_6 = index_6_1;
             }
         ],
         execute: function () {
         }
     };
 });
-System.register("typeorm/decorator/error/PrimaryColumnCannotBeNullableError", [], function (exports_172, context_172) {
+System.register("typeorm/decorator/error/PrimaryColumnCannotBeNullableError", [], function (exports_174, context_174) {
     "use strict";
-    var __moduleName = context_172 && context_172.id;
+    var __moduleName = context_174 && context_174.id;
     var PrimaryColumnCannotBeNullableError;
     return {
         setters: [],
@@ -25861,13 +25904,13 @@ System.register("typeorm/decorator/error/PrimaryColumnCannotBeNullableError", []
                 }
                 return PrimaryColumnCannotBeNullableError;
             }(Error));
-            exports_172("PrimaryColumnCannotBeNullableError", PrimaryColumnCannotBeNullableError);
+            exports_174("PrimaryColumnCannotBeNullableError", PrimaryColumnCannotBeNullableError);
         }
     };
 });
-System.register("typeorm/decorator/columns/PrimaryGeneratedColumn", ["typeorm/index", "typeorm/decorator/error/PrimaryColumnCannotBeNullableError"], function (exports_173, context_173) {
+System.register("typeorm/decorator/columns/PrimaryGeneratedColumn", ["typeorm/index", "typeorm/decorator/error/PrimaryColumnCannotBeNullableError"], function (exports_175, context_175) {
     "use strict";
-    var __moduleName = context_173 && context_173.id;
+    var __moduleName = context_175 && context_175.id;
     // todo: add overloads for PrimaryGeneratedColumn(generationType: "sequence"|"uuid" = "sequence", options?: ColumnOptions)
     /**
      * Column decorator is used to mark a specific class property as a table column.
@@ -25897,15 +25940,15 @@ System.register("typeorm/decorator/columns/PrimaryGeneratedColumn", ["typeorm/in
                 mode: "regular",
                 options: options
             };
-            index_6.getMetadataArgsStorage().columns.add(args);
+            index_7.getMetadataArgsStorage().columns.add(args);
         };
     }
-    exports_173("PrimaryGeneratedColumn", PrimaryGeneratedColumn);
-    var index_6, PrimaryColumnCannotBeNullableError_1;
+    exports_175("PrimaryGeneratedColumn", PrimaryGeneratedColumn);
+    var index_7, PrimaryColumnCannotBeNullableError_1;
     return {
         setters: [
-            function (index_6_1) {
-                index_6 = index_6_1;
+            function (index_7_1) {
+                index_7 = index_7_1;
             },
             function (PrimaryColumnCannotBeNullableError_1_1) {
                 PrimaryColumnCannotBeNullableError_1 = PrimaryColumnCannotBeNullableError_1_1;
@@ -25915,9 +25958,9 @@ System.register("typeorm/decorator/columns/PrimaryGeneratedColumn", ["typeorm/in
         }
     };
 });
-System.register("typeorm/decorator/error/ColumnTypeUndefinedError", [], function (exports_174, context_174) {
+System.register("typeorm/decorator/error/ColumnTypeUndefinedError", [], function (exports_176, context_176) {
     "use strict";
-    var __moduleName = context_174 && context_174.id;
+    var __moduleName = context_176 && context_176.id;
     var ColumnTypeUndefinedError;
     return {
         setters: [],
@@ -25933,13 +25976,13 @@ System.register("typeorm/decorator/error/ColumnTypeUndefinedError", [], function
                 }
                 return ColumnTypeUndefinedError;
             }(Error));
-            exports_174("ColumnTypeUndefinedError", ColumnTypeUndefinedError);
+            exports_176("ColumnTypeUndefinedError", ColumnTypeUndefinedError);
         }
     };
 });
-System.register("typeorm/decorator/columns/PrimaryColumn", ["typeorm/metadata/types/ColumnTypes", "typeorm/decorator/error/ColumnTypeUndefinedError", "typeorm/index", "typeorm/decorator/error/PrimaryColumnCannotBeNullableError"], function (exports_175, context_175) {
+System.register("typeorm/decorator/columns/PrimaryColumn", ["typeorm/metadata/types/ColumnTypes", "typeorm/decorator/error/ColumnTypeUndefinedError", "typeorm/index", "typeorm/decorator/error/PrimaryColumnCannotBeNullableError"], function (exports_177, context_177) {
     "use strict";
-    var __moduleName = context_175 && context_175.id;
+    var __moduleName = context_177 && context_177.id;
     /**
      * Column decorator is used to mark a specific class property as a table column.
      * Only properties decorated with this decorator will be persisted to the database when entity be saved.
@@ -25983,11 +26026,11 @@ System.register("typeorm/decorator/columns/PrimaryColumn", ["typeorm/metadata/ty
                 mode: "regular",
                 options: options
             };
-            index_7.getMetadataArgsStorage().columns.add(args);
+            index_8.getMetadataArgsStorage().columns.add(args);
         };
     }
-    exports_175("PrimaryColumn", PrimaryColumn);
-    var ColumnTypes_12, ColumnTypeUndefinedError_1, index_7, PrimaryColumnCannotBeNullableError_2;
+    exports_177("PrimaryColumn", PrimaryColumn);
+    var ColumnTypes_12, ColumnTypeUndefinedError_1, index_8, PrimaryColumnCannotBeNullableError_2;
     return {
         setters: [
             function (ColumnTypes_12_1) {
@@ -25996,8 +26039,8 @@ System.register("typeorm/decorator/columns/PrimaryColumn", ["typeorm/metadata/ty
             function (ColumnTypeUndefinedError_1_1) {
                 ColumnTypeUndefinedError_1 = ColumnTypeUndefinedError_1_1;
             },
-            function (index_7_1) {
-                index_7 = index_7_1;
+            function (index_8_1) {
+                index_8 = index_8_1;
             },
             function (PrimaryColumnCannotBeNullableError_2_1) {
                 PrimaryColumnCannotBeNullableError_2 = PrimaryColumnCannotBeNullableError_2_1;
@@ -26007,9 +26050,9 @@ System.register("typeorm/decorator/columns/PrimaryColumn", ["typeorm/metadata/ty
         }
     };
 });
-System.register("typeorm/decorator/columns/UpdateDateColumn", ["typeorm/metadata/types/ColumnTypes", "typeorm/index"], function (exports_176, context_176) {
+System.register("typeorm/decorator/columns/UpdateDateColumn", ["typeorm/metadata/types/ColumnTypes", "typeorm/index"], function (exports_178, context_178) {
     "use strict";
-    var __moduleName = context_176 && context_176.id;
+    var __moduleName = context_178 && context_178.id;
     /**
      * This column will store an update date of the updated object.
      * This date is being updated each time you persist the object.
@@ -26030,27 +26073,27 @@ System.register("typeorm/decorator/columns/UpdateDateColumn", ["typeorm/metadata
                 mode: "updateDate",
                 options: options
             };
-            index_8.getMetadataArgsStorage().columns.add(args);
+            index_9.getMetadataArgsStorage().columns.add(args);
         };
     }
-    exports_176("UpdateDateColumn", UpdateDateColumn);
-    var ColumnTypes_13, index_8;
+    exports_178("UpdateDateColumn", UpdateDateColumn);
+    var ColumnTypes_13, index_9;
     return {
         setters: [
             function (ColumnTypes_13_1) {
                 ColumnTypes_13 = ColumnTypes_13_1;
             },
-            function (index_8_1) {
-                index_8 = index_8_1;
+            function (index_9_1) {
+                index_9 = index_9_1;
             }
         ],
         execute: function () {
         }
     };
 });
-System.register("typeorm/decorator/columns/VersionColumn", ["typeorm/metadata/types/ColumnTypes", "typeorm/index"], function (exports_177, context_177) {
+System.register("typeorm/decorator/columns/VersionColumn", ["typeorm/metadata/types/ColumnTypes", "typeorm/index"], function (exports_179, context_179) {
     "use strict";
-    var __moduleName = context_177 && context_177.id;
+    var __moduleName = context_179 && context_179.id;
     /**
      * This column will store a number - version of the entity.
      * Every time your entity will be persisted, this number will be increased by one -
@@ -26073,27 +26116,27 @@ System.register("typeorm/decorator/columns/VersionColumn", ["typeorm/metadata/ty
                 mode: "version",
                 options: options
             };
-            index_9.getMetadataArgsStorage().columns.add(args);
+            index_10.getMetadataArgsStorage().columns.add(args);
         };
     }
-    exports_177("VersionColumn", VersionColumn);
-    var ColumnTypes_14, index_9;
+    exports_179("VersionColumn", VersionColumn);
+    var ColumnTypes_14, index_10;
     return {
         setters: [
             function (ColumnTypes_14_1) {
                 ColumnTypes_14 = ColumnTypes_14_1;
             },
-            function (index_9_1) {
-                index_9 = index_9_1;
+            function (index_10_1) {
+                index_10 = index_10_1;
             }
         ],
         execute: function () {
         }
     };
 });
-System.register("typeorm/decorator/columns/ObjectIdColumn", ["typeorm/index"], function (exports_178, context_178) {
+System.register("typeorm/decorator/columns/ObjectIdColumn", ["typeorm/index"], function (exports_180, context_180) {
     "use strict";
-    var __moduleName = context_178 && context_178.id;
+    var __moduleName = context_180 && context_180.id;
     /**
      * Special type of column that is available only for MongoDB database.
      * Marks your entity's column to be an object id.
@@ -26114,24 +26157,24 @@ System.register("typeorm/decorator/columns/ObjectIdColumn", ["typeorm/index"], f
                 mode: "objectId",
                 options: options
             };
-            index_10.getMetadataArgsStorage().columns.add(args);
+            index_11.getMetadataArgsStorage().columns.add(args);
         };
     }
-    exports_178("ObjectIdColumn", ObjectIdColumn);
-    var index_10;
+    exports_180("ObjectIdColumn", ObjectIdColumn);
+    var index_11;
     return {
         setters: [
-            function (index_10_1) {
-                index_10 = index_10_1;
+            function (index_11_1) {
+                index_11 = index_11_1;
             }
         ],
         execute: function () {
         }
     };
 });
-System.register("typeorm/decorator/listeners/AfterInsert", ["typeorm/index", "typeorm/metadata/types/EventListenerTypes"], function (exports_179, context_179) {
+System.register("typeorm/decorator/listeners/AfterInsert", ["typeorm/index", "typeorm/metadata/types/EventListenerTypes"], function (exports_181, context_181) {
     "use strict";
-    var __moduleName = context_179 && context_179.id;
+    var __moduleName = context_181 && context_181.id;
     /**
      * Calls a method on which this decorator is applied after this entity insertion.
      */
@@ -26142,15 +26185,15 @@ System.register("typeorm/decorator/listeners/AfterInsert", ["typeorm/index", "ty
                 propertyName: propertyName,
                 type: EventListenerTypes_2.EventListenerTypes.AFTER_INSERT
             };
-            index_11.getMetadataArgsStorage().entityListeners.add(args);
+            index_12.getMetadataArgsStorage().entityListeners.add(args);
         };
     }
-    exports_179("AfterInsert", AfterInsert);
-    var index_11, EventListenerTypes_2;
+    exports_181("AfterInsert", AfterInsert);
+    var index_12, EventListenerTypes_2;
     return {
         setters: [
-            function (index_11_1) {
-                index_11 = index_11_1;
+            function (index_12_1) {
+                index_12 = index_12_1;
             },
             function (EventListenerTypes_2_1) {
                 EventListenerTypes_2 = EventListenerTypes_2_1;
@@ -26160,9 +26203,9 @@ System.register("typeorm/decorator/listeners/AfterInsert", ["typeorm/index", "ty
         }
     };
 });
-System.register("typeorm/decorator/listeners/AfterLoad", ["typeorm/index", "typeorm/metadata/types/EventListenerTypes"], function (exports_180, context_180) {
+System.register("typeorm/decorator/listeners/AfterLoad", ["typeorm/index", "typeorm/metadata/types/EventListenerTypes"], function (exports_182, context_182) {
     "use strict";
-    var __moduleName = context_180 && context_180.id;
+    var __moduleName = context_182 && context_182.id;
     /**
      * Calls a method on which this decorator is applied after entity is loaded.
      */
@@ -26173,15 +26216,15 @@ System.register("typeorm/decorator/listeners/AfterLoad", ["typeorm/index", "type
                 propertyName: propertyName,
                 type: EventListenerTypes_3.EventListenerTypes.AFTER_LOAD
             };
-            index_12.getMetadataArgsStorage().entityListeners.add(args);
+            index_13.getMetadataArgsStorage().entityListeners.add(args);
         };
     }
-    exports_180("AfterLoad", AfterLoad);
-    var index_12, EventListenerTypes_3;
+    exports_182("AfterLoad", AfterLoad);
+    var index_13, EventListenerTypes_3;
     return {
         setters: [
-            function (index_12_1) {
-                index_12 = index_12_1;
+            function (index_13_1) {
+                index_13 = index_13_1;
             },
             function (EventListenerTypes_3_1) {
                 EventListenerTypes_3 = EventListenerTypes_3_1;
@@ -26191,9 +26234,9 @@ System.register("typeorm/decorator/listeners/AfterLoad", ["typeorm/index", "type
         }
     };
 });
-System.register("typeorm/decorator/listeners/AfterRemove", ["typeorm/index", "typeorm/metadata/types/EventListenerTypes"], function (exports_181, context_181) {
+System.register("typeorm/decorator/listeners/AfterRemove", ["typeorm/index", "typeorm/metadata/types/EventListenerTypes"], function (exports_183, context_183) {
     "use strict";
-    var __moduleName = context_181 && context_181.id;
+    var __moduleName = context_183 && context_183.id;
     /**
      * Calls a method on which this decorator is applied after this entity removal.
      */
@@ -26204,15 +26247,15 @@ System.register("typeorm/decorator/listeners/AfterRemove", ["typeorm/index", "ty
                 propertyName: propertyName,
                 type: EventListenerTypes_4.EventListenerTypes.AFTER_REMOVE
             };
-            index_13.getMetadataArgsStorage().entityListeners.add(args);
+            index_14.getMetadataArgsStorage().entityListeners.add(args);
         };
     }
-    exports_181("AfterRemove", AfterRemove);
-    var index_13, EventListenerTypes_4;
+    exports_183("AfterRemove", AfterRemove);
+    var index_14, EventListenerTypes_4;
     return {
         setters: [
-            function (index_13_1) {
-                index_13 = index_13_1;
+            function (index_14_1) {
+                index_14 = index_14_1;
             },
             function (EventListenerTypes_4_1) {
                 EventListenerTypes_4 = EventListenerTypes_4_1;
@@ -26222,9 +26265,9 @@ System.register("typeorm/decorator/listeners/AfterRemove", ["typeorm/index", "ty
         }
     };
 });
-System.register("typeorm/decorator/listeners/AfterUpdate", ["typeorm/index", "typeorm/metadata/types/EventListenerTypes"], function (exports_182, context_182) {
+System.register("typeorm/decorator/listeners/AfterUpdate", ["typeorm/index", "typeorm/metadata/types/EventListenerTypes"], function (exports_184, context_184) {
     "use strict";
-    var __moduleName = context_182 && context_182.id;
+    var __moduleName = context_184 && context_184.id;
     /**
      * Calls a method on which this decorator is applied after this entity update.
      */
@@ -26235,15 +26278,15 @@ System.register("typeorm/decorator/listeners/AfterUpdate", ["typeorm/index", "ty
                 propertyName: propertyName,
                 type: EventListenerTypes_5.EventListenerTypes.AFTER_UPDATE
             };
-            index_14.getMetadataArgsStorage().entityListeners.add(args);
+            index_15.getMetadataArgsStorage().entityListeners.add(args);
         };
     }
-    exports_182("AfterUpdate", AfterUpdate);
-    var index_14, EventListenerTypes_5;
+    exports_184("AfterUpdate", AfterUpdate);
+    var index_15, EventListenerTypes_5;
     return {
         setters: [
-            function (index_14_1) {
-                index_14 = index_14_1;
+            function (index_15_1) {
+                index_15 = index_15_1;
             },
             function (EventListenerTypes_5_1) {
                 EventListenerTypes_5 = EventListenerTypes_5_1;
@@ -26253,9 +26296,9 @@ System.register("typeorm/decorator/listeners/AfterUpdate", ["typeorm/index", "ty
         }
     };
 });
-System.register("typeorm/decorator/listeners/BeforeInsert", ["typeorm/index", "typeorm/metadata/types/EventListenerTypes"], function (exports_183, context_183) {
+System.register("typeorm/decorator/listeners/BeforeInsert", ["typeorm/index", "typeorm/metadata/types/EventListenerTypes"], function (exports_185, context_185) {
     "use strict";
-    var __moduleName = context_183 && context_183.id;
+    var __moduleName = context_185 && context_185.id;
     /**
      * Calls a method on which this decorator is applied before this entity insertion.
      */
@@ -26266,15 +26309,15 @@ System.register("typeorm/decorator/listeners/BeforeInsert", ["typeorm/index", "t
                 propertyName: propertyName,
                 type: EventListenerTypes_6.EventListenerTypes.BEFORE_INSERT
             };
-            index_15.getMetadataArgsStorage().entityListeners.add(args);
+            index_16.getMetadataArgsStorage().entityListeners.add(args);
         };
     }
-    exports_183("BeforeInsert", BeforeInsert);
-    var index_15, EventListenerTypes_6;
+    exports_185("BeforeInsert", BeforeInsert);
+    var index_16, EventListenerTypes_6;
     return {
         setters: [
-            function (index_15_1) {
-                index_15 = index_15_1;
+            function (index_16_1) {
+                index_16 = index_16_1;
             },
             function (EventListenerTypes_6_1) {
                 EventListenerTypes_6 = EventListenerTypes_6_1;
@@ -26284,9 +26327,9 @@ System.register("typeorm/decorator/listeners/BeforeInsert", ["typeorm/index", "t
         }
     };
 });
-System.register("typeorm/decorator/listeners/BeforeRemove", ["typeorm/index", "typeorm/metadata/types/EventListenerTypes"], function (exports_184, context_184) {
+System.register("typeorm/decorator/listeners/BeforeRemove", ["typeorm/index", "typeorm/metadata/types/EventListenerTypes"], function (exports_186, context_186) {
     "use strict";
-    var __moduleName = context_184 && context_184.id;
+    var __moduleName = context_186 && context_186.id;
     /**
      * Calls a method on which this decorator is applied before this entity removal.
      */
@@ -26297,15 +26340,15 @@ System.register("typeorm/decorator/listeners/BeforeRemove", ["typeorm/index", "t
                 propertyName: propertyName,
                 type: EventListenerTypes_7.EventListenerTypes.BEFORE_REMOVE
             };
-            index_16.getMetadataArgsStorage().entityListeners.add(args);
+            index_17.getMetadataArgsStorage().entityListeners.add(args);
         };
     }
-    exports_184("BeforeRemove", BeforeRemove);
-    var index_16, EventListenerTypes_7;
+    exports_186("BeforeRemove", BeforeRemove);
+    var index_17, EventListenerTypes_7;
     return {
         setters: [
-            function (index_16_1) {
-                index_16 = index_16_1;
+            function (index_17_1) {
+                index_17 = index_17_1;
             },
             function (EventListenerTypes_7_1) {
                 EventListenerTypes_7 = EventListenerTypes_7_1;
@@ -26315,9 +26358,9 @@ System.register("typeorm/decorator/listeners/BeforeRemove", ["typeorm/index", "t
         }
     };
 });
-System.register("typeorm/decorator/listeners/BeforeUpdate", ["typeorm/index", "typeorm/metadata/types/EventListenerTypes"], function (exports_185, context_185) {
+System.register("typeorm/decorator/listeners/BeforeUpdate", ["typeorm/index", "typeorm/metadata/types/EventListenerTypes"], function (exports_187, context_187) {
     "use strict";
-    var __moduleName = context_185 && context_185.id;
+    var __moduleName = context_187 && context_187.id;
     /**
      * Calls a method on which this decorator is applied before this entity update.
      */
@@ -26328,15 +26371,15 @@ System.register("typeorm/decorator/listeners/BeforeUpdate", ["typeorm/index", "t
                 propertyName: propertyName,
                 type: EventListenerTypes_8.EventListenerTypes.BEFORE_UPDATE
             };
-            index_17.getMetadataArgsStorage().entityListeners.add(args);
+            index_18.getMetadataArgsStorage().entityListeners.add(args);
         };
     }
-    exports_185("BeforeUpdate", BeforeUpdate);
-    var index_17, EventListenerTypes_8;
+    exports_187("BeforeUpdate", BeforeUpdate);
+    var index_18, EventListenerTypes_8;
     return {
         setters: [
-            function (index_17_1) {
-                index_17 = index_17_1;
+            function (index_18_1) {
+                index_18 = index_18_1;
             },
             function (EventListenerTypes_8_1) {
                 EventListenerTypes_8 = EventListenerTypes_8_1;
@@ -26346,9 +26389,9 @@ System.register("typeorm/decorator/listeners/BeforeUpdate", ["typeorm/index", "t
         }
     };
 });
-System.register("typeorm/decorator/listeners/EventSubscriber", ["typeorm/index"], function (exports_186, context_186) {
+System.register("typeorm/decorator/listeners/EventSubscriber", ["typeorm/index"], function (exports_188, context_188) {
     "use strict";
-    var __moduleName = context_186 && context_186.id;
+    var __moduleName = context_188 && context_188.id;
     /**
      * Classes decorated with this decorator will listen to ORM events and their methods will be triggered when event
      * occurs. Those classes must implement EventSubscriberInterface interface.
@@ -26358,40 +26401,22 @@ System.register("typeorm/decorator/listeners/EventSubscriber", ["typeorm/index"]
             var args = {
                 target: target
             };
-            index_18.getMetadataArgsStorage().entitySubscribers.add(args);
+            index_19.getMetadataArgsStorage().entitySubscribers.add(args);
         };
     }
-    exports_186("EventSubscriber", EventSubscriber);
-    var index_18;
+    exports_188("EventSubscriber", EventSubscriber);
+    var index_19;
     return {
         setters: [
-            function (index_18_1) {
-                index_18 = index_18_1;
+            function (index_19_1) {
+                index_19 = index_19_1;
             }
         ],
         execute: function () {
         }
     };
 });
-System.register("typeorm/decorator/options/IndexOptions", [], function (exports_187, context_187) {
-    "use strict";
-    var __moduleName = context_187 && context_187.id;
-    return {
-        setters: [],
-        execute: function () {
-        }
-    };
-});
-System.register("typeorm/decorator/options/JoinTableOptions", [], function (exports_188, context_188) {
-    "use strict";
-    var __moduleName = context_188 && context_188.id;
-    return {
-        setters: [],
-        execute: function () {
-        }
-    };
-});
-System.register("typeorm/decorator/options/EntityOptions", [], function (exports_189, context_189) {
+System.register("typeorm/decorator/options/JoinTableOptions", [], function (exports_189, context_189) {
     "use strict";
     var __moduleName = context_189 && context_189.id;
     return {
@@ -26400,9 +26425,18 @@ System.register("typeorm/decorator/options/EntityOptions", [], function (exports
         }
     };
 });
-System.register("typeorm/decorator/relations/RelationCount", ["typeorm/index"], function (exports_190, context_190) {
+System.register("typeorm/decorator/options/EntityOptions", [], function (exports_190, context_190) {
     "use strict";
     var __moduleName = context_190 && context_190.id;
+    return {
+        setters: [],
+        execute: function () {
+        }
+    };
+});
+System.register("typeorm/decorator/relations/RelationCount", ["typeorm/index"], function (exports_191, context_191) {
+    "use strict";
+    var __moduleName = context_191 && context_191.id;
     /**
      * Holds a number of children in the closure table of the column.
      */
@@ -26416,24 +26450,24 @@ System.register("typeorm/decorator/relations/RelationCount", ["typeorm/index"], 
                 propertyName: propertyName,
                 relation: relation
             };
-            index_19.getMetadataArgsStorage().relationCounts.add(args);
+            index_20.getMetadataArgsStorage().relationCounts.add(args);
         };
     }
-    exports_190("RelationCount", RelationCount);
-    var index_19;
+    exports_191("RelationCount", RelationCount);
+    var index_20;
     return {
         setters: [
-            function (index_19_1) {
-                index_19 = index_19_1;
+            function (index_20_1) {
+                index_20 = index_20_1;
             }
         ],
         execute: function () {
         }
     };
 });
-System.register("typeorm/decorator/relations/JoinColumn", ["typeorm/index"], function (exports_191, context_191) {
+System.register("typeorm/decorator/relations/JoinColumn", ["typeorm/index"], function (exports_192, context_192) {
     "use strict";
-    var __moduleName = context_191 && context_191.id;
+    var __moduleName = context_192 && context_192.id;
     /**
      * JoinColumn decorator used on one-to-one relations to specify owner side of relationship.
      * It also can be used on both one-to-one and many-to-one relations to specify custom column name
@@ -26448,24 +26482,24 @@ System.register("typeorm/decorator/relations/JoinColumn", ["typeorm/index"], fun
                 name: options.name,
                 referencedColumnName: options.referencedColumnName
             };
-            index_20.getMetadataArgsStorage().joinColumns.add(args);
+            index_21.getMetadataArgsStorage().joinColumns.add(args);
         };
     }
-    exports_191("JoinColumn", JoinColumn);
-    var index_20;
+    exports_192("JoinColumn", JoinColumn);
+    var index_21;
     return {
         setters: [
-            function (index_20_1) {
-                index_20 = index_20_1;
+            function (index_21_1) {
+                index_21 = index_21_1;
             }
         ],
         execute: function () {
         }
     };
 });
-System.register("typeorm/decorator/relations/JoinTable", ["typeorm/index"], function (exports_192, context_192) {
+System.register("typeorm/decorator/relations/JoinTable", ["typeorm/index"], function (exports_193, context_193) {
     "use strict";
-    var __moduleName = context_192 && context_192.id;
+    var __moduleName = context_193 && context_193.id;
     /**
      * JoinTable decorator is used in many-to-many relationship to specify owner side of relationship.
      * Its also used to set a custom junction table's name, column names and referenced columns.
@@ -26480,24 +26514,24 @@ System.register("typeorm/decorator/relations/JoinTable", ["typeorm/index"], func
                 joinColumn: options.joinColumn,
                 inverseJoinColumn: options.inverseJoinColumn
             };
-            index_21.getMetadataArgsStorage().joinTables.add(args);
+            index_22.getMetadataArgsStorage().joinTables.add(args);
         };
     }
-    exports_192("JoinTable", JoinTable);
-    var index_21;
+    exports_193("JoinTable", JoinTable);
+    var index_22;
     return {
         setters: [
-            function (index_21_1) {
-                index_21 = index_21_1;
+            function (index_22_1) {
+                index_22 = index_22_1;
             }
         ],
         execute: function () {
         }
     };
 });
-System.register("typeorm/decorator/relations/ManyToMany", ["typeorm/metadata/types/RelationTypes", "typeorm/index"], function (exports_193, context_193) {
+System.register("typeorm/decorator/relations/ManyToMany", ["typeorm/metadata/types/RelationTypes", "typeorm/index"], function (exports_194, context_194) {
     "use strict";
-    var __moduleName = context_193 && context_193.id;
+    var __moduleName = context_194 && context_194.id;
     /**
      * Many-to-many is a type of relationship when Entity1 can have multiple instances of Entity2, and Entity2 can have
      * multiple instances of Entity1. To achieve it, this type of relation creates a junction table, where it storage
@@ -26531,27 +26565,27 @@ System.register("typeorm/decorator/relations/ManyToMany", ["typeorm/metadata/typ
                 inverseSideProperty: inverseSideProperty,
                 options: options
             };
-            index_22.getMetadataArgsStorage().relations.add(args);
+            index_23.getMetadataArgsStorage().relations.add(args);
         };
     }
-    exports_193("ManyToMany", ManyToMany);
-    var RelationTypes_3, index_22;
+    exports_194("ManyToMany", ManyToMany);
+    var RelationTypes_3, index_23;
     return {
         setters: [
             function (RelationTypes_3_1) {
                 RelationTypes_3 = RelationTypes_3_1;
             },
-            function (index_22_1) {
-                index_22 = index_22_1;
+            function (index_23_1) {
+                index_23 = index_23_1;
             }
         ],
         execute: function () {
         }
     };
 });
-System.register("typeorm/decorator/relations/ManyToOne", ["typeorm/metadata/types/RelationTypes", "typeorm/index"], function (exports_194, context_194) {
+System.register("typeorm/decorator/relations/ManyToOne", ["typeorm/metadata/types/RelationTypes", "typeorm/index"], function (exports_195, context_195) {
     "use strict";
-    var __moduleName = context_194 && context_194.id;
+    var __moduleName = context_195 && context_195.id;
     /**
      * Many-to-one relation allows to create type of relation when Entity1 can have single instance of Entity2, but
      * Entity2 can have a multiple instances of Entity1. Entity1 is an owner of the relationship, and storages Entity2 id
@@ -26585,27 +26619,27 @@ System.register("typeorm/decorator/relations/ManyToOne", ["typeorm/metadata/type
                 inverseSideProperty: inverseSideProperty,
                 options: options
             };
-            index_23.getMetadataArgsStorage().relations.add(args);
+            index_24.getMetadataArgsStorage().relations.add(args);
         };
     }
-    exports_194("ManyToOne", ManyToOne);
-    var RelationTypes_4, index_23;
+    exports_195("ManyToOne", ManyToOne);
+    var RelationTypes_4, index_24;
     return {
         setters: [
             function (RelationTypes_4_1) {
                 RelationTypes_4 = RelationTypes_4_1;
             },
-            function (index_23_1) {
-                index_23 = index_23_1;
+            function (index_24_1) {
+                index_24 = index_24_1;
             }
         ],
         execute: function () {
         }
     };
 });
-System.register("typeorm/decorator/relations/OneToMany", ["typeorm/metadata/types/RelationTypes", "typeorm/index"], function (exports_195, context_195) {
+System.register("typeorm/decorator/relations/OneToMany", ["typeorm/metadata/types/RelationTypes", "typeorm/index"], function (exports_196, context_196) {
     "use strict";
-    var __moduleName = context_195 && context_195.id;
+    var __moduleName = context_196 && context_196.id;
     // todo: make decorators which use inverse side string separate
     /**
      * One-to-many relation allows to create type of relation when Entity2 can have multiple instances of Entity1.
@@ -26632,27 +26666,27 @@ System.register("typeorm/decorator/relations/OneToMany", ["typeorm/metadata/type
                 inverseSideProperty: inverseSide,
                 options: options
             };
-            index_24.getMetadataArgsStorage().relations.add(args);
+            index_25.getMetadataArgsStorage().relations.add(args);
         };
     }
-    exports_195("OneToMany", OneToMany);
-    var RelationTypes_5, index_24;
+    exports_196("OneToMany", OneToMany);
+    var RelationTypes_5, index_25;
     return {
         setters: [
             function (RelationTypes_5_1) {
                 RelationTypes_5 = RelationTypes_5_1;
             },
-            function (index_24_1) {
-                index_24 = index_24_1;
+            function (index_25_1) {
+                index_25 = index_25_1;
             }
         ],
         execute: function () {
         }
     };
 });
-System.register("typeorm/decorator/relations/OneToOne", ["typeorm/metadata/types/RelationTypes", "typeorm/index"], function (exports_196, context_196) {
+System.register("typeorm/decorator/relations/OneToOne", ["typeorm/metadata/types/RelationTypes", "typeorm/index"], function (exports_197, context_197) {
     "use strict";
-    var __moduleName = context_196 && context_196.id;
+    var __moduleName = context_197 && context_197.id;
     /**
      * One-to-one relation allows to create direct relation between two entities. Entity1 have only one Entity2.
      * Entity1 is an owner of the relationship, and storages Entity1 id on its own side.
@@ -26685,27 +26719,27 @@ System.register("typeorm/decorator/relations/OneToOne", ["typeorm/metadata/types
                 inverseSideProperty: inverseSideProperty,
                 options: options
             };
-            index_25.getMetadataArgsStorage().relations.add(args);
+            index_26.getMetadataArgsStorage().relations.add(args);
         };
     }
-    exports_196("OneToOne", OneToOne);
-    var RelationTypes_6, index_25;
+    exports_197("OneToOne", OneToOne);
+    var RelationTypes_6, index_26;
     return {
         setters: [
             function (RelationTypes_6_1) {
                 RelationTypes_6 = RelationTypes_6_1;
             },
-            function (index_25_1) {
-                index_25 = index_25_1;
+            function (index_26_1) {
+                index_26 = index_26_1;
             }
         ],
         execute: function () {
         }
     };
 });
-System.register("typeorm/decorator/relations/RelationId", ["typeorm/index"], function (exports_197, context_197) {
+System.register("typeorm/decorator/relations/RelationId", ["typeorm/index"], function (exports_198, context_198) {
     "use strict";
-    var __moduleName = context_197 && context_197.id;
+    var __moduleName = context_198 && context_198.id;
     /**
      * Special decorator used to extract relation id into separate entity property.
      */
@@ -26716,24 +26750,24 @@ System.register("typeorm/decorator/relations/RelationId", ["typeorm/index"], fun
                 propertyName: propertyName,
                 relation: relation
             };
-            index_26.getMetadataArgsStorage().relationIds.add(args);
+            index_27.getMetadataArgsStorage().relationIds.add(args);
         };
     }
-    exports_197("RelationId", RelationId);
-    var index_26;
+    exports_198("RelationId", RelationId);
+    var index_27;
     return {
         setters: [
-            function (index_26_1) {
-                index_26 = index_26_1;
+            function (index_27_1) {
+                index_27 = index_27_1;
             }
         ],
         execute: function () {
         }
     };
 });
-System.register("typeorm/decorator/entity/Entity", ["typeorm/index"], function (exports_198, context_198) {
+System.register("typeorm/decorator/entity/Entity", ["typeorm/index"], function (exports_199, context_199) {
     "use strict";
-    var __moduleName = context_198 && context_198.id;
+    var __moduleName = context_199 && context_199.id;
     /**
      * This decorator is used to mark classes that will be an entity (table or document depend on database type).
      * Database schema will be created for all classes decorated with it, and Repository can be retrieved and used for it.
@@ -26748,39 +26782,10 @@ System.register("typeorm/decorator/entity/Entity", ["typeorm/index"], function (
                 engine: options && options.engine ? options.engine : undefined,
                 skipSchemaSync: !!(options && options.skipSchemaSync === true)
             };
-            index_27.getMetadataArgsStorage().tables.add(args);
-        };
-    }
-    exports_198("Entity", Entity);
-    var index_27;
-    return {
-        setters: [
-            function (index_27_1) {
-                index_27 = index_27_1;
-            }
-        ],
-        execute: function () {
-        }
-    };
-});
-System.register("typeorm/decorator/entity/AbstractEntity", ["typeorm/index"], function (exports_199, context_199) {
-    "use strict";
-    var __moduleName = context_199 && context_199.id;
-    /**
-     * Abstract entity is a class that contains columns and relations for all entities that will inherit this entity.
-     * Database table for the abstract entity is not created.
-     */
-    function AbstractEntity() {
-        return function (target) {
-            var args = {
-                target: target,
-                name: undefined,
-                type: "abstract"
-            };
             index_28.getMetadataArgsStorage().tables.add(args);
         };
     }
-    exports_199("AbstractEntity", AbstractEntity);
+    exports_199("Entity", Entity);
     var index_28;
     return {
         setters: [
@@ -26792,9 +26797,38 @@ System.register("typeorm/decorator/entity/AbstractEntity", ["typeorm/index"], fu
         }
     };
 });
-System.register("typeorm/decorator/entity/ClassEntityChild", ["typeorm/index"], function (exports_200, context_200) {
+System.register("typeorm/decorator/entity/AbstractEntity", ["typeorm/index"], function (exports_200, context_200) {
     "use strict";
     var __moduleName = context_200 && context_200.id;
+    /**
+     * Abstract entity is a class that contains columns and relations for all entities that will inherit this entity.
+     * Database table for the abstract entity is not created.
+     */
+    function AbstractEntity() {
+        return function (target) {
+            var args = {
+                target: target,
+                name: undefined,
+                type: "abstract"
+            };
+            index_29.getMetadataArgsStorage().tables.add(args);
+        };
+    }
+    exports_200("AbstractEntity", AbstractEntity);
+    var index_29;
+    return {
+        setters: [
+            function (index_29_1) {
+                index_29 = index_29_1;
+            }
+        ],
+        execute: function () {
+        }
+    };
+});
+System.register("typeorm/decorator/entity/ClassEntityChild", ["typeorm/index"], function (exports_201, context_201) {
+    "use strict";
+    var __moduleName = context_201 && context_201.id;
     /**
      * Special type of the entity used in the class-table inherited tables.
      */
@@ -26807,24 +26841,24 @@ System.register("typeorm/decorator/entity/ClassEntityChild", ["typeorm/index"], 
                 orderBy: options && options.orderBy ? options.orderBy : undefined,
                 skipSchemaSync: !!(options && options.skipSchemaSync === true)
             };
-            index_29.getMetadataArgsStorage().tables.add(args);
+            index_30.getMetadataArgsStorage().tables.add(args);
         };
     }
-    exports_200("ClassEntityChild", ClassEntityChild);
-    var index_29;
+    exports_201("ClassEntityChild", ClassEntityChild);
+    var index_30;
     return {
         setters: [
-            function (index_29_1) {
-                index_29 = index_29_1;
+            function (index_30_1) {
+                index_30 = index_30_1;
             }
         ],
         execute: function () {
         }
     };
 });
-System.register("typeorm/decorator/entity/ClosureEntity", ["typeorm/index"], function (exports_201, context_201) {
+System.register("typeorm/decorator/entity/ClosureEntity", ["typeorm/index"], function (exports_202, context_202) {
     "use strict";
-    var __moduleName = context_201 && context_201.id;
+    var __moduleName = context_202 && context_202.id;
     /**
      * Used on a entities that stores its children in a tree using closure design pattern.
      */
@@ -26837,38 +26871,10 @@ System.register("typeorm/decorator/entity/ClosureEntity", ["typeorm/index"], fun
                 orderBy: options && options.orderBy ? options.orderBy : undefined,
                 skipSchemaSync: !!(options && options.skipSchemaSync === true)
             };
-            index_30.getMetadataArgsStorage().tables.add(args);
-        };
-    }
-    exports_201("ClosureEntity", ClosureEntity);
-    var index_30;
-    return {
-        setters: [
-            function (index_30_1) {
-                index_30 = index_30_1;
-            }
-        ],
-        execute: function () {
-        }
-    };
-});
-System.register("typeorm/decorator/entity/EmbeddableEntity", ["typeorm/index"], function (exports_202, context_202) {
-    "use strict";
-    var __moduleName = context_202 && context_202.id;
-    /**
-     * This decorator is used on the entities that must be embedded into another entities.
-     */
-    function EmbeddableEntity() {
-        return function (target) {
-            var args = {
-                target: target,
-                type: "embeddable",
-                orderBy: undefined
-            };
             index_31.getMetadataArgsStorage().tables.add(args);
         };
     }
-    exports_202("EmbeddableEntity", EmbeddableEntity);
+    exports_202("ClosureEntity", ClosureEntity);
     var index_31;
     return {
         setters: [
@@ -26880,24 +26886,23 @@ System.register("typeorm/decorator/entity/EmbeddableEntity", ["typeorm/index"], 
         }
     };
 });
-System.register("typeorm/decorator/entity/SingleEntityChild", ["typeorm/index"], function (exports_203, context_203) {
+System.register("typeorm/decorator/entity/EmbeddableEntity", ["typeorm/index"], function (exports_203, context_203) {
     "use strict";
     var __moduleName = context_203 && context_203.id;
     /**
-     * Special type of the table used in the single-table inherited tables.
+     * This decorator is used on the entities that must be embedded into another entities.
      */
-    function SingleEntityChild() {
+    function EmbeddableEntity() {
         return function (target) {
             var args = {
                 target: target,
-                name: undefined,
-                type: "single-table-child",
+                type: "embeddable",
                 orderBy: undefined
             };
             index_32.getMetadataArgsStorage().tables.add(args);
         };
     }
-    exports_203("SingleEntityChild", SingleEntityChild);
+    exports_203("EmbeddableEntity", EmbeddableEntity);
     var index_32;
     return {
         setters: [
@@ -26909,22 +26914,24 @@ System.register("typeorm/decorator/entity/SingleEntityChild", ["typeorm/index"],
         }
     };
 });
-System.register("typeorm/decorator/entity/TableInheritance", ["typeorm/index"], function (exports_204, context_204) {
+System.register("typeorm/decorator/entity/SingleEntityChild", ["typeorm/index"], function (exports_204, context_204) {
     "use strict";
     var __moduleName = context_204 && context_204.id;
     /**
-     * Sets what kind of table-inheritance table will use.
+     * Special type of the table used in the single-table inherited tables.
      */
-    function TableInheritance(type) {
+    function SingleEntityChild() {
         return function (target) {
             var args = {
                 target: target,
-                type: type
+                name: undefined,
+                type: "single-table-child",
+                orderBy: undefined
             };
-            index_33.getMetadataArgsStorage().inheritances.add(args);
+            index_33.getMetadataArgsStorage().tables.add(args);
         };
     }
-    exports_204("TableInheritance", TableInheritance);
+    exports_204("SingleEntityChild", SingleEntityChild);
     var index_33;
     return {
         setters: [
@@ -26936,9 +26943,36 @@ System.register("typeorm/decorator/entity/TableInheritance", ["typeorm/index"], 
         }
     };
 });
-System.register("typeorm/decorator/transaction/Transaction", ["typeorm/index"], function (exports_205, context_205) {
+System.register("typeorm/decorator/entity/TableInheritance", ["typeorm/index"], function (exports_205, context_205) {
     "use strict";
     var __moduleName = context_205 && context_205.id;
+    /**
+     * Sets what kind of table-inheritance table will use.
+     */
+    function TableInheritance(type) {
+        return function (target) {
+            var args = {
+                target: target,
+                type: type
+            };
+            index_34.getMetadataArgsStorage().inheritances.add(args);
+        };
+    }
+    exports_205("TableInheritance", TableInheritance);
+    var index_34;
+    return {
+        setters: [
+            function (index_34_1) {
+                index_34 = index_34_1;
+            }
+        ],
+        execute: function () {
+        }
+    };
+});
+System.register("typeorm/decorator/transaction/Transaction", ["typeorm/index"], function (exports_206, context_206) {
+    "use strict";
+    var __moduleName = context_206 && context_206.id;
     /**
      * Wraps some method into the transaction.
      * Note, method result will return a promise if this decorator applied.
@@ -26959,11 +26993,11 @@ System.register("typeorm/decorator/transaction/Transaction", ["typeorm/index"], 
                 for (var _i = 0; _i < arguments.length; _i++) {
                     args[_i] = arguments[_i];
                 }
-                return index_34.getConnection(connectionName)
+                return index_35.getConnection(connectionName)
                     .entityManager
                     .transaction(function (entityManager) {
                     // gets all @TransactionEntityManager() decorator usages for this method
-                    var indices = index_34.getMetadataArgsStorage()
+                    var indices = index_35.getMetadataArgsStorage()
                         .transactionEntityManagers
                         .filterByTarget(target.constructor)
                         .toArray()
@@ -26982,35 +27016,7 @@ System.register("typeorm/decorator/transaction/Transaction", ["typeorm/index"], 
             };
         };
     }
-    exports_205("Transaction", Transaction);
-    var index_34;
-    return {
-        setters: [
-            function (index_34_1) {
-                index_34 = index_34_1;
-            }
-        ],
-        execute: function () {
-        }
-    };
-});
-System.register("typeorm/decorator/transaction/TransactionEntityManager", ["typeorm/index"], function (exports_206, context_206) {
-    "use strict";
-    var __moduleName = context_206 && context_206.id;
-    /**
-     * Injects transaction's entity manager into the method wrapped with @Transaction decorator.
-     */
-    function TransactionEntityManager() {
-        return function (object, methodName, index) {
-            var args = {
-                target: object.constructor,
-                methodName: methodName,
-                index: index,
-            };
-            index_35.getMetadataArgsStorage().transactionEntityManagers.add(args);
-        };
-    }
-    exports_206("TransactionEntityManager", TransactionEntityManager);
+    exports_206("Transaction", Transaction);
     var index_35;
     return {
         setters: [
@@ -27022,9 +27028,37 @@ System.register("typeorm/decorator/transaction/TransactionEntityManager", ["type
         }
     };
 });
-System.register("typeorm/decorator/tree/TreeLevelColumn", ["typeorm/index", "typeorm/metadata/types/ColumnTypes"], function (exports_207, context_207) {
+System.register("typeorm/decorator/transaction/TransactionEntityManager", ["typeorm/index"], function (exports_207, context_207) {
     "use strict";
     var __moduleName = context_207 && context_207.id;
+    /**
+     * Injects transaction's entity manager into the method wrapped with @Transaction decorator.
+     */
+    function TransactionEntityManager() {
+        return function (object, methodName, index) {
+            var args = {
+                target: object.constructor,
+                methodName: methodName,
+                index: index,
+            };
+            index_36.getMetadataArgsStorage().transactionEntityManagers.add(args);
+        };
+    }
+    exports_207("TransactionEntityManager", TransactionEntityManager);
+    var index_36;
+    return {
+        setters: [
+            function (index_36_1) {
+                index_36 = index_36_1;
+            }
+        ],
+        execute: function () {
+        }
+    };
+});
+System.register("typeorm/decorator/tree/TreeLevelColumn", ["typeorm/index", "typeorm/metadata/types/ColumnTypes"], function (exports_208, context_208) {
+    "use strict";
+    var __moduleName = context_208 && context_208.id;
     /**
      * Creates a "level"/"length" column to the table that holds a closure table.
      */
@@ -27041,15 +27075,15 @@ System.register("typeorm/decorator/tree/TreeLevelColumn", ["typeorm/index", "typ
                 mode: "treeLevel",
                 options: options
             };
-            index_36.getMetadataArgsStorage().columns.add(args);
+            index_37.getMetadataArgsStorage().columns.add(args);
         };
     }
-    exports_207("TreeLevelColumn", TreeLevelColumn);
-    var index_36, ColumnTypes_15;
+    exports_208("TreeLevelColumn", TreeLevelColumn);
+    var index_37, ColumnTypes_15;
     return {
         setters: [
-            function (index_36_1) {
-                index_36 = index_36_1;
+            function (index_37_1) {
+                index_37 = index_37_1;
             },
             function (ColumnTypes_15_1) {
                 ColumnTypes_15 = ColumnTypes_15_1;
@@ -27059,9 +27093,9 @@ System.register("typeorm/decorator/tree/TreeLevelColumn", ["typeorm/index", "typ
         }
     };
 });
-System.register("typeorm/decorator/tree/TreeParent", ["typeorm/index", "typeorm/metadata/types/RelationTypes"], function (exports_208, context_208) {
+System.register("typeorm/decorator/tree/TreeParent", ["typeorm/index", "typeorm/metadata/types/RelationTypes"], function (exports_209, context_209) {
     "use strict";
-    var __moduleName = context_208 && context_208.id;
+    var __moduleName = context_209 && context_209.id;
     /**
      * Marks a specific property of the class as a parent of the tree.
      */
@@ -27086,15 +27120,15 @@ System.register("typeorm/decorator/tree/TreeParent", ["typeorm/index", "typeorm/
                 type: function () { return object.constructor; },
                 options: options
             };
-            index_37.getMetadataArgsStorage().relations.add(args);
+            index_38.getMetadataArgsStorage().relations.add(args);
         };
     }
-    exports_208("TreeParent", TreeParent);
-    var index_37, RelationTypes_7;
+    exports_209("TreeParent", TreeParent);
+    var index_38, RelationTypes_7;
     return {
         setters: [
-            function (index_37_1) {
-                index_37 = index_37_1;
+            function (index_38_1) {
+                index_38 = index_38_1;
             },
             function (RelationTypes_7_1) {
                 RelationTypes_7 = RelationTypes_7_1;
@@ -27104,9 +27138,9 @@ System.register("typeorm/decorator/tree/TreeParent", ["typeorm/index", "typeorm/
         }
     };
 });
-System.register("typeorm/decorator/tree/TreeChildren", ["typeorm/index", "typeorm/metadata/types/RelationTypes"], function (exports_209, context_209) {
+System.register("typeorm/decorator/tree/TreeChildren", ["typeorm/index", "typeorm/metadata/types/RelationTypes"], function (exports_210, context_210) {
     "use strict";
-    var __moduleName = context_209 && context_209.id;
+    var __moduleName = context_210 && context_210.id;
     /**
      * Marks a specific property of the class as a children of the tree.
      */
@@ -27132,52 +27166,18 @@ System.register("typeorm/decorator/tree/TreeChildren", ["typeorm/index", "typeor
                 type: function () { return object.constructor; },
                 options: options
             };
-            index_38.getMetadataArgsStorage().relations.add(args);
+            index_39.getMetadataArgsStorage().relations.add(args);
         };
     }
-    exports_209("TreeChildren", TreeChildren);
-    var index_38, RelationTypes_8;
-    return {
-        setters: [
-            function (index_38_1) {
-                index_38 = index_38_1;
-            },
-            function (RelationTypes_8_1) {
-                RelationTypes_8 = RelationTypes_8_1;
-            }
-        ],
-        execute: function () {
-        }
-    };
-});
-System.register("typeorm/decorator/Index", ["typeorm/index"], function (exports_210, context_210) {
-    "use strict";
-    var __moduleName = context_210 && context_210.id;
-    /**
-     * Composite index must be set on entity classes and must specify entity's fields to be indexed.
-     */
-    function Index(nameOrFieldsOrOptions, maybeFieldsOrOptions, maybeOptions) {
-        var name = typeof nameOrFieldsOrOptions === "string" ? nameOrFieldsOrOptions : undefined;
-        var fields = typeof nameOrFieldsOrOptions === "string" ? maybeFieldsOrOptions : nameOrFieldsOrOptions;
-        var options = (typeof nameOrFieldsOrOptions === "object" && !Array.isArray(nameOrFieldsOrOptions)) ? nameOrFieldsOrOptions : maybeOptions;
-        if (!options)
-            options = (typeof maybeFieldsOrOptions === "object" && !Array.isArray(maybeFieldsOrOptions)) ? nameOrFieldsOrOptions : maybeOptions;
-        return function (clsOrObject, propertyName) {
-            var args = {
-                target: propertyName ? clsOrObject.constructor : clsOrObject,
-                name: name,
-                columns: propertyName ? [propertyName] : fields,
-                unique: options && options.unique ? true : false
-            };
-            index_39.getMetadataArgsStorage().indices.add(args);
-        };
-    }
-    exports_210("Index", Index);
-    var index_39;
+    exports_210("TreeChildren", TreeChildren);
+    var index_39, RelationTypes_8;
     return {
         setters: [
             function (index_39_1) {
                 index_39 = index_39_1;
+            },
+            function (RelationTypes_8_1) {
+                RelationTypes_8 = RelationTypes_8_1;
             }
         ],
         execute: function () {
@@ -27309,7 +27309,7 @@ System.register("typeorm/decorator/EntityRepository", ["typeorm/index"], functio
         }
     };
 });
-System.register("typeorm/index", ["typeorm/connection/ConnectionManager", "typeorm/metadata-args/MetadataArgsStorage", "typeorm/container", "typeorm/platform/PlatformTools", "typeorm/decorator/columns/Column", "typeorm/decorator/columns/CreateDateColumn", "typeorm/decorator/columns/DiscriminatorColumn", "typeorm/decorator/columns/PrimaryGeneratedColumn", "typeorm/decorator/columns/PrimaryColumn", "typeorm/decorator/columns/UpdateDateColumn", "typeorm/decorator/columns/VersionColumn", "typeorm/decorator/columns/ObjectIdColumn", "typeorm/decorator/listeners/AfterInsert", "typeorm/decorator/listeners/AfterLoad", "typeorm/decorator/listeners/AfterRemove", "typeorm/decorator/listeners/AfterUpdate", "typeorm/decorator/listeners/BeforeInsert", "typeorm/decorator/listeners/BeforeRemove", "typeorm/decorator/listeners/BeforeUpdate", "typeorm/decorator/listeners/EventSubscriber", "typeorm/decorator/relations/RelationCount", "typeorm/decorator/relations/JoinColumn", "typeorm/decorator/relations/JoinTable", "typeorm/decorator/relations/ManyToMany", "typeorm/decorator/relations/ManyToOne", "typeorm/decorator/relations/OneToMany", "typeorm/decorator/relations/OneToOne", "typeorm/decorator/relations/RelationId", "typeorm/decorator/entity/Entity", "typeorm/decorator/entity/AbstractEntity", "typeorm/decorator/entity/ClassEntityChild", "typeorm/decorator/entity/ClosureEntity", "typeorm/decorator/entity/EmbeddableEntity", "typeorm/decorator/entity/SingleEntityChild", "typeorm/decorator/entity/TableInheritance", "typeorm/decorator/transaction/Transaction", "typeorm/decorator/transaction/TransactionEntityManager", "typeorm/decorator/tree/TreeLevelColumn", "typeorm/decorator/tree/TreeParent", "typeorm/decorator/tree/TreeChildren", "typeorm/decorator/Index", "typeorm/decorator/NamingStrategy", "typeorm/decorator/Embedded", "typeorm/decorator/DiscriminatorValue", "typeorm/decorator/EntityRepository", "typeorm/schema-builder/schema/ColumnSchema", "typeorm/schema-builder/schema/ForeignKeySchema", "typeorm/schema-builder/schema/IndexSchema", "typeorm/schema-builder/schema/PrimaryKeySchema", "typeorm/schema-builder/schema/TableSchema", "typeorm/connection/Connection", "typeorm/query-builder/QueryBuilder", "typeorm/entity-manager/EntityManager", "typeorm/entity-manager/MongoEntityManager", "typeorm/naming-strategy/DefaultNamingStrategy", "typeorm/repository/Repository", "typeorm/repository/TreeRepository", "typeorm/repository/SpecificRepository", "typeorm/repository/MongoRepository"], function (exports_215, context_215) {
+System.register("typeorm/index", ["typeorm/connection/ConnectionManager", "typeorm/metadata-args/MetadataArgsStorage", "typeorm/container", "typeorm/platform/PlatformTools", "typeorm/decorator/Index", "typeorm/decorator/columns/Column", "typeorm/decorator/columns/CreateDateColumn", "typeorm/decorator/columns/DiscriminatorColumn", "typeorm/decorator/columns/PrimaryGeneratedColumn", "typeorm/decorator/columns/PrimaryColumn", "typeorm/decorator/columns/UpdateDateColumn", "typeorm/decorator/columns/VersionColumn", "typeorm/decorator/columns/ObjectIdColumn", "typeorm/decorator/listeners/AfterInsert", "typeorm/decorator/listeners/AfterLoad", "typeorm/decorator/listeners/AfterRemove", "typeorm/decorator/listeners/AfterUpdate", "typeorm/decorator/listeners/BeforeInsert", "typeorm/decorator/listeners/BeforeRemove", "typeorm/decorator/listeners/BeforeUpdate", "typeorm/decorator/listeners/EventSubscriber", "typeorm/decorator/relations/RelationCount", "typeorm/decorator/relations/JoinColumn", "typeorm/decorator/relations/JoinTable", "typeorm/decorator/relations/ManyToMany", "typeorm/decorator/relations/ManyToOne", "typeorm/decorator/relations/OneToMany", "typeorm/decorator/relations/OneToOne", "typeorm/decorator/relations/RelationId", "typeorm/decorator/entity/Entity", "typeorm/decorator/entity/AbstractEntity", "typeorm/decorator/entity/ClassEntityChild", "typeorm/decorator/entity/ClosureEntity", "typeorm/decorator/entity/EmbeddableEntity", "typeorm/decorator/entity/SingleEntityChild", "typeorm/decorator/entity/TableInheritance", "typeorm/decorator/transaction/Transaction", "typeorm/decorator/transaction/TransactionEntityManager", "typeorm/decorator/tree/TreeLevelColumn", "typeorm/decorator/tree/TreeParent", "typeorm/decorator/tree/TreeChildren", "typeorm/decorator/NamingStrategy", "typeorm/decorator/Embedded", "typeorm/decorator/DiscriminatorValue", "typeorm/decorator/EntityRepository", "typeorm/schema-builder/schema/ColumnSchema", "typeorm/schema-builder/schema/ForeignKeySchema", "typeorm/schema-builder/schema/IndexSchema", "typeorm/schema-builder/schema/PrimaryKeySchema", "typeorm/schema-builder/schema/TableSchema", "typeorm/connection/Connection", "typeorm/query-builder/QueryBuilder", "typeorm/entity-manager/EntityManager", "typeorm/entity-manager/MongoEntityManager", "typeorm/naming-strategy/DefaultNamingStrategy", "typeorm/repository/Repository", "typeorm/repository/TreeRepository", "typeorm/repository/SpecificRepository", "typeorm/repository/MongoRepository"], function (exports_215, context_215) {
     "use strict";
     var __moduleName = context_215 && context_215.id;
     // -------------------------------------------------------------------------
@@ -27446,6 +27446,10 @@ System.register("typeorm/index", ["typeorm/connection/ConnectionManager", "typeo
             function (PlatformTools_11_1) {
                 PlatformTools_11 = PlatformTools_11_1;
             },
+            function (Index_1_1) {
+                exportStar_1(Index_1_1);
+                exportStar_1(Index_1_1);
+            },
             function (Column_1_1) {
                 exportStar_1(Column_1_1);
             },
@@ -27555,9 +27559,6 @@ System.register("typeorm/index", ["typeorm/connection/ConnectionManager", "typeo
             },
             function (TreeChildren_1_1) {
                 exportStar_1(TreeChildren_1_1);
-            },
-            function (Index_1_1) {
-                exportStar_1(Index_1_1);
             },
             function (NamingStrategy_1_1) {
                 exportStar_1(NamingStrategy_1_1);

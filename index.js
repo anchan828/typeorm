@@ -11,6 +11,7 @@ var PlatformTools_1 = require("./platform/PlatformTools");
 // Commonly Used exports
 // -------------------------------------------------------------------------
 __export(require("./container"));
+__export(require("./decorator/Index"));
 __export(require("./decorator/columns/Column"));
 __export(require("./decorator/columns/CreateDateColumn"));
 __export(require("./decorator/columns/DiscriminatorColumn"));
